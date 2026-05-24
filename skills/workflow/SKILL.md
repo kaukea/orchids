@@ -3,84 +3,123 @@ name: workflow
 description: MUST be read before starting any task, plan, or coding work, and again when finishing. Defines branch rules, commit format, merge procedure, and cleanup steps. No work begins or ends without following this.
 tracked: true
 metadata:
-  tags: [git, workflow, start, begin, task, plan, branch, finish, complete, end, merge, squash, cleanup]
+  tags: [ git, workflow, start, begin, task, plan, branch, finish, complete, end, merge, squash, cleanup ]
   share: github
 ---
 
 # Intent (Workflow)
 
-Any task, plan, workstream or otherwise set of tasks a coding agent executes sequentially for user is called a workflow and must folow those instructions.
+Any task, plan, workstream, or otherwise set of tasks a coding agent executes sequentially for user is called a workflow
+and must folow those instructions.
 
 ## Checklist
 
 The whole workflow must be followed, you must complete all these steps.
 
 Workflow Start:
- - [ ] Working tree cleaned
- - [ ] Skills synchronized
- - [ ] Git commit format understood
- - [ ] Feature branch and initial commit created
+
+- [ ] Working tree cleaned
+- [ ] Skills synchronized
+- [ ] Git commit format understood
+- [ ] Feature branch and initial commit created
 
 Workflow End:
- - [ ] Created marker tag
- - [ ] Merged squash
- - [ ] Verified Integrity
- - [ ] Feature branch deleted
+
+- [ ] Completed testing
+- [ ] Updated required documentation
+- [ ] Created marker tag
+- [ ] Merged squash
+- [ ] Verified Integrity
+- [ ] Feature branch deleted
 
 ## Rules
 
-- Any work MUST folow these rules unless user override
-- work MUST NOT start writing codeuntil all conditions in workflow start has been executed
+- Any work MUST follow these rules unless user override
+- work MUST NOT start writing code until all conditions in workflow start has been executed
 
 # Workflow start
 
-A workflow is called differently in different agents: plans, tasks, workstreams or others. They are all synonyms.
+A workflow is called differently in different agents: plans, tasks, workstreams, or others. They are all synonyms.
 
-As soon as the user indicates the start of a new workflow, the woorkflow has started and you ust follow  the rues of the workflow start immediately.
+As soon as the user indicates the start of a new workflow, the woorkflow has started and you ust follow the rues of the
+workflow start immediately.
 
-- work never starts on a dirty tree. Ask the user for confirmation to stash dirty files, do a WIP git commit or turn it into a workflow that is now complete.
+- work never starts on a dirty tree. Ask the user for confirmation to stash dirty files, do a WIP git commit or turn it
+  into a workflow that is now complete.
 - all work MUST be done on a feature branch `f/<feature-id>`
 - a feature branch MUST ONLY branch from the `main` branch, never from a feature brnch.
 - Merge commits during work in a workflow are forbidden, unless overruled by the user.
-- All work MUST be done on feature branches unless specifically allowed by the user with branch-name being (`f/<feature-id>`)
+- All work MUST be done on feature branches unless specifically allowed by the user with branch-name being (
+  `f/<feature-id>`)
 
 ## Workflow Preparation
 
-
 As soon as a user indicates wanting to start a workflow:
- - synchronize the skills
- - Use the description provided by the user or ask for the user for a short intent.
-- Create a feature branch `f/<feature-id>` from the latest `main` branch. The `<feature-id>` should be a concise, human-readable identifier for the work being done (e.g., `f/add-login-feature`, `f/fix-payment-bug`, `f/refactor-auth-module`).
- - Create a commit describing the intent of the future branch, and a trailer called `Base` with the SHA of the commit from which the branch was created. with a `tada` gitmoji. This commit serves as the anchor for the branch and the starting point for all future work in this workflow.
+
+- Synchronize the skills
+- Use the description provided by the user or ask for the user for a short intent.
+- Create a feature branch `f/<feature-id>` from the latest `main` branch. The `<feature-id>` should be a concise,
+  human-readable identifier for the work being done (e.g., `f/add-login-feature`, `f/fix-payment-bug`,
+  `f/refactor-auth-module`).
+- Create a commit describing the intent of the future branch, and a trailer called `Base` with the SHA of the commit
+  from which the branch was created. with a `tada` gitmoji. This commit serves as the anchor for the branch and the
+  starting point for all future work in this workflow.
 
 # Workflow end
 
+A workflow can only end if:
+ - The agreed work has been implemented
+ - Changes have been tested with a methodology in agreement with the user
+ - A summary of what was not told by the model about the implementation is provided
+
 Ending the workflow must follow the following steps in this order.
+
+## ⛔ User approval gate
+
+STOP. Before doing anything else, you MUST ask the user for explicit approval to merge squash.
+You must provide a summary of code changes, learnings, and problems encountered and wait for the word `MAKE IT SO`.
+.
+Do NOT proceed with any of the steps below until user confirmation.
+
+
+## Documentation Update
+
+- [ ] Memory and documentation files must be reviewed to reflect current state of the project, discarding out-of-date infomration.
+- [ ] `README.md` is for users of the project, to present what it is, what it does, and an introduction of how it works. It must be updated with the latest information about the project when needed.
+- [ ] Agreed work, followup work and future work must be updated in the `TODO.md` file, and the completed ones removed and replaced by the entry in `DONE.md`
+- [ ] Completed work must be appended in `DONE.md` like the following example. The merge commit must be appended everytime, and the short summary updated each time.
+
+```yaml
+# Completed work
+
+[date] `<short summary of all changes that day>`
+- `<git merge squash title 1>`
+- `<git merge squash title 2>`
+- `<git merge squash title 3>`
+---
+```
 
 ## Clean tree
 
 Agents leave files behind tracking their work.
 
-If files are included by .gitignore as preserve `!<path>` or ignore `<path>`, they are to be commited, otherwise alert the user and propose adding the directory or the file  to `.gitignore`, with a recommendation.
+If files are included by .gitignore as preserve `!<path>` or ignore `<path>`, they are to be commited, otherwise alert
+the user and propose adding the directory or the file to `.gitignore`, with a recommendation.
 Examples:
+
 - OpenCode plan files (`.opencode/plans/`, `plan.md`, or similar)
 - Agent task files, scratchpads, or temporary reasoning files created by the tool
 - Any file the tool created to track its own progress, not for the project
 - Propose to the user to add any such file to the `.gitignore` file
 - Do not delete files without user confirmation
 
-Task files always get commited:
+Task files always get committed:
+
 - `HANDOVER.md` — cross-session context for the next agent
 - `TODO.md` — project-level work tracking yet to do. Move completed tasks to `DONE.md`
 - `DONE.md` — project-level work done.
-- `AGENTS.shared.md` — shared rules for all agents on this project
-- Memory files under `.claude/projects/`
-
-## ⛔ User approval gate
-
-STOP. Before doing anything else, you MUST ask the user for explicit approval to merge sqash.
-You must present ONCE a summary of ALL the commits (branch name, commit count, HEAD sha) and wait for confirmation.
-Do NOT proceed with any of the steps below until user confirmation.
+- `AGENTS.shared.md` and all symlinks coming from .the `.ai` directory — they are shared rules.
+- Unnecessary memory files under `.claude/projects/`
 
 ## Marker tag
 
@@ -110,9 +149,11 @@ Co-authored-by: <model> <junie@serialseb.com>
 
 - `<sha>` - Short SHA of feature branch HEAD (the 🏁 commit)
 - `<commits>` - Number of commits squashed
-- `<lead-time>` - Human-readable lead time (e.g., "2d 8h", "1m 2d") from the first commit of the branch (NOT from the commit from which you branched, normally main)
+- `<lead-time>` - Human-readable lead time (e.g., "2d 8h", "1m 2d") from the first commit of the branch (NOT from the
+  commit from which you branched, normally main)
 - `<branch>` - The feature branch you are merging
-- `<lead-time>` Human-readable lead time (e.g., "2d 8h", "1m 2d"), the time it took between the initial feature branch commit and the merge commit.
+- `<lead-time>` Human-readable lead time (e.g., "2d 8h", "1m 2d"), the time it took between the initial feature branch
+  commit and the merge commit.
 - For anything else follow the rules in the git-commit skill.
 
 After creating the squash commit, write the commit count as a git note on the new HEAD:
@@ -147,4 +188,6 @@ If either check fails, do NOT delete the branch. Investigate and fix the squash 
 
 ## Delete branch
 
-Delete the feature branch. Use `git branch -D` (force) because squash merges do not preserve ancestry — git's `-d` safety check will always report "not fully merged" even when the content is identical. The archive tag and the integrity check above are the safety net.
+Delete the feature branch. Use `git branch -D` (force) because squash merges do not preserve ancestry — git's `-d`
+safety check will always report "not fully merged" even when the content is identical. The archive tag and the integrity
+check above are the safety net.
