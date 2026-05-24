@@ -21,7 +21,7 @@ Workflow Start:
 - [ ] Working tree resolved with user
 - [ ] Skills synchronized
 - [ ] Git commit format understood
-- [ ] Feature branch and initial commit created
+- [ ] Worktree created at `../<repo>-<feature-id>` with anchor commit
 
 Workflow End:
 
@@ -32,7 +32,7 @@ Workflow End:
 - [ ] Created marker tag
 - [ ] Merged squash
 - [ ] Verified integrity
-- [ ] Feature branch deleted
+- [ ] Worktree removed (branch ref kept — branches are immortal)
 
 ## Rules
 
@@ -48,9 +48,12 @@ workflow start immediately.
 
 - work never starts on a dirty tree. Ask the user for confirmation to stash dirty files, do a WIP git commit, or treat
   the current state as a completed workflow and end it before starting the new one.
-- all work MUST be done on a feature branch named `f/<feature-id>`.
+- all work MUST happen in a dedicated `git worktree`, on a feature branch named `f/<feature-id>`. Branch state lives
+  in the worktree's HEAD, so concurrent agents working in the source repo cannot move it under you.
 - a feature branch MUST ONLY branch from the `main` branch, never from another feature branch.
 - Merge commits during a workflow are forbidden, unless overruled by the user.
+- Branches are immortal history. They are NEVER deleted. A workflow closes via squash-merge (success) or a 💩
+  cancellation commit (abandonment); the branch ref stays either way.
 - Feature branches are required. The user MAY explicitly override for a given workflow to allow direct commits on
   `main` (or another non-`f/` branch). Absent that override, the feature-branch rule is absolute.
 
@@ -58,14 +61,22 @@ workflow start immediately.
 
 As soon as a user indicates wanting to start a workflow:
 
-- Synchronize the skills
-- Use the description provided by the user or ask for the user for a short intent.
-- Create a feature branch `f/<feature-id>` from the latest `main` branch. The `<feature-id>` should be a concise,
-  human-readable identifier for the work being done (e.g., `f/add-login-feature`, `f/fix-payment-bug`,
-  `f/refactor-auth-module`).
-- Create a commit describing the intent of the future branch, and a trailer called `Base` with the SHA of the commit
-  from which the branch was created. with a `tada` gitmoji. This commit serves as the anchor for the branch and the
-  starting point for all future work in this workflow.
+- Synchronize the skills.
+- Use the description provided by the user or ask the user for a short intent.
+- Create a worktree off the latest `main`, in a sibling directory next to the source repo:
+
+  ```sh
+  git -C <source-repo> fetch --all
+  git -C <source-repo> worktree add ../<repo>-<feature-id> -b f/<feature-id> origin/main
+  ```
+
+  `<feature-id>` is a concise, human-readable identifier (e.g., `add-login-feature`, `fix-payment-bug`). All
+  subsequent work in this workflow happens inside `../<repo>-<feature-id>`. The worktree pins HEAD to your branch:
+  other agents working in the source repo cannot accidentally move it.
+
+- Create an anchor commit describing the intent of the workflow, with a `🎉` gitmoji and a `Base:` trailer containing
+  the SHA of the commit the branch was created from. This commit is the anchor for the branch and the starting point
+  for all future work in this workflow.
 
 # Workflow end
 
@@ -229,8 +240,35 @@ ACTUAL_COUNT=$(git rev-list $(git merge-base main~ archive/<feature-id>)..archiv
 
 If either check fails, do NOT delete the branch. Investigate and fix the squash commit first.
 
-## Delete branch
+## Close worktree
 
-Delete the feature branch. Use `git branch -D` (force) because squash merges do not preserve ancestry — git's `-d`
-safety check will always report "not fully merged" even when the content is identical. The archive tag and the integrity
-check above are the safety net.
+Remove the worktree once the squash, tag, and integrity check have all passed. The branch ref itself stays:
+branches are immortal history.
+
+```sh
+git worktree remove ../<repo>-<feature-id>
+```
+
+Order matters: the worktree must be removed *before* any tooling that touches branch refs (a worktree still holding
+the branch checked out blocks ref updates from other working trees). After this step the source repo is fully clean.
+
+## Cancellation (abandoned workflows)
+
+If a workflow is abandoned before reaching the squash, do NOT delete the branch and do NOT leave it untagged.
+Append a final commit with a 💩 gitmoji explaining why, then close the worktree.
+
+```
+💩 Cancel <feature-id>: <one-line reason>
+
+<body: what was tried, what blocked it, anything reusable elsewhere>
+
+Branch: f/<feature-id>
+Co-authored-by: <model> <junie@serialseb.com>
+```
+
+```sh
+git worktree remove ../<repo>-<feature-id>
+```
+
+No squash, no `archive/` tag. The cancellation commit is the closing marker. The branch ref is permanent so the
+abandoned work stays discoverable in `git log --all` and `git branch --list 'f/*'`.
