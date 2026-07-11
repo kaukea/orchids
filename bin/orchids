@@ -169,7 +169,7 @@ cmd_init() {
     if [ -f "$root/$p" ]; then
       die "uncommitted changes under managed paths ($p) — commit them first (migration preserves local variants via git history)"
     fi
-  done < <(git -C "$root" status --porcelain -uall -- .claude/skills AGENTS.shared.md AGENTS.files.md 2>/dev/null)
+  done < <(git -C "$root" status --porcelain -uall -- .claude/skills .claude/agents .claude/hooks .claude/tools .claude/settings.json AGENTS.shared.md AGENTS.files.md 2>/dev/null)
 
   # migrate real skill dirs: identical -> link · local-only -> adopt · diverged -> AI merge
   # exclude/local/copy modes are repo-owned or unmanaged: never migrated, never sent back.
@@ -197,10 +197,17 @@ cmd_init() {
       rm -rf "${dst%/}"                                       # byte-matched, adopted, or in git history for the merge
     done
   fi
-  for f in AGENTS.shared.md AGENTS.files.md; do
-    if [ -f "$root/$f" ] && [ ! -L "$root/$f" ]; then
-      if cmp -s "$root/$f" "$clone/$f"; then rm "$root/$f"
-      else rm "$root/$f"; diverged=$((diverged+1)); DIVERGED_LIST="$DIVERGED_LIST $f"; fi
+  local rel canon_rel
+  for rel in AGENTS.shared.md AGENTS.files.md .claude/settings.json \
+             $(cd "$clone" && ls agents hooks tools 2>/dev/null | sed 's|^|IGNORED|' >/dev/null; for d in agents hooks tools; do for x in "$clone/$d"/*; do [ -e "$x" ] && echo ".claude/$d/$(basename "$x")"; done; done); do
+    case "$rel" in
+      AGENTS.*)             canon_rel="$rel" ;;
+      .claude/settings.json) canon_rel="settings.json" ;;
+      *)                    canon_rel="${rel#.claude/}" ;;
+    esac
+    if [ -f "$root/$rel" ] && [ ! -L "$root/$rel" ]; then
+      if cmp -s "$root/$rel" "$clone/$canon_rel"; then rm "$root/$rel"
+      else rm "$root/$rel"; diverged=$((diverged+1)); DIVERGED_LIST="$DIVERGED_LIST $rel"; fi
     fi
   done
   [ $adopted -gt 0 ] && git -C "$clone" push --quiet origin HEAD
