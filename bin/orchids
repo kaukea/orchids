@@ -128,9 +128,13 @@ cmd_init() {
 
   # 3. migrate existing managed files: identical -> link · local-only -> adopt · diverged -> AI merge
   # Local variants survive ONLY via this repo's git history — refuse to destroy uncommitted ones.
-  if [ -n "$(git -C "$root" status --porcelain -- .claude/skills AGENTS.shared.md AGENTS.files.md 2>/dev/null)" ]; then
-    die "uncommitted changes under managed paths — commit them first (migration preserves local variants via git history)"
-  fi
+  local dirtyp
+  while IFS= read -r dirtyp; do
+    [ -n "$dirtyp" ] || continue
+    if [ -f "$root/$dirtyp" ] && [ ! -L "$root/$dirtyp" ]; then
+      die "uncommitted changes under managed paths ($dirtyp) — commit them first (migration preserves local variants via git history)"
+    fi
+  done < <(git -C "$root" status --porcelain -- .claude/skills AGENTS.shared.md AGENTS.files.md 2>/dev/null | cut -c4-)
   local adopted=0 diverged=0 skill csv src dst DIVERGED_LIST="" 
   # 3a. skills present locally as real dirs
   if [ -d "$root/.claude/skills" ]; then
