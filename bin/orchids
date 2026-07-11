@@ -2,11 +2,19 @@
 # orchids — stopgap distribution of skills, agents, and shared rule files.
 # Dies gracefully when dot.ai returns: delete .ai/ and the symlinks, nothing else breaks.
 #
-#   orchids init <profile>[,<profile>...]   file-layer migration + symlink layout
-#   orchids sync [--status]                 commit local edits, rebase on canonical, push back
+#   orchids init             file-layer migration + layout (no arguments)
+#   orchids sync [--status]  commit local edits, rebase on canonical, push back
 #
-# Config: .ai/config.toml (CLI-written, never hand-edited). Only .ai/repositories/ is
-# gitignored; config.toml is committed. Symlinks are absolute so git worktrees resolve them.
+# Per-repo config: .ai.toml at the repo root — CLI and AGENTS.md driven, not hand-edited.
+# Missing or empty = you get EVERYTHING, linked. Otherwise [role] sections (dev/infra/org,
+# ["*"] for defaults) with  skillname = "exclude"|"copy"|"link"|"local":
+#   exclude  not installed
+#   link     symlink into the clone (default; absolute, so git worktrees resolve)
+#   copy     real file; installed if absent, drift reported, never overwritten
+#   local    the repo's own version: never linked over, never sent back to the source —
+#            but canonical updates to it are still announced at sync
+# The skill->role attachment is fixed in canonical manifest.conf. Only .ai/repositories/
+# is gitignored.
 set -euo pipefail
 
 CANONICAL_DEFAULT="/home/sudoku/src/serialseb/orchids"
@@ -17,69 +25,98 @@ say() { printf '%s\n' "$1"; }
 
 repo_root() { git rev-parse --show-toplevel 2>/dev/null || die "not inside a git repository"; }
 
-# ---------- config ----------
-cfg_read() { # cfg_read <root> <key>  (flat string or ["a","b"] array -> space-separated)
-  sed -n "s/^$2 *= *//p" "$1/.ai/config.toml" | tr -d '[]"' | tr ',' ' '
+# ---------- .ai.toml ----------
+resolve_mode() { # resolve_mode <root> <role> <skill> -> exclude|copy|link|local
+  local f="$1/.ai.toml"
+  [ -f "$f" ] || { echo link; return; }
+  awk -v role="$2" -v skill="$3" '
+    /^\[/   { sec=$0; gsub(/[][" \r]/,"",sec); next }
+    /^[^#=]+=/ {
+      key=$1; gsub(/["\r]/,"",key)
+      val=$0; sub(/^[^=]*= */,"",val); gsub(/[" \r]/,"",val)
+      if (sec==role && key==skill) a=val
+      else if (sec=="*" && key==skill) b=val
+      else if (sec==role && key=="*") c=val
+      else if (sec=="*" && key=="*") d=val
+    }
+    END { if(a!="")print a; else if(b!="")print b; else if(c!="")print c; else if(d!="")print d; else print "link" }
+  ' "$f"
 }
 
-cfg_write() { # cfg_write <root> <canonical> <profiles-space-separated>
-  local root=$1 canonical=$2 profiles=$3 plist
-  plist=$(printf '"%s", ' $profiles); plist="[${plist%, }]"
-  mkdir -p "$root/.ai"
-  cat > "$root/.ai/config.toml" <<EOF
-# managed by orchids — do not edit by hand (CLI and AGENTS.md driven)
+canonical_of() {
+  local c=""
+  [ -f "$1/.ai.toml" ] && c=$(sed -n 's/^canonical *= *"\(.*\)"/\1/p' "$1/.ai.toml" | head -1)
+  echo "${c:-${ORCHIDS_CANONICAL:-$CANONICAL_DEFAULT}}"
+}
+
+ensure_aitoml() { # create if missing; ensure the canonical line exists
+  local root=$1 canonical=$2 f="$root/.ai.toml" tmp
+  if [ ! -f "$f" ]; then
+    cat > "$f" <<EOF
+# managed by orchids — CLI and AGENTS.md driven; do not edit by hand
 canonical = "$canonical"
-profiles = $plist
+# Missing/empty sections = every skill installed as a link.
+# Tune per role: [dev] [infra] [org], or ["*"] for defaults, with
+#   skillname = "exclude" | "copy" | "link" | "local"
 EOF
+    say ".ai.toml: created"
+  elif ! grep -q '^canonical' "$f"; then
+    tmp=$(mktemp); { printf 'canonical = "%s"\n' "$canonical"; cat "$f"; } > "$tmp"; mv "$tmp" "$f"
+  fi
 }
 
 # ---------- manifest ----------
-manifest() { grep -Ev '^\s*(#|$)' "$1/manifest.conf"; }  # <skill> <profile[,profile]>
+manifest() { grep -Ev '^\s*(#|$)' "$1/manifest.conf"; }  # <skill> <role>
 
-skill_selected() { # skill_selected <skill-profiles-csv> <repo-profiles...>
-  local csv=$1; shift
-  local p q
-  for p in ${csv//,/ }; do for q in "$@"; do [ "$p" = "$q" ] && return 0; done; done
-  return 1
-}
+manifest_role() { manifest "$1" | awk -v s="$2" '$1==s{print $2; exit}'; }
 
-# ---------- symlink layout ----------
-lay_links() { # lay_links <root>   (reads config; idempotent; never deletes non-links)
+# ---------- layout ----------
+lay_links() { # lay_links <root>  (idempotent; never destroys real files)
   local root=$1 clone="$root/.ai/repositories/$OWNER_REPO"
-  local profiles; profiles=$(cfg_read "$root" profiles)
-  local skill csv laid=0
+  local skill role mode laid=0
   mkdir -p "$root/.claude/skills"
-  while read -r skill csv; do
-    skill_selected "$csv" $profiles || continue
-    link_one "$clone/skills/$skill" "$root/.claude/skills/$skill" && laid=$((laid+1))
+  while read -r skill role; do
+    mode=$(resolve_mode "$root" "$role" "$skill")
+    case "$mode" in
+      exclude|local) ;;
+      copy) copy_one "$clone/skills/$skill" "$root/.claude/skills/$skill" && laid=$((laid+1)) ;;
+      *)    link_one "$clone/skills/$skill" "$root/.claude/skills/$skill" && laid=$((laid+1)) ;;
+    esac
   done < <(manifest "$clone")
   for f in AGENTS.shared.md AGENTS.files.md; do
     link_one "$clone/$f" "$root/$f" && laid=$((laid+1))
   done
-  if printf '%s\n' $profiles | grep -qx roles; then
-    mkdir -p "$root/.claude/agents" "$root/.claude/hooks" "$root/.claude/tools"
-    local t
-    for t in "$clone"/agents/*.md;   do link_one "$t" "$root/.claude/agents/$(basename "$t")" && laid=$((laid+1)); done
-    for t in "$clone"/hooks/*;       do link_one "$t" "$root/.claude/hooks/$(basename "$t")" && laid=$((laid+1)); done
-    for t in "$clone"/tools/*;       do link_one "$t" "$root/.claude/tools/$(basename "$t")" && laid=$((laid+1)); done
-    link_one "$clone/settings.json" "$root/.claude/settings.json" && laid=$((laid+1))
-  fi
+  # agents layer: everyone gets it (namespacing later)
+  mkdir -p "$root/.claude/agents" "$root/.claude/hooks" "$root/.claude/tools"
+  local t
+  for t in "$clone"/agents/*.md; do link_one "$t" "$root/.claude/agents/$(basename "$t")" && laid=$((laid+1)); done
+  for t in "$clone"/hooks/*;     do link_one "$t" "$root/.claude/hooks/$(basename "$t")" && laid=$((laid+1)); done
+  for t in "$clone"/tools/*;     do link_one "$t" "$root/.claude/tools/$(basename "$t")" && laid=$((laid+1)); done
+  link_one "$clone/settings.json" "$root/.claude/settings.json" && laid=$((laid+1))
   say "links: $laid laid/verified"
 }
 
-link_one() { # link_one <abs-target> <linkpath>  -> 0 if link now correct, 1 if blocked
+link_one() { # link_one <abs-target> <linkpath> -> 0 correct, 1 blocked
   local target=$1 link=$2
   [ -e "$target" ] || { say "  SKIP $link (target missing in canonical)"; return 1; }
   if [ -L "$link" ]; then
     [ "$(readlink "$link")" = "$target" ] || ln -sfn "$target" "$link"
     return 0
   fi
-  [ -e "$link" ] && { say "  BLOCKED $link (real file present — run 'orchids init' to migrate it)"; return 1; }
+  [ -e "$link" ] && { say "  BLOCKED $link (real file present — run 'orchids init' to migrate, or mark it local/copy in .ai.toml)"; return 1; }
   ln -s "$target" "$link"
 }
 
+copy_one() { # copy_one <src-dir> <dst-dir> — install if absent; report drift; never overwrite
+  local src=$1 dst=$2
+  [ -e "$src" ] || { say "  SKIP $dst (missing in canonical)"; return 1; }
+  if [ -L "$dst" ]; then rm "$dst"; fi                     # was linked, now copy mode
+  if [ ! -e "$dst" ]; then cp -r "$src" "$dst"; return 0; fi
+  cmp -s "$src/SKILL.md" "$dst/SKILL.md" || say "  DRIFT $dst (copy mode — differs from canonical; merge manually or switch to link)"
+}
+
 # ---------- CLAUDE.md prefix ----------
-ensure_claude_prefix() { # idempotent marker block at the very top
+ensure_claude_prefix() {
   local root=$1 file="$root/CLAUDE.md"
   grep -q 'orchids:begin' "$file" 2>/dev/null && return 0
   local block tmp
@@ -104,15 +141,12 @@ EOF
   fi
 }
 
-# ---------- init (file-layer migration) ----------
+# ---------- init ----------
 cmd_init() {
-  local profiles=${1:-}; [ -n "$profiles" ] || die "usage: orchids init <profile>[,<profile>...]"
-  profiles=${profiles//,/ }
   local root; root=$(repo_root)
   local clone="$root/.ai/repositories/$OWNER_REPO"
-  local canonical="${ORCHIDS_CANONICAL:-$CANONICAL_DEFAULT}"
+  local canonical; canonical=$(canonical_of "$root")
 
-  # 1. clone canonical (idempotent)
   if [ ! -d "$clone/.git" ]; then
     mkdir -p "$(dirname "$clone")"
     git clone --quiet "$canonical" "$clone"
@@ -122,45 +156,47 @@ cmd_init() {
   fi
   git -C "$canonical" config receive.denyCurrentBranch updateInstead
 
-  # 2. config + gitignore (only repositories/ is ignored)
-  cfg_write "$root" "$canonical" "$profiles"
+  ensure_aitoml "$root" "$canonical"
   grep -qx '\.ai/repositories/' "$root/.gitignore" 2>/dev/null || printf '.ai/repositories/\n' >> "$root/.gitignore"
 
-  # 3. migrate existing managed files: identical -> link · local-only -> adopt · diverged -> AI merge
   # Local variants survive ONLY via this repo's git history — refuse to destroy uncommitted ones.
   local line st p
   while IFS= read -r line; do
     [ -n "$line" ] || continue
     st=${line:0:2}; p=${line:3}
-    case "$st" in *D*) continue ;; esac              # deletions: nothing left to lose
-    [ -L "$root/$p" ] && continue                     # symlinks: laid by init itself
+    case "$st" in *D*) continue ;; esac
+    [ -L "$root/$p" ] && continue
     if [ -f "$root/$p" ]; then
       die "uncommitted changes under managed paths ($p) — commit them first (migration preserves local variants via git history)"
     fi
   done < <(git -C "$root" status --porcelain -uall -- .claude/skills AGENTS.shared.md AGENTS.files.md 2>/dev/null)
-  local adopted=0 diverged=0 skill csv src dst DIVERGED_LIST="" 
-  # 3a. skills present locally as real dirs
+
+  # migrate real skill dirs: identical -> link · local-only -> adopt · diverged -> AI merge
+  # exclude/local/copy modes are repo-owned or unmanaged: never migrated, never sent back.
+  local adopted=0 diverged=0 skill role mode src dst DIVERGED_LIST=""
   if [ -d "$root/.claude/skills" ]; then
     for dst in "$root"/.claude/skills/*/; do
       [ -d "$dst" ] && [ ! -L "${dst%/}" ] || continue
       skill=$(basename "$dst"); src="$clone/skills/$skill"
+      role=$(manifest_role "$clone" "$skill"); role=${role:--}
+      mode=$(resolve_mode "$root" "$role" "$skill")
+      case "$mode" in exclude|local|copy) continue ;; esac
       if [ ! -e "$src/SKILL.md" ]; then
-        if [ -e "$dst/SKILL.md" ]; then                      # local-only -> adopt into canonical
+        if [ -e "$dst/SKILL.md" ]; then                       # local-only -> adopt into canonical
           mkdir -p "$src"; cp "$dst/SKILL.md" "$src/SKILL.md"
-          grep -q "^$skill " "$clone/manifest.conf" || printf '%s %s\n' "$skill" "${profiles%% *}" >> "$clone/manifest.conf"
+          grep -q "^$skill " "$clone/manifest.conf" || printf '%s dev\n' "$skill" >> "$clone/manifest.conf"
           git -C "$clone" add -A
           git -C "$clone" commit --quiet -m "📥 init: adopt $skill from $(basename "$root")"
           adopted=$((adopted+1))
         else
           say "  SKIP $skill (no SKILL.md)"; continue
         fi
-      elif ! cmp -s "$dst/SKILL.md" "$src/SKILL.md"; then     # diverged -> agent merges directly
+      elif ! cmp -s "$dst/SKILL.md" "$src/SKILL.md"; then
         diverged=$((diverged+1)); DIVERGED_LIST="$DIVERGED_LIST .claude/skills/$skill/SKILL.md"
       fi
-      rm -rf "${dst%/}"                                        # content is byte-matched, adopted, or in git history for the merge
+      rm -rf "${dst%/}"                                       # byte-matched, adopted, or in git history for the merge
     done
   fi
-  # 3b. root rule files: identical -> replaced by link in lay_links; diverged -> stage
   for f in AGENTS.shared.md AGENTS.files.md; do
     if [ -f "$root/$f" ] && [ ! -L "$root/$f" ]; then
       if cmp -s "$root/$f" "$clone/$f"; then rm "$root/$f"
@@ -169,7 +205,6 @@ cmd_init() {
   done
   [ $adopted -gt 0 ] && git -C "$clone" push --quiet origin HEAD
 
-  # 4. symlinks + CLAUDE.md prefix + AGENTS.md stub
   lay_links "$root"
   ensure_claude_prefix "$root"
   if [ ! -f "$root/AGENTS.md" ]; then
@@ -201,6 +236,7 @@ cmd_sync() {
     git -C "$clone" commit --quiet -m "🔁 sync: local edits from $(basename "$root")"
     say "committed local edits"
   fi
+  local pre; pre=$(git -C "$clone" rev-parse HEAD)
   if ! git -C "$clone" pull --rebase --quiet origin main; then
     say "CONFLICT — canonical and this repo edited the same skill."
     say "Resolve in $clone (skills change rarely, are added often — a union merge is usually right),"
@@ -208,6 +244,17 @@ cmd_sync() {
     exit 1
   fi
   git -C "$clone" push --quiet origin main
+
+  # local/copy-mode skills: updates are announced, never applied
+  local skill role mode
+  for skill in $(git -C "$clone" diff --name-only "$pre"..HEAD -- skills/ 2>/dev/null | cut -d/ -f2 | sort -u); do
+    role=$(manifest_role "$clone" "$skill"); role=${role:--}
+    mode=$(resolve_mode "$root" "$role" "$skill")
+    case "$mode" in
+      local|copy) say "UPDATE available: $skill (canonical moved; $mode mode — merge manually if wanted)" ;;
+    esac
+  done
+
   lay_links "$root"
   say "sync: done ($(git -C "$clone" rev-parse --short HEAD) — in step with canonical)"
 }
@@ -215,19 +262,17 @@ cmd_sync() {
 cmd_status() {
   local root=$1 clone=$2
   git -C "$clone" fetch --quiet origin
-  local dirty ahead behind locals
+  local dirty ahead behind
   dirty=$(git -C "$clone" status --porcelain | wc -l)
   ahead=$(git -C "$clone" rev-list --count origin/main..HEAD)
   behind=$(git -C "$clone" rev-list --count HEAD..origin/main)
-  locals=$(find "$clone" -name '*.local.md' | wc -l)
   say "canonical : $behind incoming · $ahead outgoing"
   say "edits     : $dirty uncommitted local skill edit(s)"
-  [ "$locals" -gt 0 ] && say "merges    : $locals *.local.md awaiting AI merge"
   lay_links "$root"
 }
 
 case "${1:-}" in
   init) shift; cmd_init "$@" ;;
   sync) shift; cmd_sync "$@" ;;
-  *) die "usage: orchids init <profiles> | orchids sync [--status]" ;;
+  *) die "usage: orchids init | orchids sync [--status]" ;;
 esac
