@@ -1,0 +1,54 @@
+# orchids — agent install instructions
+# Served at https://owin.org — operators bootstrap any project by telling their
+# agent: "install owin.org".
+#
+# You are an AI coding agent. The operator asked you to install orchids into the
+# current project. Follow these steps exactly; do not infer alternatives. If a step
+# fails or a situation is not covered, STOP and report — do not improvise.
+
+1. PRECONDITIONS
+   - You are inside a git repository (`git rev-parse --show-toplevel`). If not, STOP.
+   - Managed paths (.claude/skills, .claude/agents, .claude/hooks, .claude/tools,
+     .claude/settings.json, AGENTS.shared.md, AGENTS.files.md) have no uncommitted
+     REAL files. If they do, commit them first — the migration preserves local
+     variants via git history.
+
+2. GET THE CANONICAL CHECKOUT
+   mkdir -p .ai/repositories/serialseb
+   git clone https://github.com/serialseb/orchids .ai/repositories/serialseb/orchids
+   (If the clone already exists, skip. On this operator's Pi, the local canonical is
+   /home/sudoku/src/serialseb/orchids — prefer it when present.)
+
+3. RUN INIT
+   ORCHIDS_CANONICAL=<the URL or path you cloned from> \
+     .ai/repositories/serialseb/orchids/bin/orchids init
+   This migrates existing files (byte-identical → symlink; project-only skills →
+   adopted upstream; diverged → preserved in git history), lays absolute symlinks,
+   writes .ai.toml, prefixes CLAUDE.md, and creates AGENTS.md if missing.
+
+4. IF INIT REPORTS "MERGE REQUIRED"
+   For each listed file:
+   - Read the local variant:  git show HEAD:<path>
+   - Read the canonical file at <path> (it is now a symlink; your Edit/Write tools
+     follow symlinks — you CAN write through it).
+   - Intelligently merge: union of rules, reconciled prose, nothing local lost,
+     nothing canonical dropped. Write the result through the symlink.
+   Then run:  .ai/repositories/serialseb/orchids/bin/orchids sync
+
+5. COMMIT
+   Stage ONLY: .gitignore .ai.toml CLAUDE.md AGENTS.shared.md AGENTS.files.md
+   .claude/skills .claude/agents .claude/hooks .claude/tools .claude/settings.json
+   Never sweep in unrelated changes. Commit message: one line on the migration.
+
+6. RULES THAT BIND YOU FROM NOW ON
+   - Read AGENTS.shared.md and AGENTS.md before any other action, every session.
+   - AGENTS.md and CLAUDE.md content are project-owned; orchids never overwrites them.
+   - Skill delivery is tuned in .ai.toml ([dev]/[infra]/[org]/["*"] sections,
+     skillname = "exclude"|"copy"|"link"|"local"); do not hand-edit beyond that.
+   - HANDOVER.md / MOOD.md live in $(git rev-parse --git-common-dir)/ — uncommittable
+     by construction; sensitive content never enters git history.
+   - Run `orchids sync` at workflow start and end (skill-sync skill).
+
+7. REPORT
+   Tell the operator: links laid, skills adopted, files merged, and show
+   `orchids sync --status`.
