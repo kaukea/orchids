@@ -128,3 +128,4 @@ If after 5 unsuccessful attempts the problem is not solved, stop.
 - Present the operator with the alternatives that remain — different angles, different
   tools, external help.
 - Ask the operator how to proceed.
+<!-- kauk round-trip test 2026-07-14 -->
