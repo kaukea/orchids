@@ -17,7 +17,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · · blocked-on-answers · process ·` [Architect close choreography without fragile hooks](TODO.md.d/hook-choreography.md)
 - `feature · todo · low · queued · process ·` [Decide the SessionStart self-heal hook](TODO.md.d/session-start-hook.md)
 - `housekeeping · todo · · queued · process ·` [Registry file set for orchids itself](TODO.md.d/registry-file-set.md)
-- `bug · todo · · queued · process ·` [Self-install: root link entries collide (src == dst)](TODO.md.d/self-install-link-collision.md)
+- `bug · todo · low · parked · process ·` [Self-install: root link entries collide (src == dst)](TODO.md.d/self-install-link-collision.md)
 
 ## Future (dot.ai features, design only)
 

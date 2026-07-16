@@ -25,9 +25,19 @@
   `.claude/skills/` symlinks — those point at the vendored clone, and push-back sync
   targets a checked-out origin.
 
+## Operator ruling (2026-07-16)
+- Parked: kauk migration work is deferred; not dealing with it now.
+- Sync is expected to rebase the clone; a manually-made old copy means it
+  predates the tool — not a sync defect.
+- Stopgap in this repo: when sync typechanges the root AGENTS files, merge
+  manually if the changes make sense; never commit the `T` symlink form.
+- Known: the repo is non-conforming and carries too many skills; both get
+  fixed later.
+
 ## Proposal
-Fix in kauk: during link laying, resolve src and dst; if identical, skip the entry
-(the repo IS the package). One-line guard, no manifest change needed.
+Fix in kauk (when migration work resumes): during link laying, resolve src
+and dst; if identical, skip the entry (the repo IS the package). One-line
+guard, no manifest change needed.
 
 ## Testing
 In this repo: run `kauk sync`, confirm AGENTS.shared.md / AGENTS.files.md stay
