@@ -17,7 +17,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · · blocked-on-answers · process ·` [Architect close choreography without fragile hooks](TODO.md.d/hook-choreography.md)
 - `feature · todo · low · queued · process ·` [Decide the SessionStart self-heal hook](TODO.md.d/session-start-hook.md)
 - `housekeeping · done · · complete · process ·` [Registry file set for orchids itself](TODO.md.d/registry-file-set.md)
-- `bug · todo · low · parked · process ·` [Self-install: root link entries collide (src == dst)](TODO.md.d/self-install-link-collision.md)
+- `bug · cancelled · low · complete · process ·` [~~Self-install: root link entries collide (src == dst)~~](TODO.md.d/self-install-link-collision.md)
 - `bug · todo · · blocked-on-answers · process ·` [ARCHITECTURE.md has no Taxonomy table — board lint fails 13/13](TODO.md.d/architecture-taxonomy-missing.md)
 - `feature · todo · · blocked-on-answers · process ·` [Cross-repo inbox: agents deliver requirements and knowledge between projects](TODO.md.d/cross-repo-inbox.md) ~role-delivery ~external-blockers
 - `feature · todo · · blocked-on-answers · process ·` [Orchestrator resolves external blockers when loading its tasks](TODO.md.d/external-blockers.md) ~cross-repo-inbox

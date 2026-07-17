@@ -1,5 +1,19 @@
 - created: 2026-07-16
 - created_by: fable-5
+- completed: 2026-07-17
+- completed_during: main (orchestrator board work)
+
+### Why cancelled
+**Moved to kauk, not dropped.** This is kauk engine work — this sidecar's own Proposal
+says so ("Fix in kauk … during link laying, resolve src and dst"). Under the operator
+ruling of 2026-07-17, work to be done by kauk belongs on kauk's board, so it now lives
+at `serialseb/kauk` → `docs/TODO.md.d/self-install-link-collision.md` (`cli` /
+`cli-core`), carrying the findings, the operator's 2026-07-16 parking ruling, and the
+proposal intact. It stays parked; only its home changed.
+
+**What orchids keeps:** the standing workaround below is an orchids working rule and
+still applies until kauk ships the guard — never commit the `T` typechange on
+`AGENTS.shared.md` / `AGENTS.files.md`.
 
 ## Blockers
 - none
