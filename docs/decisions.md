@@ -186,3 +186,27 @@ authored only by the orchestrator, directly on `main` — Decision-065's existin
 ownership rule, restated at the operator's request after the pane requirement failed
 to survive as conversation memory. Requirements about the machinery belong in the
 agent def and this file, nowhere else.
+
+## [2026-07-17 16:02 CEST] Decision-007: Agents hold a standing write-right over linked package files
+#kauk #symlinks #permissions #skills #settings #workflow
+
+The harness refuses Edit/Write through a symlink ("Refusing to write through
+symlink"), and no setting exists to change that (verified against current Claude
+Code documentation, 2026-07-17). The kauk skill's "edit at the path you loaded it
+from, never chase the target" is therefore unexecutable as written. Operator ruling:
+
+- **Agents are authorised — and required — to write linked package files by
+  resolving the symlink and writing the target** in
+  `.ai/repositories/<owner>/<repo>/`. That is kauk's local-edit surface; `kauk sync`
+  reconciles (commit → rebase → push back). In the package's OWN repo, mirror the
+  change to the real source files (repo root) in the same turn, or run `kauk sync`
+  so checkout and source converge — never leave the two divergent.
+- **The refusal is a harness limitation, not a policy signal.** It is not a "no";
+  agents do not stop or re-ask on it. The operator's permission here is standing.
+- **The fleet `settings.json` ships allow rules** — `Edit(.ai/repositories/**)` and
+  `Write(.ai/repositories/**)` — so the resolved-path write is neither denied nor
+  prompted, and (via permission-rule merge into the sandbox writable paths) not
+  sandbox-blocked either.
+
+Follow-up owed upstream: amend the kauk skill text (pull-only, lives in
+serialseb/kauk) — see TODO `kauk-skill-symlink-write`.

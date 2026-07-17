@@ -21,6 +21,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `bug · todo · · blocked-on-answers · process ·` [ARCHITECTURE.md has no Taxonomy table — board lint fails 13/13](TODO.md.d/architecture-taxonomy-missing.md)
 - `feature · todo · · blocked-on-answers · process ·` [Cross-repo inbox: agents deliver requirements and knowledge between projects](TODO.md.d/cross-repo-inbox.md) ~role-delivery ~external-blockers
 - `feature · todo · · blocked-on-answers · process ·` [Orchestrator resolves external blockers when loading its tasks](TODO.md.d/external-blockers.md) ~cross-repo-inbox
+- `housekeeping · todo · low · queued · process ·` [Kauk skill: symlink-write guidance is unexecutable under the harness](TODO.md.d/kauk-skill-symlink-write.md)
 
 ## Role delivery
 
