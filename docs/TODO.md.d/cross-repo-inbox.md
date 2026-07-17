@@ -86,11 +86,39 @@
     the natural candidate. And who judges "no further value" — is it automatic at close,
     or operator-gated? (Operator's thought was cut off mid-sentence; confirm the
     intended trigger before building it.)
-  - **Caveats to verify, not assume:** `git push --mirror` / `--all` and some CI or
-    mirroring setups DO carry extra refs; a hidden ref is invisible in the GitHub UI but
-    still in the object store once pushed; and an agent must be able to read it, so
-    tooling (board render, grooming) needs to know the ref exists. Test the "never
-    travels" claim rather than trusting this note.
+  - **TESTED 2026-07-17 — the "never travels" claim is HALF FALSE. Read this before
+    designing anything.** Empirical results from a scratch repo with a canary on
+    `refs/sensitive/foo`:
+
+    | operation | sensitive object travels? |
+    |---|---|
+    | `git push <remote> main` (default) | **no** — safe |
+    | `git clone --no-local <path>` | **no** — safe |
+    | `git clone file://<path>` | **no** — safe |
+    | `git clone <local-path>` (plain) | **YES — LEAKS** |
+    | `git clone --no-hardlinks <path>` | **YES — LEAKS** (does not help) |
+    | `git push --mirror` | **YES — LEAKS** (expected) |
+
+    A plain local-path clone takes the **local hardlink/copy optimisation** and copies
+    the WHOLE object store. The refs do not come across (recipient sees only
+    `refs/heads/*`), but the objects do — and **`git fsck --lost-found` surfaces the
+    dangling commit blind, no SHA needed, content fully readable.** Only `--no-local` or
+    a `file://` URL forces the pack path, which sends reachable-only objects.
+  - **THIS IS LIVE IN THE FLEET TODAY.** `bin/kauk:237` runs
+    `git clone --quiet "$origin" "$clone"`, and `.ai.toml` origins are local paths
+    (`origin = "/home/sudoku/src/serialseb/orchids"`). So every vendored clone under
+    `.ai/repositories/` in every consuming repo would carry every sensitive object,
+    recoverable by anyone with `fsck`. **kauk must clone `--no-local` (or `file://`)
+    before `refs/sensitive/*` is safe** — a kauk-side requirement, so it belongs on
+    kauk's board when this design lands, not specified here.
+  - **Deletion VERIFIED to work, but needs an explicit prune.** `update-ref -d` alone
+    leaves the object in the store. `git reflog expire --expire=now --all &&
+    git gc --prune=now` removes it — confirmed: object gone, canary absent from all of
+    `.git/`. So the retention rule must specify the prune, not just the ref delete.
+    (Default gc would get there eventually — ~2 weeks — which is not a guarantee worth
+    resting on.)
+  - Still unverified: whether `git rev-list --all` reaching `refs/sensitive/*` (it does)
+    matters for any tooling that scans it; behaviour on GitHub/forge mirroring.
 - **Whose component is the transport?** The protocol and the rules are orchids
   (workflow component). If delivery needs more than a shared filesystem or a git remote,
   that is kauk `federation` — and per its own rule, it gets filed on kauk's board, not
