@@ -20,6 +20,10 @@
   reconciles), and in the package's own repo mirror to the real source in the same
   turn. The fleet `settings.json` ships `Edit`/`Write` allow rules for
   `.ai/repositories/**`.
+- Operator constraint (2026-07-17): real kauk installs GLOBALLY, not per-repo — the
+  per-repo `.ai/repositories/` surface is the stopgap's. When the global install
+  lands, the Decision-007 allow rules (and the resolve-target procedure's path) must
+  follow the new local-edit surface, wherever kauk puts it.
 
 ## Proposal
 In `serialseb/kauk`, amend the kauk skill's Intent paragraph: replace the
