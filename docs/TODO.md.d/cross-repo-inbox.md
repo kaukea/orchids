@@ -64,9 +64,28 @@
     agent must remember. Compare option (a), which is discipline-only.
   - **It composes with encryption rather than competing.** Hidden ref = not published.
     Encrypted = survivable if it ever is. Belt and braces; pick both or state why not.
-  - **Open:** notes proper (`refs/notes/<ns>`, attached to a commit) vs a dedicated ref
-    namespace (e.g. `refs/private/<id>`, free-standing)? Notes attach sensitive content
-    to a specific commit, which may or may not be the right anchor for a *task*.
+  - **DECIDED (operator, 2026-07-17): a dedicated ref namespace, `refs/sensitive/<id>`,
+    NOT notes.** Notes anchor to a commit; a task is not a property of a commit.
+  - **`<id>` is a reference ID, never a number.** A number implies a sequence, and
+    **nothing is linear once several agents work at once** — the same reasoning that
+    makes board ids file basenames rather than counters. Default guess: the same id as
+    the feature (so it matches the sidecar name), but a feature may carry SEVERAL
+    sensitive items, so the scheme must allow more than one per feature. Shape still
+    open: `refs/sensitive/<feature-id>` holding many, vs one ref per item with a
+    distinct id.
+  - **The sidecar references the id and says where to find it** — the plaintext sidecar
+    stays the spine; the ref is where the sensitive part lives.
+  - **DELETION IS THE POINT, and only this option delivers it** (operator, 2026-07-17):
+    a rule must require private/encrypted content to be deleted once it is no longer
+    needed — e.g. the feature is complete and the information has no further value.
+    `git update-ref -d refs/sensitive/<id>` plus gc makes the objects unreachable and
+    they are genuinely gone. **No history rewrite, no filter-repo, no scrub ceremony.**
+    Sensitive content committed in-tree can NEVER be removed that cheaply — that
+    asymmetry is arguably the strongest argument for this storage choice.
+    Open: who fires the deletion? The `housekeeper` owns the deterministic close and is
+    the natural candidate. And who judges "no further value" — is it automatic at close,
+    or operator-gated? (Operator's thought was cut off mid-sentence; confirm the
+    intended trigger before building it.)
   - **Caveats to verify, not assume:** `git push --mirror` / `--all` and some CI or
     mirroring setups DO carry extra refs; a hidden ref is invisible in the GitHub UI but
     still in the object store once pushed; and an agent must be able to read it, so
