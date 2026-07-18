@@ -108,7 +108,8 @@ worktree + branch. **Read live refs before dispatching** (`git log --oneline f/<
 branch tip, `git rev-parse main`) — pass the housekeeper current SHAs, never a SHA you remember
 from the dispatch; main and the branch both move while the architect works. The housekeeper DOES return to you live (it is your subagent). Then update
 the board, re-triage, offer the next choice. If the architect left chatter in
-`.git/the-works/HANDOVER.md`, ingest it and delete it on sight (the `handover` skill).
+a `_closed` stream in `.git/the-works/`, ingest it — promote its pending decisions and
+remaining work, then archive the stream to `.git/the-works/_ingested/` (the `handover` skill).
 
 # Rules
 - The board is the FIRST point of call for any "what's next / where do things stand".

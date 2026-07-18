@@ -51,7 +51,7 @@
    - AGENTS.md and CLAUDE.md content are project-owned; packages never overwrite them.
    - Skill delivery is tuned in .ai.toml ([dev]/[infra]/[org]/["*"] sections,
      skillname = "exclude"|"copy"|"link"|"local"); do not hand-edit beyond that.
-   - HANDOVER.md / MOOD.md live in $(git rev-parse --git-common-dir)/the-works/ — uncommittable
+   - Workstream logs / MOOD.md live in $(git rev-parse --git-common-dir)/the-works/ — uncommittable
      by construction; sensitive content never enters git history.
    - Run `kauk sync` at workflow start and end (`kauk` skill).
 

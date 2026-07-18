@@ -75,9 +75,11 @@ You and the orchestrator are SEPARATE sessions; you cannot "return" to it. Write
 into the sidecar (`## Findings` + a `Result:` line): outcome (`done` | `blocked` |
 `abandoned`) · branch + HEAD · what was tested and the result · any tasks spawned. The
 orchestrator reads this on its next triage. Chatter and anything sensitive —
-conversation context, personal information — go ONLY to
-`$(git rev-parse --git-common-dir)/the-works/HANDOVER.md` (uncommittable; the orchestrator
-burns it after reading), NEVER into the committed sidecar.
+conversation context, personal information — go ONLY into your rolling session log in
+`$(git rev-parse --git-common-dir)/the-works/<feature-id>/` (uncommittable; the
+orchestrator promotes then archives the stream after reading), NEVER into the committed
+sidecar. Rulings agreed mid-feature go to the log's `## Decisions (pending promotion)`
+— the board and `docs/decisions.md` are the orchestrator's to write, not yours.
 
 **You AUTHOR the durable docs — the housekeeper only verifies.** While the feature context is
 hot, write each to its home: `decisions.md` (any design decision + its rationale),

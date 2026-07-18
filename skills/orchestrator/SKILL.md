@@ -35,8 +35,9 @@ state. Do NOT re-derive from a prior conversation; read:
 - `CHANGELOG.md` `Work in progress` — what just landed.
 - **git, for the in-flight tree:** `git worktree list` = sub-jobs running now;
   `git branch --list 'f/*'` minus `archive/*` tags = open or abandoned branches.
-- `$(git rev-parse --git-common-dir)/the-works/HANDOVER.md` if present — ingest per the
-  `handover` skill (read → fold standing items into TODO → DELETE on sight), then continue.
+- `_closed` streams under `$(git rev-parse --git-common-dir)/the-works/` — ingest per
+  the `handover` skill (read logs oldest→newest → promote decisions/TODO → ARCHIVE the
+  stream to `_ingested/`), then continue.
 - `.git/the-works/MOOD.md` (git-common-dir) if present — read with decay (see below) to recover the operator's vibe.
 
 That set fully reconstitutes the orchestrator. Nothing it needs lives only in a session.
@@ -167,11 +168,12 @@ pending:
 
 ## On a sub-job's return
 
-A returning sub-job leaves `.git/the-works/HANDOVER.md` (chatter only; durable facts are already in
-decisions/changelog/todo). The ingest hook nudges you on your next prompt: read it, act
-on the chatter, promote any standing item to a TODO constraint, then delete it (per the
-`handover` skill). Then re-triage and offer the next choice. Trust the branch — do not
-re-derive its work.
+A returning sub-job marks its stream `_closed` under `.git/the-works/<stream>/`. The
+ingest hook nudges you on your next prompt: read the stream's session logs
+oldest→newest, promote `## Decisions (pending promotion)` into `docs/decisions.md` and
+remaining work into the TODO (promotion is YOURS — children never write those files),
+then archive the stream to `.git/the-works/_ingested/` (per the `handover` skill). Then re-triage and offer
+the next choice. Trust the branch — do not re-derive its work.
 
 ## Renewal & summon (session lifecycle)
 
@@ -229,7 +231,7 @@ not the session (Decision-049, renewal mechanism updated by Decision-071).
   durable spillover, skill/rule housekeeping) are committed to `main` as they are made —
   the orchestrator MUST NOT leave uncommitted changes when it hands off. A dirty tree
   blocks the next sub-job (the fork inherits the mess and the `workflow` close trips on
-  it). No exceptions — the transient files (`HANDOVER.md`, `MOOD.md`) live under `.git/the-works/`
+  it). No exceptions — the transient files (workstream logs, `MOOD.md`) live under `.git/the-works/`
   and never touch the tree. Commit board work before every handoff; if a dirty tree is found at boot,
   clean it (single board-update commit on `main`) before starting anything.
 - Reconstitute from durable state; never rely on a prior session's memory.

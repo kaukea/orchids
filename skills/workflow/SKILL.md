@@ -18,7 +18,8 @@ The whole workflow must be followed, you must complete all these steps.
 
 Workflow Start:
 
-- [ ] Prior `.git/the-works/HANDOVER.md` ingested (read → fold into docs → DELETE on sight) if present — see the `handover` skill
+- [ ] Closed workstreams ingested if announced (`_closed` under `.git/the-works/*/`): promote → archive — see the `handover` skill
+- [ ] Own session log created in `.git/the-works/<feature-id>/` (`handover` skill), rolled as work progresses
 - [ ] Working tree resolved with user
 - [ ] Skills synchronized
 - [ ] Git commit format understood
@@ -35,7 +36,7 @@ Workflow Completion — executed via the `workflow-complete` skill, loaded on `M
 - [ ] Verified integrity
 - [ ] Pushed to origin (commits + `archive/` tag + notes)
 - [ ] Worktree removed and branch ref deleted (archive tag is the tombstone)
-- [ ] Handover written for the orchestrator
+- [ ] Workstream log closed for the orchestrator (final `## State`, `_closed` marker)
 
 ## Rules
 

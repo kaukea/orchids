@@ -40,8 +40,8 @@ Durable state lives in files; no role depends on chat history.
   role reads-and-advances: `Blockers / Questions / Findings / Proposal /
   Testing`. Formats in `AGENTS.files.md`.
 - `docs/decisions.md` — rulings, greppable by `#keyword`.
-- `MOOD.md` / `HANDOVER.md` — uncommittable by construction, kept in
-  `$(git rev-parse --git-common-dir)/the-works/`.
+- workstream logs (per-session, rolling) / `MOOD.md` — uncommittable by
+  construction, kept in `$(git rev-parse --git-common-dir)/the-works/`.
 
 Converting a live conversation into this model is a one-time distillation:
 scope → `Proposal`, test method → `Testing`, open items → `Questions` /

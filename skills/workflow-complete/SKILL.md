@@ -55,7 +55,7 @@ Task files always get committed:
 - `AGENTS.shared.md` and all symlinks coming from the `.ai` directory — they are shared rules.
 - Memory files under `.claude/projects/` that are still relevant. Delete obsolete ones before committing.
 
-(`HANDOVER.md` is not a tree concern — it lives inside `.git/the-works/`, uncommittable; see Handover write below.)
+(Workstream logs are not a tree concern — they live inside `.git/the-works/`, uncommittable; see Workstream log close below.)
 
 ## Marker tag
 
@@ -146,18 +146,21 @@ squash, the `archive/` tag, and the branch history under it are intact and autho
 re-squash, or skip the remaining close steps. Report the failure to the operator verbatim and let them
 decide when to retry; never silently swallow it.
 
-## Handover write
+## Workstream log close
 
 Record the outcome as the closing act, before removing the worktree — split by
-sensitivity (this is a **mandatory** close step):
+sensitivity (this is a **mandatory** close step; full protocol in the `handover` skill):
 
 - **Durable, sanitized task state** → the task's sidecar (`docs/TODO.md.d/<id>.md` →
   `## Findings` + a `Result:` line, per `AGENTS.files.md` §Sidecar): outcome, merged
   SHA (or cancelled), what was tested and the real result. Committed — so no
   conversation quotes, personal data, or secrets.
-- **Chatter and anything sensitive** → `$(git rev-parse --git-common-dir)/the-works/HANDOVER.md`
-  per the `handover` skill — uncommittable, ingested then deleted by the parent the
-  moment it is seen.
+- **The stream's log** — append the final `## State` (outcome `done` | `reverted` |
+  `wip`, merged SHA or tombstone tag) to YOUR session log in
+  `$(git rev-parse --git-common-dir)/the-works/<feature-id>/`, make sure `## Decisions
+  (pending promotion)` carries every ruling not yet in `docs/decisions.md`, then
+  `touch` the stream's `_closed` marker. The ingester (parent — or this session
+  itself when top-level) promotes decisions/TODO and deletes the directory.
 
 ## Close worktree and delete the branch
 
@@ -176,7 +179,7 @@ failed, do NOT delete the branch — fix the squash first.)
 
 ## Return to the parent (remind the operator)
 
-The close is done, the handover is written. Switching sessions is operator-driven and the
+The close is done, the stream is marked closed. Switching sessions is operator-driven and the
 parent only ingests when it is foregrounded, so the final act is a reminder — not an
 action you can take:
 

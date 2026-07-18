@@ -268,3 +268,26 @@ the operator's acceptance IS the existing direct-commit override. The agent neve
 self-selects the path, and promotes to a full workflow the moment scope grows (a
 landed micro-commit stays on `main`; the grown scope starts fresh). Such commits
 carry `Branch: main` — the sole exception to the git-commit trailer rule.
+
+## [2026-07-18 19:10 CEST] Decision-011: Per-session workstream logs replace the handover; promotion is the ingester's
+#the-works #workstream-log #handover #session #reset #relay #single-writer #todo #decisions
+
+Supersedes the monolithic `HANDOVER.md` mechanics (the channel location rulings in
+Decision-008 stand; this changes what lives there). Rulings:
+
+- **Every session keeps its OWN rolling log** in `.git/the-works/<stream>/`
+  (`YYYYMMDD-HHMMSS-<role>.md`): State (rewritten in place), Findings, Dead ends,
+  Decisions pending promotion, Pointers — written as work happens, never
+  reconstructed at the end. One file per session; a session never edits another's;
+  a stream reads oldest→newest. This makes a reset or agent change
+  non-destructive: the successor reads the stream and continues.
+- **Single-writer on main's docs.** The board (`TODO`) and `docs/decisions.md` are
+  written only by the orchestrator / top-level session. Children stage rulings in
+  their log's "Decisions (pending promotion)"; the ingester promotes them. A
+  top-level session (no parent) self-promotes at its own close.
+- **Ingest = promote → archive.** A `_closed` stream (marker file, announced by
+  the shared hook) is read, promoted, then MOVED to `.git/the-works/_ingested/` —
+  PROVISIONALLY retained, not deleted: commit messages and the changelog already
+  carry the positive record, but dead ends and failures have no committed home;
+  a few weeks of use decide whether that archive earns its keep (follow-up task
+  `ingested-retention`).

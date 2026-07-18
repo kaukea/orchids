@@ -46,7 +46,7 @@ restructuring one, read its section there — do NOT invent a format from memory
 | ARCHITECTURE.md | repo root | close, only if a trigger below fired | no | `AGENTS.files.md` §Architecture |
 | CHANGELOG.md | repo root | close: append one entry | no (append-only) | `AGENTS.files.md` §Changelog |
 | README.md | repo root | close, only if user-facing/tooling change | no | `readme-sync` skill |
-| HANDOVER.md | `.git/the-works/` (git-common-dir) — uncommittable | chatter only — written on finish by the child · ingested then DELETED by the parent the moment it is seen | no | `handover` skill |
+| the-works/\<stream\>/\<session\>.md *(workstream logs)* | `.git/the-works/` (git-common-dir) — uncommittable | one per session, ROLLING — created at session start, updated as work progresses · stream marked `_closed` at finish · promoted then ARCHIVED to `_ingested/` by the ingester | no — hook announces closed streams | `handover` skill |
 | migrations/\<YYYY-MM-DD\>-\<slug\>.md | package root | authored in the same branch as any move/rename/reformat of a managed artifact · applied when the hook reports pending | no — hook-triggered | `AGENTS.files.md` §Migrations |
 
 The functionality/component taxonomy lives in the project's `ARCHITECTURE.md`; agents do
@@ -68,7 +68,8 @@ operator), update each file whose condition is met:
 - [ ] **README** — only if a user-facing or tooling change → `readme-sync` skill
 - [ ] **MIGRATION** — only if the work moved, renamed, or reformatted a managed
   artifact: a dated entry ships in the same branch → `AGENTS.files.md` §Migrations
-- [ ] **HANDOVER** — written as the closing act → `handover` skill
+- [ ] **WORKSTREAM LOG** — final `## State` (outcome) appended, durable findings
+  flushed to the sidecar, stream marked `_closed` → `handover` skill
 
 A workflow is never closed before its Testing gate (below) has been met.
 
@@ -93,24 +94,33 @@ These hold even when no skill is loaded:
 
 - **Sensitive content never enters git history.** Conversation quotes, personal
   information, and secrets go ONLY into the uncommittable channels under `.git/the-works/`
-  (`HANDOVER.md`, `MOOD.md`) — never into sidecars, TODO, decisions, changelog, or
+  (workstream logs, `MOOD.md`) — never into sidecars, TODO, decisions, changelog, or
   commit messages. Committed docs carry sanitized technical state only. If sensitive
   content is ever found committed — in the working tree OR anywhere in past history —
   it is scrubbed IMMEDIATELY on detection, including rewriting the git history that
   contains it (e.g. `git filter-repo`); surface it to the operator at once, who gates
   the rewrite. This overrides the `main`-is-immutable rule for exactly this case.
-- **Durable facts go to their homes, not the handover.** Decisions → `docs/decisions.md`,
-  outcomes → `CHANGELOG.md`, remaining/follow-up work → `TODO`. `HANDOVER.md` carries
-  **chatter only** (short-lived gotchas with no durable home, and anything sensitive)
-  and is ingested-then-deleted by the parent the moment it is seen. It lives inside
-  `.git/the-works/` (uncommittable). Full protocol in the `handover` skill.
+- **Every session keeps a rolling workstream log** — its OWN file under
+  `.git/the-works/<stream>/`, created at session start and updated as work
+  progresses: state, findings, dead ends, decisions pending promotion, pointers.
+  Enough for a successor to continue cold; a reset or agent change never destroys
+  a workstream. One file per session — never edit another session's log; read a
+  stream oldest→newest. Full protocol in the `handover` skill.
+- **Durable facts go to their homes via promotion, not scatter.** The log is a
+  staging area: sanitized findings are flushed to the stream's committed sidecar;
+  decisions and remaining work reach `docs/decisions.md` / the `TODO` when the
+  ingester (the parent — or the top-level session itself at its own close)
+  promotes a `_closed` stream, then archives it under `.git/the-works/_ingested/`
+  (provisional retention). The board and
+  `docs/decisions.md` are written by the orchestrator / top-level session, never
+  directly by a child.
 - **Link at the moment of deferral.** When work is split, deferred, or delegated, write
   the relationship into the `TODO` immediately — `parent`/`subtasks`/`blocked_by` + a
-  one-line "moved from X to Y because Z", or "delegated to \<child\>". The handover is
-  deleted; this link is what keeps any-level orchestrator from running blind.
-- **TRUST YOUR BRANCH.** A session that receives a handover or a child's result acts on
-  it and does not re-derive or re-confirm by re-reading everything. Trust is earned by
-  the writer leaving a complete, confidence-marked handover.
+  one-line "moved from X to Y because Z", or "delegated to \<child\>". Stream logs leave
+  the active path at ingestion; this link is what keeps any-level orchestrator from running blind.
+- **TRUST YOUR BRANCH.** A session that receives a stream's logs or a child's result acts
+  on them and does not re-derive or re-confirm by re-reading everything. Trust is earned
+  by the writer keeping a complete, confidence-marked, rolling log.
 
 ---
 

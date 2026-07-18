@@ -44,5 +44,5 @@ the former `workflow-complete` procedure.
 
 # Return (typed result to the orchestrator)
 outcome (`merged` | `abandoned`) · `archive/<id>` SHA · the squash title · what was pushed
-(or the push error verbatim) · which docs were updated. No `HANDOVER.md` — this typed
+(or the push error verbatim) · which docs were updated. No workstream log of its own — this typed
 result is the hand-back.

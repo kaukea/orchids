@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "gcd=\"$(git rev-parse --git-common-dir 2>/dev/null)\"; set -- \"$gcd/the-works\"/HANDOVER*.md; [ -f \"$1\" ] && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"One or more HANDOVER files are present in .git/the-works/: a child has returned. Ingest them FIRST per the handover skill (batch rule: all in one pass, oldest-first; read, act on the chatter, promote any standing item to TODO, then delete each) before responding to the user.\"}}'; exit 0",
+            "command": "gcd=\"$(git rev-parse --git-common-dir 2>/dev/null)\"; hit=\"\"; set -- \"$gcd/the-works\"/*/_closed; [ -e \"$1\" ] && hit=1; set -- \"$gcd/the-works\"/HANDOVER*.md; [ -f \"$1\" ] && hit=1; [ -n \"$hit\" ] && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"Closed workstream(s) or legacy HANDOVER files await ingestion in .git/the-works/. Per the handover skill: read each _closed stream'\"'\"'s session logs oldest-first, promote pending decisions and remaining work into docs/decisions.md and the TODO, then delete the stream directory. Legacy flat HANDOVER*.md files: apply pending migrations first. Do this BEFORE responding to the user.\"}}'; exit 0",
             "timeout": 5
           },
           {
