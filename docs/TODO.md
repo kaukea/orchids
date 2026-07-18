@@ -22,6 +22,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · · blocked-on-answers · process ·` [Cross-repo inbox: agents deliver requirements and knowledge between projects](TODO.md.d/cross-repo-inbox.md) ~role-delivery ~external-blockers
 - `feature · todo · · blocked-on-answers · process ·` [Orchestrator resolves external blockers when loading its tasks](TODO.md.d/external-blockers.md) ~cross-repo-inbox
 - `housekeeping · todo · low · queued · process ·` [Kauk skill: symlink-write guidance is unexecutable under the harness](TODO.md.d/kauk-skill-symlink-write.md)
+- `feature · done · · complete/interactive · process ·` [The works: .git/the-works/ transients, dated migrations, write gates, micro-tasks](TODO.md.d/the-works-channel.md) ~kauk-skill-symlink-write
 
 ## Role delivery
 

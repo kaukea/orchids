@@ -63,6 +63,16 @@ chatter into history (`handover`), groom the board (`groom`, `orchestrator`),
 migrate a grown-wild repo into the canonical shape (`history-rewrite`), and
 teach agents to write new skills properly (`doing-skills`).
 
+**Upgrades that catch every repo up.** When the package moves or reshapes a
+managed file, it ships a dated entry in `migrations/` — state-guarded
+instructions any agent applies in one pass, prompted by a hook the moment a
+repo is behind. A repo that skipped ten upgrades converges the same way as one
+that skipped one; the highest migration date IS the package version. Transient
+session files (`HANDOVER.md`, `MOOD.md`) live in `.git/the-works/` —
+physically uncommittable, shared across worktrees. And when the ask is just a
+typo fix, the agent offers a single commit on `main` instead of the full
+branch ceremony — you say yes, it stays micro.
+
 ## What it is not
 
 orchids is **data only** — no code, no installer. Distribution is

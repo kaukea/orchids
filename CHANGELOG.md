@@ -10,10 +10,30 @@ _base: `f65ad36`_
   door, the "install kauk/orchids" bootstrap contract
   (`Agent-installation.md`), and `docs/decisions.md` seeded with the
   history-rewrite charter.
+- 🗃️ The works: transients (`HANDOVER.md`, `MOOD.md`) namespaced into
+  `.git/the-works/`; dated, state-guarded `migrations/` catch any repo up in
+  one pass (watermark + hook, the highest date IS the package version);
+  cross-repo writes gated to package content surfaces; micro-tasks may ride
+  `main` on an operator-accepted offer.
 
 ### 🐛 Bug fixes
 
 ---
+
+#### 🗃️ `f/the-works-channel` → `archive/the-works-channel`
+
+The uncommittable channel moves to `.git/the-works/` and every structural
+change now ships a dated migration: `migrations/YYYY-MM-DD-<slug>.md`,
+state-guarded and merge-safe, applied as one net-effect pass against the
+per-clone `.git/the-works/migrated` watermark announced by a `settings.json`
+hook (two entries backfill 2026-07-11 and 2026-07-18). Handover ingest drains
+gathered batches oldest-first. The blanket `.ai/repositories/**` allow rules
+narrow to `agents/`/`skills/`/`files/`, with the agent-behaviour norm that a
+fix to another repo rides that repo's workflow. The workflow skill gains the
+micro-task path (`Branch: main` sanctioned on exactly those commits).
+
+_See the board entry (`docs/TODO.md.d/the-works-channel.md`) and
+Decisions 008–010 in `docs/decisions.md`._
 
 #### ✂️ `f/data-only-split` → `archive/data-only-split`
 
