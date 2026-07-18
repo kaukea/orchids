@@ -320,9 +320,13 @@ def pull(board: Board):
             closed_from_gh += 1
     all_open = gh_json("issue", "list", "-R", board.repo, "--state", "open",
                        "--limit", "500",
-                       "--json", "number,title,body,url") or []
+                       "--json", "number,title,body,url,labels") or []
     for issue in all_open:
         if issue["number"] in by_gh:
+            continue
+        # already board-labelled but unknown here = a projection in flight
+        # (gh# commit not yet visible to this checkout) — never re-ingest
+        if any(l["name"] == "board" for l in issue["labels"]):
             continue
         slug = slugify(issue["title"])
         sidecar = board.root / "docs" / "TODO.md.d" / f"{slug}.md"

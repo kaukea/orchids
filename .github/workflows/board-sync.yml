@@ -1,0 +1,52 @@
+# Central board-sync workflow (the orchids package owns the logic).
+# Consuming repos lay a thin shim that `uses:` this file — see
+# templates/board-sync-shim.yml. orchids itself triggers directly.
+name: board-sync
+
+on:
+  workflow_call: {}
+  workflow_dispatch: {}
+  issues:
+    types: [opened, edited, closed, reopened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  ingest:
+    # Actor gate: only the operator's own events run anything.
+    if: github.event_name == 'workflow_dispatch' || github.event.sender.login == 'serialseb'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: kaukea/orchids
+          path: .board-pkg
+      - name: Ingest GitHub-born changes into the board
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "board-sync"
+          git config user.email "actions@github.com"
+          python3 .board-pkg/tools/board_gh.py pull --repo-root .
+          rm -rf .board-pkg
+          git add docs/TODO.md docs/TODO.md.d/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "board unchanged"; exit 0
+          fi
+          git commit -m "📋 Board ingest: GitHub-born changes landed
+
+          Automated intake by the board-sync workflow: issues filed or
+          closed on GitHub become board state; stubs await triage.
+
+          Branch: main
+          Co-authored-by: board-sync workflow <actions@github.com>"
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase origin main
+          done
+          git push
