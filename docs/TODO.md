@@ -26,6 +26,8 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · done · · complete/interactive · process ·` [Workstream logs: per-session rolling records replace the handover](TODO.md.d/workstream-log.md) ~the-works-channel
 - `housekeeping · todo · low · queued · process ·` [Decide retention for ingested workstream logs](TODO.md.d/ingested-retention.md) ~workstream-log
 - `housekeeping · todo · · queued · process ·` [Configure origin remote; push pending closes](TODO.md.d/origin-remote-missing.md)
+- `feature · todo · · queued · process ·` [Hide machinery skills from the slash list (user-invocable pass)](TODO.md.d/skill-slash-visibility.md)
+- `feature · todo · · queued · process ·` [Standard tree display+selection for package installs (upstream kauk)](TODO.md.d/package-select-tree.md) ~kauk-skill-symlink-write
 
 ## Role delivery
 
