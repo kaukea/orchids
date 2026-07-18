@@ -15,10 +15,28 @@ _base: `f65ad36`_
   one pass (watermark + hook, the highest date IS the package version);
   cross-repo writes gated to package content surfaces; micro-tasks may ride
   `main` on an operator-accepted offer.
+- 📓 Workstream logs: every session keeps its own small rolling record in
+  `.git/the-works/<stream>/` — state, findings, dead ends, decisions pending
+  promotion, pointers — so resets and agent swaps never lose the thread;
+  `_closed` streams are promoted by the ingester (single-writer on the board
+  and decisions) then archived to `_ingested/` (provisional retention).
 
 ### 🐛 Bug fixes
 
 ---
+
+#### 📓 `f/workstream-log` → `archive/workstream-log`
+
+The monolithic `HANDOVER.md` becomes per-session rolling workstream logs in
+`.git/the-works/<stream>/` (`handover` skill rewritten as the protocol): one
+file per session, five fixed sections, read oldest→newest; `_closed` marker +
+hook announcement; ingest = promote decisions/TODO (single-writer — children
+never write main's docs) then archive the stream to `_ingested/`, kept
+provisionally to evaluate the dead-ends record. A migration folds legacy flat
+`HANDOVER*.md` into a closed `legacy` stream.
+
+_See the board entry (`docs/TODO.md.d/workstream-log.md`) and Decision-011 in
+`docs/decisions.md`._
 
 #### 🗃️ `f/the-works-channel` → `archive/the-works-channel`
 

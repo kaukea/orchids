@@ -23,6 +23,9 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · · blocked-on-answers · process ·` [Orchestrator resolves external blockers when loading its tasks](TODO.md.d/external-blockers.md) ~cross-repo-inbox
 - `housekeeping · todo · low · queued · process ·` [Kauk skill: symlink-write guidance is unexecutable under the harness](TODO.md.d/kauk-skill-symlink-write.md)
 - `feature · done · · complete/interactive · process ·` [The works: .git/the-works/ transients, dated migrations, write gates, micro-tasks](TODO.md.d/the-works-channel.md) ~kauk-skill-symlink-write
+- `feature · done · · complete/interactive · process ·` [Workstream logs: per-session rolling records replace the handover](TODO.md.d/workstream-log.md) ~the-works-channel
+- `housekeeping · todo · low · queued · process ·` [Decide retention for ingested workstream logs](TODO.md.d/ingested-retention.md) ~workstream-log
+- `housekeeping · todo · · queued · process ·` [Configure origin remote; push pending closes](TODO.md.d/origin-remote-missing.md)
 
 ## Role delivery
 
