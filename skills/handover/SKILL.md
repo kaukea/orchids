@@ -80,6 +80,13 @@ it's written and tell the operator it's safe to start a fresh session.
 
 ## Ingest it (parent session, on a child's return)
 
+**Batch rule** — when several `HANDOVER*.md` files sit in `.git/the-works/` (e.g.
+strays gathered by a migration under provenance-stamped names), ingest ALL of them
+in one boot pass, oldest-first by mtime, each per the steps below. Legacy strays may
+predate the durable-facts discipline: anything durable-looking found inside (a
+decision, an outcome, deferred work) is promoted to its proper home
+(decisions / CHANGELOG / board) during triage instead of assumed already there.
+
 The parent MUST:
 
 1. **Read** `HANDOVER.md`. **TRUST YOUR BRANCH** — act on it; do not re-derive the
@@ -100,7 +107,7 @@ The parent MUST:
 
 - Chatter only — durable facts go to decisions/changelog/todo, never the handover.
 - It lives under `.git/` — uncommittable by construction; never copy it into the tree.
-- Ingest-then-delete — one at a time, never left stale.
+- Ingest-then-delete — never left stale; a gathered batch drains fully in one pass.
 - TRUST YOUR BRANCH — the receiver acts on the handover and does not re-derive; the
   writer earns that trust with a complete, confidence-marked handover.
 - Link at the moment of deferral — the "moved from X to Y" relationship goes into the
