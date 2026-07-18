@@ -232,6 +232,40 @@ proceeding with work affected by either.
 
 ---
 
+## §Migrations — package structural upgrades
+
+`migrations/` at a package root holds ONE dated file per structural change to a
+managed artifact — a location, name, or format change: `YYYY-MM-DD-<slug>.md`. The
+ISO date is the day the change shipped (historical entries may be backdated to the
+change they describe), so filenames sort chronologically and **the package version IS
+the highest filename** — that is how "older vs newer" is answered from any consuming
+repo.
+
+**Watermark** — `$(git rev-parse --git-common-dir)/the-works/migrated` holds the
+basename of the last applied migration, per clone (the state being migrated is
+per-clone). No watermark = everything pending. The shared `settings.json` hook
+compares the highest available basename (repo-root `migrations/` or
+`.ai/repositories/*/*/migrations/`) against it and injects a pending notice.
+
+**Execution** — the agent reads ALL pending migrations at once, merges them, and
+applies the net effect in one pass (chained moves collapse; steps a later migration
+undoes are never performed), then writes the latest basename to the watermark.
+
+**Authoring rules:**
+- Every action is guarded by observable state ("if X exists, move it") — NEVER by
+  assumed position in the sequence ("the repo is now at layout N"). State-guarded
+  steps are idempotent and merge-safe by construction.
+- Mechanical steps go in a verbatim shell block the agent runs; judgement steps
+  (triage, merge, ingest) are written as instructions.
+- Never clobber: moves use `mv -n` and provenance-stamped names when several files
+  could land on one destination.
+- Structure: what changed and why (2–4 lines) → `## Detect → convert` →
+  `## Verify` (the observable end-state).
+- A migration ships **in the same branch as the structural change it describes**
+  (Close gate item in `AGENTS.shared.md`).
+
+---
+
 ## §Changelog
 
 Repo-wide record at the repository root. The single release/record artifact — there is

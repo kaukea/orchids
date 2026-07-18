@@ -18,7 +18,7 @@ The whole workflow must be followed, you must complete all these steps.
 
 Workflow Start:
 
-- [ ] Prior `.git/HANDOVER.md` ingested (read → fold into docs → DELETE on sight) if present — see the `handover` skill
+- [ ] Prior `.git/the-works/HANDOVER.md` ingested (read → fold into docs → DELETE on sight) if present — see the `handover` skill
 - [ ] Working tree resolved with user
 - [ ] Skills synchronized
 - [ ] Git commit format understood
@@ -66,7 +66,9 @@ workflow start immediately.
   is the signal: untagged = open/suspended → preserve; tagged = closed → already deleted at that close. No process
   (board reconciliation included) deletes an untagged branch.
 - Feature branches are required. The user MAY explicitly override for a given workflow to allow direct commits on
-  `main` (or another non-`f/` branch). Absent that override, the feature-branch rule is absolute.
+  `main` (or another non-`f/` branch). Absent that override, the feature-branch rule is absolute — but for a task
+  the agent judges micro, it PROPOSES that override up front (see Micro-task path below) instead of waiting for
+  the operator to remember it.
 - No work goes uncommitted. If work was done — even work that leaves no file changes to record (investigation,
   configuration applied elsewhere, a manual action, a decision reached, a dependency verified) — it is STILL
   captured by a commit that describes it, using an empty commit (`git commit --allow-empty`). The absence of a
@@ -106,6 +108,30 @@ As soon as a user indicates wanting to start a workflow:
 - Create an anchor commit describing the intent of the workflow, with a `🎉` gitmoji and a `Base:`
   trailer containing the SHA of the commit the branch was created from. This commit is the anchor for
   the branch and the starting point for all future work in this workflow.
+
+## Micro-task path
+
+The full machinery (worktree, anchor, archive tag, squash, handover) exists for work
+with scope; a one-commit triviality earns none of it. When a task looks micro — the
+agent judges it a single commit's worth, with no design choice to make and no
+meaningful testing question (a typo, a prose fix, a one-line config value) — the
+agent OFFERS, before creating anything: *"this is micro — direct commit on `main`
+instead of a full workflow?"* The operator's acceptance IS the direct-commit
+override; the agent never self-selects this path.
+
+On acceptance:
+
+- No worktree, no branch, no anchor, no tag, no squash, no handover. One
+  properly-formatted commit straight on `main` (`git-commit` skill; the commit
+  carries `Branch: main` — sanctioned for micro-task commits only).
+- The close gate collapses to what actually happened: almost always nothing beyond
+  the diff; a decision, if one was somehow made, is still appended.
+- Push behaviour is unchanged.
+
+**Promotion** — the moment a micro-task grows (a second concern appears, a test is
+warranted, a choice surfaces), the agent STOPS and promotes it to a real workflow:
+worktree off the current `main`, full machinery from there. A micro-commit already
+landed stays on `main` as the trivial fix it was; the grown scope starts fresh.
 
 # Finishing a workflow
 

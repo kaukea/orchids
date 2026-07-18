@@ -35,9 +35,9 @@ state. Do NOT re-derive from a prior conversation; read:
 - `CHANGELOG.md` `Work in progress` — what just landed.
 - **git, for the in-flight tree:** `git worktree list` = sub-jobs running now;
   `git branch --list 'f/*'` minus `archive/*` tags = open or abandoned branches.
-- `$(git rev-parse --git-common-dir)/HANDOVER.md` if present — ingest per the
+- `$(git rev-parse --git-common-dir)/the-works/HANDOVER.md` if present — ingest per the
   `handover` skill (read → fold standing items into TODO → DELETE on sight), then continue.
-- `.git/MOOD.md` (git-common-dir) if present — read with decay (see below) to recover the operator's vibe.
+- `.git/the-works/MOOD.md` (git-common-dir) if present — read with decay (see below) to recover the operator's vibe.
 
 That set fully reconstitutes the orchestrator. Nothing it needs lives only in a session.
 
@@ -141,7 +141,7 @@ markers are gitignored. See TODO `#mainline-subjob-title`.
 
 ## MOOD.md — the vibe snapshot
 
-`MOOD.md` lives at `$(git rev-parse --git-common-dir)/MOOD.md` — inside `.git/`, so it is
+`MOOD.md` lives at `$(git rev-parse --git-common-dir)/the-works/MOOD.md` — inside `.git/`, so it is
 **uncommittable by construction** — observational data about the operator, on-box only
 (Decision-048). It is a snapshot of *right now*, not a journal
 (trends are reconstructable from git). Shape:
@@ -167,7 +167,7 @@ pending:
 
 ## On a sub-job's return
 
-A returning sub-job leaves `.git/HANDOVER.md` (chatter only; durable facts are already in
+A returning sub-job leaves `.git/the-works/HANDOVER.md` (chatter only; durable facts are already in
 decisions/changelog/todo). The ingest hook nudges you on your next prompt: read it, act
 on the chatter, promote any standing item to a TODO constraint, then delete it (per the
 `handover` skill). Then re-triage and offer the next choice. Trust the branch — do not
@@ -229,12 +229,12 @@ not the session (Decision-049, renewal mechanism updated by Decision-071).
   durable spillover, skill/rule housekeeping) are committed to `main` as they are made —
   the orchestrator MUST NOT leave uncommitted changes when it hands off. A dirty tree
   blocks the next sub-job (the fork inherits the mess and the `workflow` close trips on
-  it). No exceptions — the transient files (`HANDOVER.md`, `MOOD.md`) live under `.git/`
+  it). No exceptions — the transient files (`HANDOVER.md`, `MOOD.md`) live under `.git/the-works/`
   and never touch the tree. Commit board work before every handoff; if a dirty tree is found at boot,
   clean it (single board-update commit on `main`) before starting anything.
 - Reconstitute from durable state; never rely on a prior session's memory.
 - TODO intake metadata are cheap, overridable hints, not contracts (Decision-047):
   `created_during` always; `size` only when born-in-context; `blocked_by` only for a real
   ordering gate; a soft `parent`/related ref otherwise. Never block on getting them right.
-- `MOOD.md` is personal and lives under `.git/` (uncommittable) — never ship it anywhere.
+- `MOOD.md` is personal and lives under `.git/the-works/` (uncommittable) — never ship it anywhere.
 - The operator may overrule any of this per session.

@@ -41,7 +41,7 @@ Durable state lives in files; no role depends on chat history.
   Testing`. Formats in `AGENTS.files.md`.
 - `docs/decisions.md` — rulings, greppable by `#keyword`.
 - `MOOD.md` / `HANDOVER.md` — uncommittable by construction, kept in
-  `$(git rev-parse --git-common-dir)/`.
+  `$(git rev-parse --git-common-dir)/the-works/`.
 
 Converting a live conversation into this model is a one-time distillation:
 scope → `Proposal`, test method → `Testing`, open items → `Questions` /
@@ -74,6 +74,8 @@ skills/<name>/     SKILL.md packages (→ .claude/skills/, per role)
 hooks/             architect-close.sh
 tools/             board_lint.py · board_stale.py (→ .claude/tools/)
 templates/         AGENTS.md (template) · CLAUDE.md (prefix block)
+migrations/        dated structural-upgrade instructions (YYYY-MM-DD-<slug>.md); applied
+                   per clone against the .git/the-works/migrated watermark
 AGENTS.shared.md   fleet-wide non-negotiable rules (linked)
 AGENTS.files.md    file-format contracts: board, sidecars (linked)
 settings.json      shared Claude Code settings (linked)

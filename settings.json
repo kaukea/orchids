@@ -1,4 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Edit(.ai/repositories/*/*/agents/**)",
+      "Write(.ai/repositories/*/*/agents/**)",
+      "Edit(.ai/repositories/*/*/skills/**)",
+      "Write(.ai/repositories/*/*/skills/**)",
+      "Edit(.ai/repositories/*/*/files/**)",
+      "Write(.ai/repositories/*/*/files/**)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
@@ -16,7 +26,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "root=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; gcd=\"$(git rev-parse --git-common-dir 2>/dev/null)\"; [ -f \"$gcd/HANDOVER.md\" ] && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"A HANDOVER.md is present in .git/: a child has returned. Ingest it FIRST per the handover skill (read it, act on the chatter, promote any standing item to TODO, then delete) before responding to the user.\"}}'; exit 0",
+            "command": "gcd=\"$(git rev-parse --git-common-dir 2>/dev/null)\"; set -- \"$gcd/the-works\"/HANDOVER*.md; [ -f \"$1\" ] && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"One or more HANDOVER files are present in .git/the-works/: a child has returned. Ingest them FIRST per the handover skill (batch rule: all in one pass, oldest-first; read, act on the chatter, promote any standing item to TODO, then delete each) before responding to the user.\"}}'; exit 0",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "root=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; gcd=\"$(git rev-parse --git-common-dir 2>/dev/null)\"; [ -n \"$root\" ] || exit 0; wm=\"\"; [ -f \"$gcd/the-works/migrated\" ] && wm=\"$(cat \"$gcd/the-works/migrated\")\"; latest=\"\"; for d in \"$root/migrations\" \"$root\"/.ai/repositories/*/*/migrations; do [ -d \"$d\" ] || continue; for f in \"$d\"/*.md; do [ -e \"$f\" ] || continue; b=\"${f##*/}\"; b=\"${b%.md}\"; [ \"$b\" \\> \"$latest\" ] && latest=\"$b\"; done; done; [ -n \"$latest\" ] && [ \"$latest\" \\> \"$wm\" ] && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"Package migrations are pending (watermark: %s, latest: %s). Read every migrations/*.md newer than the watermark (repo root or .ai/repositories/*/*/migrations/), merge them and apply the net effect - every step guarded by observable state - then write the latest name to .git/the-works/migrated. See AGENTS.files.md Migrations section.\"}}' \"${wm:-none}\" \"$latest\"; exit 0",
             "timeout": 5
           }
         ]

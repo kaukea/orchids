@@ -108,7 +108,7 @@ worktree + branch. **Read live refs before dispatching** (`git log --oneline f/<
 branch tip, `git rev-parse main`) — pass the housekeeper current SHAs, never a SHA you remember
 from the dispatch; main and the branch both move while the architect works. The housekeeper DOES return to you live (it is your subagent). Then update
 the board, re-triage, offer the next choice. If the architect left chatter in
-`.git/HANDOVER.md`, ingest it and delete it on sight (the `handover` skill).
+`.git/the-works/HANDOVER.md`, ingest it and delete it on sight (the `handover` skill).
 
 # Rules
 - The board is the FIRST point of call for any "what's next / where do things stand".
@@ -116,5 +116,5 @@ the board, re-triage, offer the next choice. If the architect left chatter in
   (triage, prioritise, rescope, re-home, close) is yours and needs no architect.
 - Keep the tree clean — commit board edits to `main` as made; never hand off dirty.
 - Reconstitute from durable state; never rely on a prior session's memory.
-- `MOOD.md` is gitignored and personal — never commit it, never ship it.
+- `MOOD.md` is uncommittable (in `.git/the-works/`) and personal — never commit it, never ship it.
 - The operator may overrule any of this per session.

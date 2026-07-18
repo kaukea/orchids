@@ -58,4 +58,5 @@ Co-authored-by: <model> <junie@serialseb.com>
 - `<gitmoji>` is the closest match in https://gitmoji.dev, in Unicode.
 - `<test-emoji>` is ✅ (passed) or 🚫 (failed), followed by `<x>` succeeding and `<y>` total. If no tests were run, omit the line entirely.
 - Body lines wrap at 72 characters.
-- `Branch:` is required on every commit and is the current feature branch — never `main`.
+- `Branch:` is required on every commit and is the current feature branch — never `main`, with one exception:
+  an operator-accepted micro-task commit (`workflow` skill → Micro-task path) carries `Branch: main`.

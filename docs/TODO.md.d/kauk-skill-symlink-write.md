@@ -28,7 +28,10 @@
 ## Proposal
 In `serialseb/kauk`, amend the kauk skill's Intent paragraph: replace the
 write-through-symlink claim with the Decision-007 procedure, and note that the
-harness refusal is expected and not a policy "no".
+harness refusal is expected and not a policy "no". Fold in Decision-009 (orchids,
+2026-07-18): the procedure applies only on explicit operator direction, only inside
+the content surfaces (`agents/`, `skills/`, `files/`), and the skill must not present
+clone write-back as the default route for fixing package content.
 
 ## Testing
 In a consuming repo: an Edit addressed to a `.claude/` symlink is refused by the

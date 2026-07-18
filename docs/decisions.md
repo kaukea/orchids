@@ -210,3 +210,61 @@ from, never chase the target" is therefore unexecutable as written. Operator rul
 
 Follow-up owed upstream: amend the kauk skill text (pull-only, lives in
 serialseb/kauk) — see TODO `kauk-skill-symlink-write`.
+
+## [2026-07-18 18:34 CEST] Decision-008: Transients live in .git/the-works/; structural changes ship dated migrations
+#the-works #handover #mood #migrations #watermark #git #hooks
+
+Two rulings from the-works workstream:
+
+- **The uncommittable channel is namespaced.** `HANDOVER.md`, `MOOD.md`, and the
+  migration watermark live in `$(git rev-parse --git-common-dir)/the-works/` — same
+  guarantees as the former flat `.git/` placement (physically uncommittable,
+  worktree-shared), plus an identity that cannot collide with git's own files or
+  other tooling. Writers `mkdir -p` the directory.
+- **Every structural change to a managed artifact ships a migration.** One dated,
+  state-guarded file in the package's `migrations/` (format:
+  `AGENTS.files.md` §Migrations), in the same branch as the change. The package
+  version IS the highest migration filename; a per-clone watermark
+  (`.git/the-works/migrated`) plus a `settings.json` hook announce pending entries;
+  the agent merges all pending migrations and applies the net effect once.
+  Historical entries may be backdated to the change they describe — a repo that
+  never had the package converges by running the whole series, no fresh-install
+  special case.
+
+Context, not ruling: skills describe only the current world; legacy-conversion
+clauses belong in migrations, never in skill text.
+
+## [2026-07-18 18:36 CEST] Decision-009: Cross-repo writes are gated, surface-bound, and never the suggested route
+#kauk #permissions #settings #cross-repo #skills #agents #symlinks
+
+Narrows Decision-007's third ruling (the blanket `Edit/Write(.ai/repositories/**)`
+allow rules). Decision-007's other rulings stand: the resolve-the-symlink write
+procedure remains the sanctioned mechanism, and the harness symlink refusal remains
+a limitation, not a policy signal. Three rules, by strength:
+
+- **Hard gate.** No standing write-right over `.ai/repositories/**` as a whole.
+  Because `kauk sync` pushes package edits back upstream, a clone write is a
+  cross-repository change propagating fleet-wide — the harness permission prompt is
+  the authorization gate, per occasion, not standing.
+- **Surface boundary.** The fleet `settings.json` allows frictionless writes only
+  inside a package's content surfaces: `agents/`, `skills/`, `files/` (the
+  direct-into-repo symlink folder — the rule attaches to the folder, whatever it
+  holds). Machinery (`manifest.conf`, `settings.json`, `hooks/`, `tools/`, `bin/`)
+  is never writable from a consuming repo; machinery changes happen only in the
+  package's own repo, through its own workflow.
+- **Reasoning norm.** An agent avoids even SUGGESTING edits to a repository it is
+  not working from: capture the issue (TODO naming the source repo, or report to
+  the operator) and let the fix ride the source repo's workflow (`agent-behaviour`
+  skill). Decision-007's write-through path is used only on explicit operator
+  direction.
+
+## [2026-07-18 18:39 CEST] Decision-010: Micro-tasks may ride main, offered by the agent, gated by the operator
+#workflow #micro-task #main #commits #branching
+
+A one-commit triviality (typo, prose fix, one-line config value) does not earn the
+full workflow machinery. The agent, judging a task micro — single commit, no design
+choice, no meaningful testing question — OFFERS a direct commit on `main` up front;
+the operator's acceptance IS the existing direct-commit override. The agent never
+self-selects the path, and promotes to a full workflow the moment scope grows (a
+landed micro-commit stays on `main`; the grown scope starts fresh). Such commits
+carry `Branch: main` — the sole exception to the git-commit trailer rule.

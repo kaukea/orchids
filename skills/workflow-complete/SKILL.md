@@ -55,7 +55,7 @@ Task files always get committed:
 - `AGENTS.shared.md` and all symlinks coming from the `.ai` directory — they are shared rules.
 - Memory files under `.claude/projects/` that are still relevant. Delete obsolete ones before committing.
 
-(`HANDOVER.md` is not a tree concern — it lives inside `.git/`, uncommittable; see Handover write below.)
+(`HANDOVER.md` is not a tree concern — it lives inside `.git/the-works/`, uncommittable; see Handover write below.)
 
 ## Marker tag
 
@@ -155,7 +155,7 @@ sensitivity (this is a **mandatory** close step):
   `## Findings` + a `Result:` line, per `AGENTS.files.md` §Sidecar): outcome, merged
   SHA (or cancelled), what was tested and the real result. Committed — so no
   conversation quotes, personal data, or secrets.
-- **Chatter and anything sensitive** → `$(git rev-parse --git-common-dir)/HANDOVER.md`
+- **Chatter and anything sensitive** → `$(git rev-parse --git-common-dir)/the-works/HANDOVER.md`
   per the `handover` skill — uncommittable, ingested then deleted by the parent the
   moment it is seen.
 

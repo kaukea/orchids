@@ -1,6 +1,6 @@
 ---
 name: handover
-description: The handover protocol. NOT a manual command — the handover is written only as part of the close housework (the workflow-complete skill) that MAKE IT SO triggers, at success or abandonment. Writes a transient, gitignored HANDOVER.md carrying CHATTER ONLY — short-lived gotchas the spawning parent needs, nothing else — so the parent absorbs the child WITHOUT re-deriving it. Durable facts never go here; they are appended straight into decisions/changelog/todo. Also defines how a parent ingests one on a child's return.
+description: The handover protocol. NOT a manual command — the handover is written only as part of the close housework (the workflow-complete skill) that MAKE IT SO triggers, at success or abandonment. Writes a transient, uncommittable HANDOVER.md (in .git/the-works/) carrying CHATTER ONLY — short-lived gotchas the spawning parent needs, nothing else — so the parent absorbs the child WITHOUT re-deriving it. Durable facts never go here; they are appended straight into decisions/changelog/todo. Also defines how a parent ingests one on a child's return.
 share: github
 compatibility: Requires git
 metadata:
@@ -48,10 +48,11 @@ own — the top parent sees deltas plus one layer of chatter, never the whole su
 
 ## File
 
-- Path: `$(git rev-parse --git-common-dir)/HANDOVER.md` — INSIDE `.git/`, so it is
+- Path: `$(git rev-parse --git-common-dir)/the-works/HANDOVER.md` — INSIDE `.git/`, so it is
   **physically uncommittable**: no `git add -A`, no forgotten gitignore, no accident
   can ever land it in history. The common dir means a worktree child and the
-  main-checkout parent see the same file.
+  main-checkout parent see the same file. The writer creates `the-works/` if it
+  does not exist yet (`mkdir -p`).
 - This is the ONLY channel where conversational context, personal information, or
   anything sensitive may be written. Such content NEVER goes into committed files
   (sidecars, TODO, decisions, changelog, commit messages). If such content is ever
@@ -79,6 +80,13 @@ it's written and tell the operator it's safe to start a fresh session.
 
 ## Ingest it (parent session, on a child's return)
 
+**Batch rule** — when several `HANDOVER*.md` files sit in `.git/the-works/` (e.g.
+strays gathered by a migration under provenance-stamped names), ingest ALL of them
+in one boot pass, oldest-first by mtime, each per the steps below. Legacy strays may
+predate the durable-facts discipline: anything durable-looking found inside (a
+decision, an outcome, deferred work) is promoted to its proper home
+(decisions / CHANGELOG / board) during triage instead of assumed already there.
+
 The parent MUST:
 
 1. **Read** `HANDOVER.md`. **TRUST YOUR BRANCH** — act on it; do not re-derive the
@@ -99,7 +107,7 @@ The parent MUST:
 
 - Chatter only — durable facts go to decisions/changelog/todo, never the handover.
 - It lives under `.git/` — uncommittable by construction; never copy it into the tree.
-- Ingest-then-delete — one at a time, never left stale.
+- Ingest-then-delete — never left stale; a gathered batch drains fully in one pass.
 - TRUST YOUR BRANCH — the receiver acts on the handover and does not re-derive; the
   writer earns that trust with a complete, confidence-marked handover.
 - Link at the moment of deferral — the "moved from X to Y" relationship goes into the
