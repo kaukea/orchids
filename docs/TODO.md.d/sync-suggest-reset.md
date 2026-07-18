@@ -19,7 +19,12 @@
   boots on the new package with the thread intact.
 
 ## Proposal
-One rule appended to the kauk skill's sync/install procedure: if the pull
+Two changes to the kauk skill's sync/install procedure. First, retime the sync
+(operator ruling 2026-07-18): START of a session/workflow = pull and converge —
+absorbing changes there is nearly free (nothing invested yet, reset trivial);
+END of a workflow = push-back ONLY when the stream edited vendored package
+files, never a pull (the next session converges at its own start). Second, the
+reset rule: if the pull
 changed anything (non-empty diff old..new SHA), tell the operator plainly —
 "kauk pulled updates; to run on them, reset this session (the workstream log
 carries the thread)" — and let the operator decide. Declining is fine;
