@@ -288,8 +288,8 @@ Structure:
 
 **Operator gate** — promotion of a feature that reached `done`/`functional` is NOT
 automatic: at workflow end the agent MUST ask the operator explicitly per feature
-("Feature `<id>` reached `functional` — promote to CHANGELOG.md?"). Operator can defer
-individual features.
+("Feature `<id>` reached `functional` — are we ready to amend the CHANGELOG?").
+Operator can defer individual features.
 
 ---
 
