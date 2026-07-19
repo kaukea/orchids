@@ -58,6 +58,13 @@ Paths tried and failed, and WHY — so no successor retries them.
 Rulings agreed with the operator this session, awaiting promotion to
 docs/decisions.md at ingest. Sanitized wording — they will be committed.
 
+## Dispatched sub-agents
+The LEDGER. One line per sub-agent AT THE MOMENT IT IS DISPATCHED — never after
+it returns: `<id/label> · <what it was sent to do> · dispatched <HH:MM> ·
+returned <HH:MM|NO>`. Mark the return when it lands. A sub-agent in flight lives
+only in process memory; if the process exits, this ledger is the ONLY trace that
+something was running. It is what the end-of-task guard (below) reads.
+
 ## Pointers
 Files, docs, URLs, sidecars a successor needs. Enough for a cold start.
 ```
@@ -72,6 +79,27 @@ Confidence-mark entries: **verified** (and how) vs **suspected**.
   dead ends land when they happen. A session that dies mid-flight has, by
   construction, already written what its successor needs — this is what makes a
   reset or an agent swap non-destructive.
+- **Write AS you change, not in catch-ups.** The log is written at the moment of
+  the change — each state change, finding, dead end, decision and dispatch is
+  flushed as it happens, never batched into a periodic summary. Batching
+  reintroduces exactly the window this protocol exists to close: everything
+  since the last catch-up dies with the process. This binds every role,
+  including the orchestrator.
+
+## End-of-task guard (MUST)
+
+Before ANY session declares its work finished — an architect presenting `done` or
+countersigning, a role session reporting a task complete, an orchestrator reporting
+a feature closed — it MUST clear this guard:
+
+- [ ] **No sub-agent left in flight.** Every entry in the `## Dispatched sub-agents`
+  ledger has returned, was re-dispatched, or is explicitly recorded as abandoned with
+  its work reassigned. A session NEVER ends with an unreturned sub-agent.
+- [ ] **End state verified by observation, not by report.** Where the work has an
+  observable end state, check the state itself rather than trusting an agent's
+  summary — for a close: the tag exists, the branch is gone, the squash is on `main`,
+  the push landed, the worktree is removed, the tree is clean. Reports can be lost,
+  stale, or wrong; the repository cannot.
 - **Durable facts still go to their homes** — the log is the staging area, not
   the destination. Sanitized technical findings are flushed to the stream's
   committed sidecar (`## Findings`) by the session that owns it; decisions and

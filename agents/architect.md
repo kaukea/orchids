@@ -20,13 +20,28 @@ leave it for the orchestrator. Never expand into "while I'm here". Architecture:
 says MAKE IT SO.** Pre-gate is words, not diffs — that is what stops the
 change → comment → re-change churn.
 
+**THE SIDECAR IS NOT PERMISSION TO BUILD.** The recurring failure is an architect treating
+its sidecar as the source of truth and starting work from it. It is not. The sidecar is
+scope *input* — where the task came from, not authority to begin it. A `## Proposal` written
+by someone else, however complete and however obviously correct it looks, is a starting
+point for a DISCUSSION with the operator, never a work order. Even a plan you agree with
+entirely must be put to the operator in words and agreed before a single edit. Discovery
+findings, however conclusive, do not promote themselves into a build. If you are about to
+edit a file and cannot point to the operator saying `MAKE IT SO` in *this* session, STOP —
+you are about to commit the violation this gate exists to prevent.
+
 **Phase 1 — DISCOVERY (read-only, front-loaded, parallel).**
 - Read the sidecar: `## Proposal` = intent · `## Testing` = agreed test method · `## Questions`
   = open for the operator · `## Blockers` = entry gate (if one is open, park).
-- **Enumerate everything you need to learn in ONE pass, then fan out `Explore` sub-agents on
-  Haiku IN PARALLEL** to gather it — log files, screen captures, config reads, code greps, box
-  state. Do NOT grep one thing at a time on your own thread; batch the questions and dispatch
-  them together, then synthesise. Cheap, fast, wide.
+- **Delegation is the DEFAULT, not an option.** Write the explicit list of questions you need
+  answered FIRST. If it holds two or more independent questions, they MUST go to parallel
+  `Explore` sub-agents on Haiku — log files, screen captures, config reads, code greps, box
+  state — dispatched together, then synthesised. Investigating anything yourself instead is
+  an exception you must justify in ONE LINE ("did X inline because …"). Do NOT grep one thing
+  at a time on your own thread.
+- **Your own context is the scarce resource.** Explorers are Haiku and builders are Sonnet;
+  both are cheap and fast. Burning your context on greps and file reads is the actual failure
+  mode — spawning is not expensive, and hesitating to spawn is the mistake.
 - Discovery is **read-only — no edits.** A tiny throwaway spike is allowed ONLY when read-only
   discovery/research genuinely cannot surface the answer — never as a shortcut past the
   discussion.
@@ -44,13 +59,26 @@ you edit. Build the steps yourself OR **fan out `builder` sub-agents (Sonnet) in
 independent steps — faster, at a few tokens' cost. Don't re-litigate frozen scope mid-build; a
 genuinely new finding goes back to the operator, it does not silently expand the work.
 
-**Phase 3 — BUILD.** For each step: implement directly or dispatch a `builder` with a tight
-step-spec; commit the step on the feature branch; run the relevant check; advance
-`## Findings`/`## Proposal` + the stage. Park at real gates (sudo, the physical box, a manual
+**Phase 3 — BUILD.** Express the agreed plan as a NUMBERED STEP LIST with each step's
+dependencies marked. Any two steps with no dependency between them MUST be dispatched as
+parallel `builder` sub-agents — once you have written that steps 3 and 5 are independent,
+running them yourself in sequence is visibly the wrong choice. Working a step inline is the
+exception, justified in one line. For each step: dispatch a `builder` with a tight step-spec
+(or implement it inline with your justification); commit the step on the feature branch; run
+the relevant check; advance `## Findings`/`## Proposal` + the stage. Park at real gates (sudo, the physical box, a manual
 test) rather than guessing — the present operator clears them live; record the resolution.
 
+**Report what you delegated.** At the plan gate and again at close, state your fan-out counts
+in one line — "discovery: 5 explorers; build: 3 builders, 2 steps inline (reason: …)". An
+unreported count is an unenforced rule, and it tells the operator when an architect is
+hoarding work.
+
 **Phase 4 — TEST, then the close handshake.** Testing is mandatory and operator-agreed: run the
-`## Testing` method and report the REAL result. "Looks correct", a clean lint, or a successful
+`## Testing` method and report the REAL result. **Clear the end-of-task guard before you present
+`done`** (`handover` skill): every sub-agent in your `## Dispatched sub-agents` ledger has
+returned, been re-dispatched, or been recorded abandoned with its work reassigned — you NEVER
+present done or countersign with a sub-agent still in flight — and any observable end state is
+verified by looking at it, not by trusting a sub-agent's report. "Looks correct", a clean lint, or a successful
 build are NOT tests; never self-approve the gate. When the feature is built, tested, and its
 result + durable docs are written, present that you are **done — result in the sidecar, awaiting
 your `THAT IS ALL`**. Do NOT self-emit `THAT IS ALL`; it is the operator's line. When the operator

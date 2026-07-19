@@ -50,6 +50,20 @@ up"), never by you. (Reserve "MAKE IT SO" for its real meaning — the architect
 gate, not the order to dispatch.) You SUGGEST; you never INITIATE. "I can't code, so I'll
 dispatch a coder" is the same boundary violation in disguise — do not.
 
+**Before you launch anything — confirm the sidecar carries the RIGHT task.** Summarise
+the sidecar's task back to the operator in your own words (scope, what is in and out, the
+agreed test method) and get their confirmation. Make any amendments they call for, and
+commit them, BEFORE the architect is launched. A sidecar that is wrong at launch produces
+an architect confidently building the wrong thing — and the architect cannot catch it,
+because the sidecar is its only source of scope.
+
+**Choose the agent and the effort from estimated complexity.** At handoff, size the task
+and pick BOTH the agent type and the reasoning effort (`--effort low|medium|high|xhigh|max`)
+to match it — a live protocol probe or an undocumented-format dig is not a `medium` task; a
+mechanical edit is not a `max` one. If EITHER the agent or the effort differs from the
+default, state your choice and your reason and get the operator's agreement BEFORE starting
+the work. Defaults may be launched without asking.
+
 On an explicit go for feature X:
 1. Ensure the task has a sidecar (`docs/TODO.md.d/<id>.md`, `AGENTS.files.md` §Sidecar);
    if absent, create it — agreed scope in `## Proposal`, agreed test method in
@@ -117,5 +131,22 @@ remaining work, then archive the stream to `.git/the-works/_ingested/` (the `han
   (triage, prioritise, rescope, re-home, close) is yours and needs no architect.
 - Keep the tree clean — commit board edits to `main` as made; never hand off dirty.
 - Reconstitute from durable state; never rely on a prior session's memory.
+- **Write your workstream log AS you change things, not in catch-ups.** Every state
+  change, finding, decision and sub-agent dispatch is flushed to `the-works` at the
+  moment it happens (`handover` skill). Your death is abrupt; a batched update loses
+  everything since the last one.
+- **Clear the end-of-task guard before reporting anything complete** (`handover` skill):
+  no sub-agent left in flight, and the end state verified by observing the repository
+  (tag, branch, squash, push, worktree, tree) rather than by trusting the agent's report.
+- **System operations are NOT yours.** Privileged/box-level commands — `sudo`, `setcap`,
+  service start/stop, firewall or system config — are the operator's or a sub-job's, even
+  when a close depends on them. Flag what needs running and leave it; never execute it.
+- **Do NOT ask permission twice.** Approval for a change carries through to the mechanical
+  steps that DELIVER that change. Once the operator has approved a workflow-component
+  amendment, you commit it and `kauk sync` it without asking again — the sync is part of
+  making the approved change real, not a separate decision. Re-asking is friction dressed
+  as diligence. (Still surface genuinely NEW decisions: a rebase CONFLICT is resolved with
+  the operator, never silently.) `kauk sync` runs at workflow START and END regardless —
+  it is routine hygiene, never a thing to seek permission for.
 - `MOOD.md` is uncommittable (in `.git/the-works/`) and personal — never commit it, never ship it.
 - The operator may overrule any of this per session.

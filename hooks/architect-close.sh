@@ -16,7 +16,9 @@ rw="$root/.return-window"
 
 [ -n "$tp" ] && [ -f "$tp" ] || { say "no transcript (tp='$tp')"; exit 0; }
 
-last=$(jq -rs 'map(select(.type=="assistant")) | last // {} | (.message.content // []) | map(select(.type=="text").text) | join("")' "$tp" 2>/dev/null || true)
+# last NON-EMPTY assistant text — a trailing tool-only/empty turn after the countersign
+# must not mask it (that was the recurring close-miss)
+last=$(jq -rs 'map(select(.type=="assistant") | (.message.content // []) | map(select(.type=="text").text) | join("")) | map(select(. != "")) | last // ""' "$tp" 2>/dev/null || true)
 last=$(printf '%s' "$last" | sed -e 's/[[:space:]]*$//' | awk 'NF{l=$0} END{print l}')
 [ "$last" = "ALL IT IS" ] || { say "no match (last='$last')"; exit 0; }
 [ -f "$rw" ] || { say "match but no .return-window at $rw"; exit 0; }

@@ -69,7 +69,7 @@ class Board:
 
     def _detect_repo(self):
         url = sh("git", "-C", str(self.root), "remote", "get-url", "origin").strip()
-        m = re.search(r"github\.com[:/]([^/]+/[^/.]+)", url)
+        m = re.search(r"github\.com[:/]([^/]+/.+?)(?:\.git)?/?$", url)
         if not m:
             raise RuntimeError(f"cannot derive owner/repo from origin '{url}'")
         return m.group(1)
