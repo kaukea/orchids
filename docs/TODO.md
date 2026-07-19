@@ -32,6 +32,8 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · · queued · process · gh#12` [Sync suggests a reset when the package changed (upstream kauk)](TODO.md.d/sync-suggest-reset.md) ~package-select-tree ~kauk-skill-symlink-write
 - `feature · functional · high · complete/interactive · process · gh#13` [Cross-repo board view: GitHub issues + user-level Project, orchestrator-synced](TODO.md.d/github-board-sync.md) ~cross-repo-inbox ~external-blockers
 - `housekeeping · paused · low · blocked-on-answers · process · gh#14` [Install-id migration to the kaukea org — parked until the org name is final](TODO.md.d/install-id-kaukea.md)
+- `feature · todo · · queued · process ·` [Orchard: messaging across repository boundaries](TODO.md.d/orchard.md) ~status-channel ~cross-repo-inbox
+- `feature · todo · urgent · queued · process ·` [Injection integrity: make instructions arrive intact, not summarised](TODO.md.d/injection-integrity.md) ~session-start-hook
 - `feature · todo · idea · queued · · gh#15` [Writing emails — scope to be defined by the operator](TODO.md.d/writing-emails.md)
 
 ## Role delivery
