@@ -36,6 +36,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · critical · queued · process ·` [Injection integrity: make instructions arrive intact, not summarised](TODO.md.d/injection-integrity.md) ⊘readme-changelog-ownership ~session-start-hook
 - `feature · todo · · queued · process ·` [Sidecar liveness: prove an agent is still listening after load](TODO.md.d/bus-liveness.md) ~message-bus
 - `feature · todo · · queued · process ·` [Agent metadata: model, effort and token denominators on the bus](TODO.md.d/agent-metadata.md) ~message-bus
+- `feature · todo · · queued · process ·` [Review model + effort per agent role; make effort frontmatter-pinnable like model](TODO.md.d/role-model-effort.md) ~agent-metadata ~role-dag-frontmatter
 - `bug · todo · urgent · queued · process ·` [Distribution is a hand-typed index: derive it from the tree, and fail loudly meanwhile](TODO.md.d/manifest-by-convention.md) ~role-dag-frontmatter
 - `feature · todo · critical · queued · process ·` [Move README and CHANGELOG to the orchestrator](TODO.md.d/readme-changelog-ownership.md) ~injection-integrity
 - `feature · todo · urgent · queued · process ·` [Deviance detection: surface drift when it happens, not weeks later](TODO.md.d/deviance-detection.md) ⊘injection-integrity
