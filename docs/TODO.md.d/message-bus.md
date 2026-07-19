@@ -179,3 +179,16 @@ Empirically established (verified, not inferred):
 Result: done — bus mechanism built and tested; branch `f/status-channel`; gates 1-4 pass
 live, gate 5 rejected as written with a replacement proposed. No tasks spawned; deferred
 items above are for the orchestrator to triage.
+
+## Parent session — decided, wiring deferred to the spawn (2026-07-20)
+
+- The bus already READS `ORCHID_PARENT_SESSION` (identity_of); the consuming side is done.
+- Producing side: the orchestrator passes its own id as an env var on the architect's launch
+  line — `ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect …`. Env var,
+  not a file, because we own the command line. This is ONE string on the spawn command and
+  belongs to the spawn/tmux work, NOT this feature — do not couple it here or touch the tmux
+  layout for it.
+- Agent type needs no passing: an agent launched with `--agent <x>` is aware of what it is;
+  `identity` takes the type from the agent, not from an env var.
+- Until the spawn wires the env var, an architect's identity broadcast carries
+  `parent_session: null`. Acceptable; it resolves when the spawn work lands.
