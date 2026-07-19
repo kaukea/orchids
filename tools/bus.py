@@ -28,9 +28,9 @@ Usage:
   bus.py init [id]                             create an inbox
   bus.py teardown [id]                         remove it (session end)
   bus.py list                                  registry: one agent id per line
-  bus.py send --from A --to B --type t --body X [--visible]
+  bus.py send --from A --to B [--body X] [--visible]
                                                [--request-id R] [--in-reply-to R]
-  bus.py broadcast --from A --type t --body X [--visible]
+  bus.py broadcast --from A [--body X] [--visible]
   bus.py receive [id]                          drain: JSON array, oldest first
   bus.py identity                              immutable facts about this session
   bus.py status                                mutable state: occupancy and spend
@@ -46,8 +46,6 @@ import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-
-TYPES = ("post", "broadcast", "request", "reply", "status", "identity", "departure")
 
 # Logical request ids the sidecar answers itself, without waking its parent.
 REQUEST_IDENTITY = "orchid:identity"
@@ -180,17 +178,19 @@ def status_of() -> dict:
 
 
 def envelope_of(args, to: str) -> dict:
-    return {
+    env = {
         "id": uuid.uuid4().hex[:12],
         "ts": datetime.now(timezone.utc).isoformat(),
         "from": args.sender,
         "to": to,
-        "type": args.type,
         "visible": bool(getattr(args, "visible", False)),
         "request_id": getattr(args, "request_id", None),
         "in_reply_to": getattr(args, "in_reply_to", None),
-        "body": args.body,
     }
+    body = getattr(args, "body", None)
+    if body is not None:
+        env["body"] = body
+    return env
 
 
 def fan_out(sender: str, envelope_for) -> int:
@@ -256,14 +256,13 @@ def cmd_list(args) -> None:
                 print(d.name)
 
 
-def announcement(kind: str, body: dict, sender: str):
+def announcement(body: dict, sender: str):
     def build(to: str) -> dict:
         return {
             "id": uuid.uuid4().hex[:12],
             "ts": datetime.now(timezone.utc).isoformat(),
             "from": sender,
             "to": to,
-            "type": kind,
             "visible": False,
             "request_id": REQUEST_IDENTITY,
             "in_reply_to": None,
@@ -275,13 +274,13 @@ def announcement(kind: str, body: dict, sender: str):
 def cmd_announce(args) -> None:
     me = whoami()
     inbox(me).mkdir(parents=True, exist_ok=True)
-    reached = fan_out(me, announcement("identity", identity_of(), me))
+    reached = fan_out(me, announcement(identity_of(), me))
     print(f"announced to {reached} agent(s)")
 
 
 def cmd_depart(args) -> None:
     me = whoami()
-    reached = fan_out(me, announcement("departure", {"session_id": me}, me))
+    reached = fan_out(me, announcement({"session_id": me}, me))
     print(f"departure sent to {reached} agent(s)")
 
 
@@ -307,8 +306,7 @@ def main() -> None:
 
     def msg_args(s):
         s.add_argument("--from", dest="sender", required=True)
-        s.add_argument("--type", default="post", choices=TYPES)
-        s.add_argument("--body", required=True)
+        s.add_argument("--body")
         s.add_argument("--visible", action="store_true",
                        help="the sending agent intends this for the user to see")
         return s

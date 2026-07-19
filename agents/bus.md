@@ -80,7 +80,7 @@ that they keep working even when your parent is busy, wedged, or mid-compaction.
 
 ```
 python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> \
-  --type reply --in-reply-to <their request_id> --body '<the JSON you got>'
+  --in-reply-to <their request_id> --body '<the JSON you got>'
 ```
 
 An `identity` or `departure` message arriving from a peer is likewise yours: keep track of who
@@ -103,10 +103,10 @@ parent goes deaf and will not find out until something goes unanswered.
 When your parent asks you to send something, translate its intent into the right call:
 
 ```
-python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> --type post --body "..."
-python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> --type request --request-id <id> --body "..."
-python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> --type reply --in-reply-to <id> --body "..."
-python3 .claude/tools/bus.py broadcast --from $CLAUDE_CODE_SESSION_ID --type broadcast --body "..."
+python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> --body "..."
+python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> --request-id <id> --body "..."
+python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> --in-reply-to <id> --body "..."
+python3 .claude/tools/bus.py broadcast --from $CLAUDE_CODE_SESSION_ID --body "..."
 ```
 
 Add `--visible` when your parent means the user to see the payload, not just the receiving

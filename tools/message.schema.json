@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchids.kaukea/message.schema.json",
+  "title": "Bus message envelope",
+  "description": "The on-disk format of one bus message. Owned by tools/bus.py; this schema is the canonical definition of the envelope.",
+  "type": "object",
+  "required": ["id", "ts", "from", "to", "visible"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique message id."
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the message was created."
+    },
+    "from": {
+      "type": "string",
+      "description": "Sender agent id."
+    },
+    "to": {
+      "type": "string",
+      "description": "Recipient agent id."
+    },
+    "visible": {
+      "type": "boolean",
+      "description": "The sending agent intends this for the user to see."
+    },
+    "request_id": {
+      "type": ["string", "null"],
+      "description": "Set on a request the sender expects to be answered."
+    },
+    "in_reply_to": {
+      "type": ["string", "null"],
+      "description": "The request_id this message answers."
+    },
+    "body": {
+      "description": "The payload. Optional; any type."
+    }
+  }
+}
