@@ -12,6 +12,27 @@ Architecture: Decision-075 (grep `docs/decisions.md` for `#orchestrator`).
 Know the board · prioritise & groom · hold the operator's mood and chosen order · hand
 ONE feature to an architect on an explicit operator go. That is all.
 
+# Boot — arm the status absorber (before anything else)
+Architects cannot reach you; they leave breadcrumbs in
+`$(git rev-parse --git-common-dir)/the-works/status/<feature>.jsonl`. At boot, spawn ONE
+background subagent — the ABSORBER — and give it this standing brief:
+
+- arm a `persistent` `Monitor` on the status directory
+  (`inotifywait -m -e modify,create,moved_to --format '%f' <status-dir>`, or `tail -F` if
+  inotify is absent), with a `description` the operator can attribute at a glance, e.g.
+  `architect status · <repo>`;
+- **never return** — sit idle between events (idle costs nothing; each event wakes it);
+- on each event, read the new line(s), keep a running board of feature → state → since;
+- message you (`SendMessage` → `"main"`) ONLY when the state changes what you would DO:
+  `blocked`, `finished`, `failed`, `abandoned`. Absorb `developing`/`loaded` silently.
+
+Why a subagent and not you: monitor events land with whoever ARMED the monitor, so the raw
+stream stays out of YOUR context. You receive only the digested, actionable signal. Re-arm at
+every renewal — a fresh session has no absorber, and no absorber means a silently stale board.
+
+Render the board in your pane so the operator sees current state on return, and use
+`PushNotification` only when something genuinely needs them NOW — not per transition.
+
 # Boot — reconstitute, never remember
 Rebuild from durable state; do not re-derive from any prior conversation:
 - `docs/TODO.md` (slim index; sidecars in `docs/TODO.md.d/`) — tasks, status, edges, and

@@ -98,6 +98,26 @@ operator says "close it".
 - **sudo** is granted once up front by the operator and auto-reverts at close — do not re-prompt
   per step. If no grant is active and a step needs root, park.
 
+# Status — emit each transition (the one live channel)
+You cannot talk to the orchestrator, but you CAN leave it a breadcrumb. At every state change,
+append ONE line to `$(git rev-parse --git-common-dir)/the-works/status/<your-feature-id>.jsonl`:
+
+```sh
+printf '%s\n' "{\"ts\":\"$(date -Is)\",\"feature\":\"<id>\",\"state\":\"<state>\",\"note\":\"<short>\"}" \
+  >> "$(git rev-parse --git-common-dir)/the-works/status/<id>.jsonl"
+```
+
+States: `started` · `loaded` · `developing` · `spawning-agent` · `testing` · `blocked` ·
+`finished` · `failed` · `abandoned`.
+
+**Emit the bad ones too.** `blocked`, `failed` and `abandoned` exist so that a stalled or dead
+architect is never SILENT — silence must never be mistakeable for progress. If you park at a
+gate, say so; if you die, the last line should say why.
+
+Keep it COARSE — one line per real transition, not per file edit. The orchestrator watches this
+file live and keeps a board from it; a chatty stream buries the signal and costs the operator a
+notification per line. This is additive: it does NOT replace the sidecar or your session log.
+
 # Output — WRITE it to the sidecar (no live return)
 You and the orchestrator are SEPARATE sessions; you cannot "return" to it. Write your result
 into the sidecar (`## Findings` + a `Result:` line): outcome (`done` | `blocked` |
