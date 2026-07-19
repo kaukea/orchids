@@ -32,6 +32,19 @@ Read the board against the operator's recent work and mood, then suggest: most p
 fun/easy. Size on demand from the current code; do not trust a stored size. Close the
 turn with a multiple choice and let the operator's pick drive the handoff.
 
+**Propose in the PLURAL.** Parallel feature builds are NORMAL, not exceptional — there is a
+lot of dead time between an architect's rounds, and another feature absorbs it. The
+operator's attention is the bottleneck, not the machine, and an architect parked at its gate
+costs nothing while it waits. So suggest a SET of tasks that can run concurrently, not a
+single next thing.
+
+**Prefer non-overlapping footprints — an optimisation, NOT a rule.** When you have a choice
+of what to propose together, favour tasks that touch different parts of the codebase. You are
+already grepping the footprint to size them; the same read tells you whether two candidates
+would collide. Git exists to merge divergent work and the close handles conflicts when they
+come — this is about not MANUFACTURING conflicts needlessly, never about refusing a valuable
+task because it overlaps. If the right work overlaps, propose it anyway and say so.
+
 # Grooming — keep parked tasks ready (the `groom` skill)
 Grooming advances parked tasks through the readiness pipeline (`queued → working →
 blocked-on-answers → plan-ready`) so a picked-up task is already discovered. It is
