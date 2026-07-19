@@ -94,3 +94,39 @@ Operator-agreed — exercised end to end before this closes:
 5. **Gate:** an agent that never loads its bus has no ID and cannot send.
 
 Pass = each observed live. A clean read of the code is not a pass.
+
+## Handover — state at handoff (2026-07-19)
+
+**Written by the orchestrator, which should not have been building this.** Three files exist
+and are committed; treat them as a FIRST DRAFT to be reviewed, not as settled work.
+
+Done (each committed with its own message):
+- `tools/bus.py` — the envelope owner. Tested in isolation and passing: ordering preserved,
+  broadcast reaches every peer and excludes the sender, request/reply correlate by id, drain
+  empties, teardown clears the registry, atomic writes leave no partials, and sending to an
+  agent with no inbox fails loudly. Identity derives from location (`whoami`): a linked
+  worktree is its feature id, the main checkout is `orch`.
+- `agents/bus.md` — the sidecar role.
+- `hooks/bus-init.sh` + `settings.json` SessionStart wiring — creates the inbox and injects.
+  Verified: valid JSON, inbox created, and the injection leaks neither identity nor path.
+
+**REQUIRED: a full code review of all three before anything else.** They were written by one
+agent in one pass with no second pair of eyes. Review at minimum: the `whoami` derivation
+(what happens outside a git repo, or with two agents in one checkout — the orchestrator and a
+groomer would collide on `orch`); concurrent drain versus delivery; whether `teardown` at
+session end can strand messages; error paths; and whether the sidecar prompt can be made
+harder to ignore.
+
+Remaining work:
+1. The architect and orchestrator definition edits — the architect asks its bus to send a
+   status update at each transition (`started` · `loaded` · `developing` · `spawning-agent` ·
+   `testing` · `blocked` · `finished` · `failed` · `abandoned`, failure states mandatory so a
+   dead architect is never silent); the orchestrator keeps a board from what arrives and
+   renders it. Behaviour only — NO mechanism in either prompt.
+2. Testing gates 3, 4 and 5 from `## Testing` above, which are NOT yet done: a live bus
+   subagent receiving a message written by another process and delivering it upward; the
+   isolation check (raw traffic must not reach the parent except through the sidecar); and
+   the gate check (an agent that never loads its bus cannot send).
+
+Do not widen scope beyond this. Orchard (cross-repo) and injection-integrity are separate
+board tasks and stay there.
