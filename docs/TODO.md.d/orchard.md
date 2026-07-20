@@ -51,4 +51,4 @@
 
 Parent-level: the walkthrough above executed end-to-end across at least two repositories
 (orchids + one more), from `orchard` launch to a closed task returning focus — agreed per
-child at grooming.
+child at ripening.

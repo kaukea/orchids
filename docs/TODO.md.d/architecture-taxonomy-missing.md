@@ -3,7 +3,7 @@
 
 ## Blockers
 - Needs the operator: the vocabulary is a controlled list and `AGENTS.files.md` §TODO
-  is explicit that "agents do not invent values". Cannot be groomed to done by an agent
+  is explicit that "agents do not invent values". Cannot be ripened to done by an agent
   alone.
 
 ## Questions

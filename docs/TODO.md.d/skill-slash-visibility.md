@@ -8,7 +8,7 @@
 ## Questions
 - Which skills stay operator-facing in the slash list? (Judgement pass per skill;
   machinery like workflow-complete/handover/read-agents are clear `user-invocable:
-  false` candidates; groom and the utilities likely stay visible.)
+  false` candidates; ripen and the utilities likely stay visible.)
 
 ## Findings
 - Verified against current Claude Code docs (2026-07-18): `user-invocable: false`

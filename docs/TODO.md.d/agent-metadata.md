@@ -28,4 +28,4 @@ rule for which source wins when the announcement and the live state disagree.
 
 ## Testing
 
-To agree when groomed.
+To agree when ripened.

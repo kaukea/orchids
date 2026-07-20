@@ -30,10 +30,10 @@
 
 ## Proposal
 
-- (to be groomed once the Questions are answered; expected shape — one diagnostic event
+- (to be ripened once the Questions are answered; expected shape — one diagnostic event
   format, per-habitat transport, sidebar and orchestrator as first consumers)
 
 ## Testing
 
-To agree at grooming; must cover one local and one cloud agent each surfacing a forced
+To agree at ripening; must cover one local and one cloud agent each surfacing a forced
 diagnostic event end-to-end to the consumer surface.

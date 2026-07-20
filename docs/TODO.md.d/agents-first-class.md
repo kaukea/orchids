@@ -27,7 +27,7 @@ Operator rulings, 2026-07-17 — these close what were the three open questions 
 
 Operator rulings, 2026-07-17 (Decision-004) — close the two questions above:
 - **Agents depend on other agents, and declare it.** The real graph's edges
-  (orchestrator → architect/housekeeper/groomer; architect → builder) become
+  (orchestrator → architect/housekeeper/ripener; architect → builder) become
   declarations; an undeclared edge deploys a broken agent. On page 1, an agent
   required by a chosen agent is greyed out — visible, selected, not deselectable —
   exactly the page-2 skill pattern.
@@ -52,7 +52,7 @@ Background (unchanged):
   (dead) role field; agents have nothing.
 - Agent frontmatter carries only `name`, `description`, `model`. No roles, no deps.
 - Real dependency edges exist and cannot currently be stated: the workflow needs the
-  groomer; the architect needs `workflow` + `workflow-complete` + `handover`; the
+  ripener; the architect needs `workflow` + `workflow-complete` + `handover`; the
   housekeeper needs `workflow-complete` + `readme-sync`.
 
 ## Proposal

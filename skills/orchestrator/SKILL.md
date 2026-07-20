@@ -61,7 +61,7 @@ the mirror is a view. The orchestrator owns both directions, nobody else:
   badges it writes are committed as part of the board change.
 
 Ingested stubs (`created_by: gh-ingest`) are UNTRIAGED: type/component/urgency are
-placeholders until the operator grooms them — surface them in the board render.
+placeholders until the operator ripens them — surface them in the board render.
 
 **Progressive first turn:** don't make the operator wait for the full board. Turn 1 =
 a one-line greeting + the closing choice, built from `MOOD.md` + a single `git` glance

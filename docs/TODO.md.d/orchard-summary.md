@@ -28,7 +28,7 @@
 The orchestrator maintains a machine-readable summary file as part of its board
 commits: repo identity, per-urgency counts, blocked items with what blocks them
 (including cross-repo edges), the prepared/plan-ready tasks with one-line descriptions,
-and the board SHA + timestamp it reflects. Format settled at grooming (answer the
+and the board SHA + timestamp it reflects. Format settled at ripening (answer the
 Questions first).
 
 ## Testing

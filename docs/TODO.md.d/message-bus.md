@@ -103,7 +103,7 @@ Code review of the three drafts found, and the build fixed:
 
 - **Identity was derived from the working directory.** It ignored the environment,
   which already publishes the answer, and collided for any two sessions sharing a
-  location (orchestrator + groomer both resolved to `orch`). Now
+  location (orchestrator + ripener both resolved to `orch`). Now
   `CLAUDE_CODE_SESSION_ID`.
 - **None of the three bus files were in `manifest.conf`.** They were never linked into
   `.claude/`, so `settings.json`'s SessionStart hook pointed at a path that did not

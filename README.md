@@ -14,7 +14,7 @@ versioned in one place and delivered identically to every repository you own.
 You talk to the **orchestrator** — it knows the board, reads your mood, and
 suggests what's worth doing next. It never writes a line of code.
 
-While you think, the **groomer** keeps the backlog sharp: every parked task
+While you think, the **ripener** keeps the backlog sharp: every parked task
 gets researched, scoped, and questioned before you ever pick it up, so nothing
 starts cold.
 
@@ -66,7 +66,7 @@ storage.
 
 **And the model's own machinery.** Skills that keep the agents honest
 (`read-agents`, `agent-behaviour`), pass work between sessions without leaking
-chatter into history (`handover`), groom the board (`groom`, `orchestrator`),
+chatter into history (`handover`), ripen the board (`ripen-tasks`, `orchestrator`),
 migrate a grown-wild repo into the canonical shape (`history-rewrite`), and
 teach agents to write new skills properly (`authoring-skills`).
 

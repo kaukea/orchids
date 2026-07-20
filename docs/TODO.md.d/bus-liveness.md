@@ -29,5 +29,5 @@ become a heartbeat cron by the back door.
 
 ## Testing
 
-To agree when groomed — expected shape: a sidecar is killed mid-session and the condition is
+To agree when ripened — expected shape: a sidecar is killed mid-session and the condition is
 detected without polling infrastructure.

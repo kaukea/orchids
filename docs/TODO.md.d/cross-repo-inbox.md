@@ -26,7 +26,7 @@
   Delete-and-sanitize was considered and rejected: a message that warrants a task is
   persistent by definition, so destroying it destroys what the task needs.
   "Sensitive but not persistent" is an incoherent category. The orchestrator encrypts
-  sensitive information at board grooming; `content: sensitive` marks content to
+  sensitive information at board ripening; `content: sensitive` marks content to
   **encrypt**, not to delete. Open below — this ruling sets the direction, not the
   mechanics:
   - **This contradicts a hard rule in an immutable file.** `AGENTS.shared.md` says
@@ -49,7 +49,7 @@
     published later, permanently. If sensitive tasks are instead confined to the private
     side of that split, the encryption question may narrow considerably — decide the
     split first, or at least alongside.
-  - Grooming is done by the `groomer` agent as well as the orchestrator; both need this,
+  - Ripening is done by the `ripener` agent as well as the orchestrator; both need this,
     or the rule has a hole.
 - **Storage: in-tree, or on an invisible ref?** (operator, 2026-07-17 — leading idea.)
   Sensitive content need not live in the working tree at all. Store it the way `git

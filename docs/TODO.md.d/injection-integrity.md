@@ -37,5 +37,5 @@ what matters onto push channels or gates. Getting more pressing as the rule set 
 
 ## Testing
 
-To agree when groomed — expected shape: evidence that a given instruction was actually in an
+To agree when ripened — expected shape: evidence that a given instruction was actually in an
 agent's context (not summarised) at the moment it mattered.

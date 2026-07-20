@@ -90,7 +90,7 @@ nothing else changed.
    → Only that row's Urgency changes in Orchidarium.
 6. **Orchestrator boot.** Start a fresh orchestrator session after (1).
    → Pull runs before the board read; the untriaged stub is surfaced in the
-   render; groom assigns type/component and push updates the issue body.
+   render; ripen assigns type/component and push updates the issue body.
 7. **Central update propagation.** Edit the central workflow on orchids main
    (e.g. a log line); file a kauk issue.
    → kauk's run shows the new logic with no kauk-side change (shim untouched).

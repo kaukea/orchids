@@ -28,7 +28,7 @@ trust questions moved there; Decision-023's re-evaluation trigger rides along.
   stays with the housekeeper (Decision-023) until this is fixed; re-evaluate then.
 
 ## Proposal
-- (to be groomed once the Questions are answered)
+- (to be ripened once the Questions are answered)
 
 ## Testing
 One full feature cycle in which the architect demonstrably delegates per the

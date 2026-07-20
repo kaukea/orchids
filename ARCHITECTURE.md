@@ -7,7 +7,7 @@ package-resident summary.
 ## The operating model — one pipeline, walked by real agents
 
 ```
-groom → [Questions] → select → [pick-HOW] → build·test loop
+ripen → [Questions] → select → [pick-HOW] → build·test loop
       → [sudo/on-box] [manual-test] → [MAKE IT SO] → close
 ```
 
@@ -23,7 +23,7 @@ build approval are human-only, always.
 | Role | Model | Dispatch | Scope & boundary |
 |---|---|---|---|
 | orchestrator | opus | top-level session (`claude --agent orchestrator`) | Knows the board, prioritises, holds MOOD, hands ONE feature to an architect on explicit operator go. Never codes; never opens a sidecar in steady state. Authors only the workflow component, directly on `main`. |
-| groomer | sonnet | dispatched per parked task | Prep only: advances one task's readiness, fleshes its sidecar, commits. Never builds, branches, or opens PRs; build-ready parks at `plan-ready`. |
+| ripener | sonnet | dispatched per parked task | Prep only: advances one task's readiness, fleshes its sidecar, commits. Never builds, branches, or opens PRs; build-ready parks at `plan-ready`. |
 | architect | opus | worktree session (`.claude/worktrees/<id>`, branch `f/<id>`) | One feature; its sidecar is the whole scope. Read-only discovery (parallel explorers) → plan agreed with the operator → **no file edit before MAKE IT SO** → builds/tests → signals `THAT IS ALL`. Never reads the board or prior conversation. |
 | builder | sonnet | headless subagent from the architect | Exactly one step-spec; returns typed diff + self-test. |
 | housekeeper | sonnet | headless, in the MAIN repo, after operator says "close it" | The deterministic close: verify docs, tag, squash-merge, push, remove worktree + branch. Verifies documentation, never authors it. |

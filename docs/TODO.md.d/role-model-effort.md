@@ -10,7 +10,7 @@ domain, no architect). Operator registered the choices 2026-07-20; see Decision-
 
 - `model:` + `effort:` set in all six agent-def frontmatters with concrete current IDs:
   orchestrator `claude-fable-5`/high, architect `claude-opus-4-8`/xhigh (pegged),
-  builder `claude-sonnet-5`/high, groomer `claude-sonnet-5`/low, housekeeper
+  builder `claude-sonnet-5`/high, ripener `claude-sonnet-5`/low, housekeeper
   `claude-haiku-4-5`/low, bus `claude-haiku-4-5`/low.
 - Orchestrator definition gained the model-tier heuristic: it scales the architect's
   model (fable ↔ opus ↔ sonnet) and effort from sized complexity at handoff, floor =
@@ -39,13 +39,13 @@ domain, no architect). Operator registered the choices 2026-07-20; see Decision-
 
 ## Findings
 
-- Current pins (agent-def `model:` frontmatter): orchestrator/architect/builder/groomer/
+- Current pins (agent-def `model:` frontmatter): orchestrator/architect/builder/ripener/
   housekeeper all `opus`- or `sonnet`-generic in prose; the bus sidecar is pinned `model: haiku`.
   None carry an effort default — effort travels only as a launch flag.
 - The generic tier names are stale against the current lineup. Grounded starting points
   (from the current model catalogue + Anthropic's effort/tier guidance, NOT measured on our
   workloads — treat as sweep starting points, "start at high, iterate"):
-  - **orchestrator** — `claude-opus-4-8`, effort **high** (xhigh for heavy grooming). Board
+  - **orchestrator** — `claude-opus-4-8`, effort **high** (xhigh for heavy ripening). Board
     reasoning + judgment; medium was ruled too weak here (operator, 2026-07-19).
   - **architect** — `claude-opus-4-8`, effort **xhigh**; escalate to `claude-fable-5` for the
     hardest long-horizon builds (Fable pricing exceeds Opus-tier — per-task escalation, not
@@ -53,7 +53,7 @@ domain, no architect). Operator registered the choices 2026-07-20; see Decision-
   - **builder** — `claude-sonnet-5`, effort **medium** (high for tricky steps). Sonnet 5 now
     reaches near-Opus quality on coding/agentic at ~3/5 the price and is the first Sonnet with
     `xhigh` — a genuine upgrade from the old sonnet-4-6 assumption.
-  - **groomer** — `claude-sonnet-5`, effort **low–medium**. Prep / sidecar fleshing.
+  - **ripener** — `claude-sonnet-5`, effort **low–medium**. Prep / sidecar fleshing.
   - **housekeeper** — `claude-sonnet-5` (or `claude-haiku-4-5`), effort **low**. Deterministic
     git close, mechanical.
   - **bus / absorber / explorers** — `claude-haiku-4-5`, effort **low**. Pure mechanism.
@@ -78,5 +78,5 @@ role DEFAULTS in the definition — different layer).
 
 ## Testing
 
-To agree when groomed. Likely: pin the fields, launch each role, confirm the effort default is
+To agree when ripened. Likely: pin the fields, launch each role, confirm the effort default is
 honoured (frontmatter or launcher path) and the per-task override still wins.

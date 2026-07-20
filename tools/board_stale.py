@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""git-date staleness walk over the board — the `make`-style grooming check.
+"""git-date staleness walk over the board — the `make`-style ripening check.
 
-A parked, groomable task is STALE when a hard dependency's sidecar was committed more
+A parked, ripenable task is STALE when a hard dependency's sidecar was committed more
 recently than the task's own sidecar: `max(commit-date of parent + blocked_by) > commit-date
 of this task's sidecar`. Pure git, zero model tokens. `related` edges are soft (excluded).
 Decisions are out of the graph for now (§Sidecar staleness-walk finding).
 
-Groomable = a parked task (status todo|functional; done/cancelled are terminal).
+Ripenable = a parked task (status todo|functional; done/cancelled are terminal).
 
 Usage:
   python3 .claude/tools/board_stale.py [--n N] [--json]
-     list the N stalest groomable tasks (default: all stale, stalest first)
+     list the N stalest ripenable tasks (default: all stale, stalest first)
   python3 .claude/tools/board_stale.py --since <sha>
-     list groomable tasks whose sidecar OR a hard dep changed since <sha>
+     list ripenable tasks whose sidecar OR a hard dep changed since <sha>
      (the orchestrator's change-signal cue)
 """
 import re, os, sys, json, subprocess
@@ -20,7 +20,7 @@ import re, os, sys, json, subprocess
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BOARD = os.path.join(ROOT, 'docs/TODO.md')
 SC = 'docs/TODO.md.d'
-GROOMABLE = {'todo', 'functional'}
+RIPENABLE = {'todo', 'functional'}
 
 
 def commit_ct(relpath):
@@ -72,7 +72,7 @@ def main():
 
     rows = []
     for t in tasks:
-        if t['status'] not in GROOMABLE:
+        if t['status'] not in RIPENABLE:
             continue
         own_rel = f"{SC}/{t['id']}.md"
         deps = [d for d in ([t['parent']] if t['parent'] else []) + t['blocked_by'] if d in by_id]
@@ -96,7 +96,7 @@ def main():
         print(json.dumps([{'id': i, 'fn': f, 'stale_by_s': s} for i, f, s in rows], indent=1))
     else:
         label = 'changed since ' + since if since else 'stale (stalest first)'
-        print(f"# {len(rows)} groomable tasks {label}")
+        print(f"# {len(rows)} ripenable tasks {label}")
         for i, f, s in rows:
             extra = '' if since else f"  (+{s // 86400}d{(s % 86400) // 3600}h behind dep)"
             print(f"  {f:12} {i}{extra}")

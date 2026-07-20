@@ -20,7 +20,7 @@
   `orch`. The orchestrator is TOLD the operator's pick and DOUBLE-CHECKS it against the
   live board before handing off (the summary the pick came from may be stale).
 - Picking something new instead of a prepared task drops into the normal orchestrator
-  intake flow (create the task, groom, then hand off) — Orchard adds no second intake path.
+  intake flow (create the task, ripen, then hand off) — Orchard adds no second intake path.
 - The `orch` wrapper (`bin/orch`) already implements resume-or-create per repo; the
   session-per-repo spawn is its fleet-scale sibling.
 

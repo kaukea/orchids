@@ -46,7 +46,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
   - `feature · todo · · queued · process ·` [Diagnostic channel for agents, cloud and local — cross-cutting](TODO.md.d/diagnostic-channel.md) ~bus-liveness ~agent-metadata ~fleet-sidebar ~cloud-architect
   - `feature · todo · · queued · process ·` [Ripener charter: close functional scope, statistical readiness, auto-kick](TODO.md.d/psychometric-discovery.md) ~handover-contract ~retire-groom-vocabulary
 - `housekeeping · todo · low · queued · process ·` [Rename the TODO vocabulary to task list](TODO.md.d/todo-to-task-list.md)
-- `housekeeping · todo · urgent · plan-ready · process ·` [Retire the groom word family: rename the skill, the agent, and the verb](TODO.md.d/retire-groom-vocabulary.md) ~todo-to-task-list
+- `housekeeping · todo · urgent · plan-ready · process ·` [Retire the ripen word family: rename the skill, the agent, and the verb](TODO.md.d/retire-groom-vocabulary.md) ~todo-to-task-list
 - `feature · todo · critical · queued · process ·` [Injection integrity: make instructions arrive intact, not summarised](TODO.md.d/injection-integrity.md) ⊘readme-changelog-ownership ~session-start-hook
 - `feature · todo · · queued · process ·` [Sidecar liveness: prove an agent is still listening after load](TODO.md.d/bus-liveness.md) ~message-bus
 - `feature · todo · · queued · process ·` [Agent metadata: model, effort and token denominators on the bus](TODO.md.d/agent-metadata.md) ~message-bus

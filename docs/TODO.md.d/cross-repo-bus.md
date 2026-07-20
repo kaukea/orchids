@@ -37,7 +37,7 @@ bus is proven in use.
 
 ## Testing
 
-To agree when the task is groomed — expected shape: an agent in one repository addresses an
+To agree when the task is ripened — expected shape: an agent in one repository addresses an
 agent in another and the message is delivered, with broadcast still confined to its own repo.
 
 ## Wall item promoted from the bus build (2026-07-19)
