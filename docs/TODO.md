@@ -48,7 +48,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 ## Role delivery
 
 - `feature · todo · · blocked-on-answers · · gh#16` [Role-based delivery of skills and agents](TODO.md.d/role-delivery.md) ~dynamic-skill-delivery
-  - `feature · todo · · plan-ready · sync ·` [Declare the role DAG in skill and agent frontmatter](TODO.md.d/role-dag-frontmatter.md)
+  - `feature · done · · complete/interactive · sync ·` [Declare the role DAG in skill and agent frontmatter](TODO.md.d/role-dag-frontmatter.md)
   - `feature · todo · · plan-ready · sync ·` [Make agents first-class, with skill dependencies](TODO.md.d/agents-first-class.md) ⊘role-dag-frontmatter
   - `refactor · todo · · blocked-on-answers · process ·` [Rename and split skills to fit the role DAG](TODO.md.d/skill-renames-and-splits.md)
   - `refactor · todo · · blocked-on-answers · process ·` [Terseness and conflicting-advice pass over all skills](TODO.md.d/skill-terseness-pass.md) ⊘role-dag-frontmatter ⊘skill-renames-and-splits
