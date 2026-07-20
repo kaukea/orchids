@@ -39,7 +39,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
   - `feature · todo · · queued · process ·` [Orchard launch: session per repo, orchestrator told the pick and double-checks](TODO.md.d/orchard-launch.md) ⊘orchard-view
   - `feature · todo · · queued · process ·` [Tmux topology: window per architect, stacked pane per coder, focus returns on close](TODO.md.d/tmux-topology.md) ~hook-choreography ~fleet-sidebar
   - `feature · todo · · queued · process ·` [Fleet sidebar: always-visible navigable job states with phase emojis](TODO.md.d/fleet-sidebar.md) ⊘session-naming ~bus-liveness ~agent-metadata
-  - `bug · todo · urgent · queued · process ·` [Session and feature naming: short, descriptive, visible — sidebar prerequisite](TODO.md.d/session-naming.md)
+  - `bug · todo · urgent · blocked-on-answers · process ·` [Session and feature naming: short, descriptive, visible — sidebar prerequisite](TODO.md.d/session-naming.md)
   - `feature · todo · urgent · working · process ·` [Handover contract: build-ready sidecars, questions front-loaded before launch](TODO.md.d/handover-contract.md) ~architect-delegation ~injection-integrity
   - `feature · todo · urgent · plan-ready · process ·` [Cloud architect: automate the analyzable share of the architect's job](TODO.md.d/cloud-architect.md) ~handover-contract
   - `feature · todo · · queued · process ·` [Cross-repo bus: live messaging across repository boundaries](TODO.md.d/cross-repo-bus.md) ~status-channel ~cross-repo-inbox
