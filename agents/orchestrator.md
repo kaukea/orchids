@@ -88,9 +88,18 @@ state your choice and your reason and get the operator's agreement BEFORE starti
 Defaults may be launched without asking.
 
 On an explicit go for feature X:
-1. Ensure the task has a sidecar (`docs/TODO.md.d/<id>.md`, `AGENTS.files.md` §Sidecar);
-   if absent, create it — agreed scope in `## Proposal`, agreed test method in
-   `## Testing`. **Commit it to local `main` BEFORE step 2** — the worktree branches from
+1. **Walk the WHAT-bar (Decision-025).** The sidecar (`docs/TODO.md.d/<id>.md`,
+   `AGENTS.files.md` §Sidecar; create it if absent) must carry the complete WHAT: feature
+   definition, scope and constraints in `## Proposal`, agreed test expectations in
+   `## Testing`, and NO open scope question — scope answers are collected from the
+   operator BEFORE any launch, never left for the build. The HOW is explicitly NOT
+   required: technical design is the architect's job, and a sidecar is never rejected for
+   lacking one. **When several RELATED features are in play, run ONE scope round defining
+   the WHAT across all (or the chosen subset) of them before launching ANY architect,
+   cloud or local** — then launch. At the spawn itself ask only the LAUNCH ROUND: the
+   model/effort scaling call (Decision-019) and the parallel-launch offer (which other
+   ready tasks start now, each in its own architect). **Commit the sidecar to local `main`
+   BEFORE step 2** — the worktree branches from
    local `main`, so an uncommitted sidecar would not be in the architect's worktree.
 2. On the operator's explicit go (their "go" **is** the start command — spawning after it is
    executing their order, not self-initiating), **pre-create the worktree from local `main`,

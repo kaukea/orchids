@@ -148,8 +148,10 @@ header field with no value.
 3. `## Findings` — established facts the work resolved (the pivot): verified results,
    dead-ends not to repeat, measurements. Durable — where former "handover chatter" with
    lasting value now lands.
-4. `## Proposal` — the resolution / what will be done; for a multi-step feature, the
-   staged plan. This is the HOW the architect runs.
+4. `## Proposal` — the WHAT: feature definition, scope, constraints — complete enough
+   that the architect never needs a scope answer mid-build. The HOW (technical design)
+   is NOT handoff content: the architect authors it in its plan phase and records the
+   agreed plan here once frozen (Decision-025).
 5. `## Testing` — exit gate: the pre-agreed test method, set up front (satisfying the
    mandatory Testing gate before the close, not at it).
 

@@ -10,46 +10,51 @@
 - ~~Does [[architect-delegation]] fold into this contract rewrite or stay its own task?~~
   FOLDED IN (operator, 2026-07-20) — that entry is cancelled-as-absorbed; its content
   lives here now.
-- What is the completeness BAR for a build-ready sidecar — a checklist the orchestrator
-  must satisfy (design settled, questions closed, test method agreed, size), enforced how?
-- "Ask me all the questions before launching": collected from where — the sidecar's open
-  Questions only, or also the ones grooming would surface? And batched in one round?
-- (absorbed) What restores delegation trust: mandatory builder dispatch above a size
-  threshold, evidence of delegation in the close-gate report, or a different contract
-  shape? Does the contract stop permitting single-handed builds outright?
+- ~~What is the completeness BAR for a build-ready sidecar?~~ RULED (Decision-025): the
+  bar is the complete WHAT — definition, scope, constraints, scope answers; the HOW is
+  the architect's own plan-phase output, never required at handoff. Architect discovers,
+  plan-gated.
+- ~~How are the operator's questions collected and asked?~~ RULED (Decision-025): two
+  rounds — scope while parked, launch decisions at spawn; one scope round spans a
+  cluster of RELATED features before any architect (cloud or local) launches.
+- ~~(absorbed) What restores delegation trust?~~ RULED (Decision-025): builder dispatch
+  mandatory above s-size, zero-builder builds fail the close gate; inline s-size builds
+  are stated and justified in the close report.
 
 ## Findings
 
 - Absorbed from [[architect-delegation]] (2026-07-20): the operator does not currently
   trust the architect — the 2026-07-20 role-dag build dispatched 4 Haiku explorers in
-  discovery but built every step single-handed. The architect definition PERMITS that
-  ("directly or via parallel builders"), so the contract, not just the behaviour, is
-  what needs tightening. Decision-023's deferred header-fill move re-evaluates when
-  delegation trust is restored — the trigger now lives here.
+  discovery but built every step single-handed. The architect definition PERMITTED that
+  ("directly or via parallel builders"), so the contract, not just the behaviour, was
+  the bug. Decision-023's deferred header-fill move re-evaluates when delegation trust
+  is restored — the trigger lives here.
 - Operator (2026-07-20): the lines between orchestrator and architect are VERY BLURRED.
-  Intended split — the ORCHESTRATOR owns task relationships (priorities, relative
-  importance, functional relevance — e.g. warning that a feature has no consuming
-  component), and owns getting the sidecar complete enough that the ARCHITECT thinks
-  only about HOW to build, then dispatches coders. "Already supposed to be the case" —
-  but not what happens (see [[architect-delegation]]: the 2026-07-20 build was
-  single-handed).
-- Before launching an architect the orchestrator asks the operator ALL open questions
-  up front, and also offers parallel work: whether to launch additional tasks/architects
-  at the same time ([[tmux-topology]] gives each its window).
+  The split, now ruled: the ORCHESTRATOR owns task relationships (priorities, relative
+  importance, functional relevance) and the complete WHAT; the ARCHITECT owns the HOW —
+  discovery + technical design IS the role — then dispatches coders.
 - Hard consequence: [[cloud-architect]] cannot work without this contract — a cloud
-  agent cannot ping-pong questions mid-flight, so the handover must be complete at
-  dispatch. The operator wants the pair delivered together, with strong gating.
+  agent cannot ping-pong questions mid-flight, so both rounds must be complete at
+  dispatch. Delivered together, with strong gating (operator).
 
 ## Proposal
 
-Define the orchestrator→architect handover as a CONTRACT: the build-ready bar for a
-sidecar, the front-loaded question round, the parallel-launch offer, and what the
-architect may assume on receipt (design done — HOW only). Encode it in the orchestrator
-and architect definitions and the sidecar §format; enforcement per the bar Question.
+Encode the contract in the definitions — DONE 2026-07-20, directly on main
+(orchestrator domain, Decision-065):
+
+- `agents/architect.md`: sidecar = WHAT, HOW is the architect's; open scope question at
+  launch = broken handoff (park, don't ask mid-build); builder dispatch mandatory above
+  s-size, zero-builder builds fail the close gate; frontmatter description updated.
+- `agents/orchestrator.md`: the WHAT-bar walked before every spawn; one scope round
+  across related features before any launch; spawn carries only the launch round
+  (model/effort scaling + parallel-launch offer).
+- `AGENTS.files.md` §Sidecar: `## Proposal` redefined as the WHAT; the architect records
+  the frozen plan there post-gate.
+- `docs/decisions.md`: Decision-025.
 
 ## Testing
 
-One feature taken through the new handover: every operator question asked in one round
-before launch; the architect receives a sidecar it never has to bounce back for design
-answers; a cloud-shaped dry run (no mid-flight operator contact) reaches MAKE IT SO
-readiness on the sidecar alone.
+Live-fire on the next architect launch: the spawn is preceded by a walked WHAT-bar and
+carries only the launch round; no scope question reaches the operator mid-build; the
+close report lists builder dispatches (or the justified s-size inline note). Method
+pending operator agreement; the task stays open until that run passes.

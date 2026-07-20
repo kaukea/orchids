@@ -513,3 +513,34 @@ The live cross-repository messaging previously carried under the Orchard name
 moves to its own task id, [[cross-repo-bus]], scope unchanged. References to
 "orchard" in older docs (e.g. the message-bus sidecar) should be read as the
 workbench programme from this date.
+
+## [2026-07-20 21:35 CEST] Decision-025: The handover contract — the sidecar is the WHAT, the HOW is the architect's, delegation is mandatory above s
+#handover #architect #orchestrator #delegation #sidecar #what-how #questions #cloud
+
+Operator rulings (2026-07-20), the contract behind [[handover-contract]]:
+
+1. **WHAT/HOW split.** The sidecar carries the complete WHAT — feature
+   definition, scope, constraints, relationships, and the operator's scope
+   answers. The orchestrator owns getting it complete. The HOW — discovery and
+   technical design — is the ARCHITECT's job (that is the role), presented at
+   the plan gate and frozen by MAKE IT SO; it is never required handoff
+   content. (Amends the former §Sidecar wording "Proposal is the HOW the
+   architect runs".)
+2. **Two question rounds, not a ping-pong.** Scope (WHAT) questions are put to
+   the operator while the task is parked in the readiness pipeline; the spawn
+   itself carries only the LAUNCH round — model/effort scaling (Decision-019)
+   and the parallel-launch offer. When several RELATED features are in play,
+   ONE scope round defines the WHAT across all (or the chosen subset) before
+   ANY architect launches, cloud or local. An open scope question at launch
+   means the handoff broke; a mid-build scope question pauses the build and
+   goes through the orchestrator, it is not asked ad hoc.
+3. **Delegation is mandatory above s-size.** An architect build above s-size
+   MUST dispatch builders; zero builders fails the close gate. An s-sized
+   feature may be built inline, stated and justified in the close report. The
+   former "directly or via parallel builders" permission was the bug
+   (absorbed architect-delegation task). Restores the trust condition behind
+   Decision-023's deferred header-fill move.
+
+The cloud consequence: an autonomous/cloud architect has no mid-flight
+operator contact, so rounds one and two are its hard precondition —
+[[cloud-architect]] builds on this contract.
