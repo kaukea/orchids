@@ -21,6 +21,13 @@ name: cloud-path
 on:
   issue_comment:
     types: [created]
+  # Registration ping: GitHub only registers (and lets you dispatch) a workflow it
+  # has seen in an event — a file sitting on a feature branch is invisible. A push
+  # touching this file registers it; the run itself is a no-op (every job's `if`
+  # matches only issue_comment / workflow_dispatch).
+  push:
+    paths:
+      - .github/workflows/cloud-path.yml
   workflow_dispatch:
     inputs:
       hop:
