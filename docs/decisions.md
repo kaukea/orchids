@@ -498,3 +498,18 @@ A third proposal — moving the `completed:`/`completed_during:` header fill to
 the architect's close-gate — is REJECTED for now: the operator does not
 currently trust the architect (it does not dispatch builders as contracted;
 see the architect-delegation task). Re-evaluate when that is fixed.
+
+## [2026-07-20 20:44 CEST] Decision-024: Orchard is the fleet workbench; the cross-repo bus keeps its own name
+#orchard #naming #cross-repo #workbench #fleet
+
+The codename **Orchard** now means the fleet workbench: the cross-repository
+view, selection and dispatch UX the operator specified 2026-07-20 (global
+overview of every repository's prepared work, counts of pressing/broken/
+blocked issues, cross-repo dependencies, session-per-repo launch). Orchard
+PRESENTS ONLY what each repository's orchestrator has already prepared — it
+never derives or re-triages.
+
+The live cross-repository messaging previously carried under the Orchard name
+moves to its own task id, [[cross-repo-bus]], scope unchanged. References to
+"orchard" in older docs (e.g. the message-bus sidecar) should be read as the
+workbench programme from this date.

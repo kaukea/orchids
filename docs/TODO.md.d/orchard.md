@@ -4,42 +4,51 @@
 
 ## Blockers
 
-- Depends on the repo-scoped bus landing first ([[status-channel]]) — Orchard extends it,
-  it does not replace it.
+- None at the parent level; ordering lives on the children.
 
 ## Questions
 
-- Is the cross-repo hop live (a bus that spans repos) or a relay between two repo-scoped
-  buses? The latter keeps each repo's bus unchanged and confines the new part to the hop.
-- Addressing across repos: an agent ID is unique within a repository, so a cross-repo
-  address needs the repo as a qualifier. What is the canonical repo identifier?
-- Broadcast semantics across repos — does a broadcast stop at the repo boundary? (Almost
-  certainly yes; crossing it by default would be surprising.)
+- (parent rolls up — open questions live in the children)
 
 ## Findings
 
-- Messaging is REPO-SCOPED by design: agents, orchestrators and third-party local agents
-  are all scoped by repository, so the bus is too ([[status-channel]]).
-- Distinct from [[cross-repo-inbox]]: that is the OFFLINE, durable delivery of requirements
-  and knowledge between projects. Orchard is the LIVE messaging path. Same boundary, two
-  different mechanisms — do not merge them (operator).
-- Motivating instance: on 2026-07-19 work was discovered in seb.tv that belonged to orchids,
-  with no channel to deliver it — so it was edited into a vendored clone and pushed straight
-  to main, bypassing the workflow. The wrong path was the only path.
+- Re-scoped 2026-07-20 by operator dictation: **Orchard is the fleet workbench** — the
+  cross-repository view, selection and dispatch UX (Decision-024). The former content of
+  this sidecar (live cross-repo messaging) moved to [[cross-repo-bus]].
+- Operator's core problem: repos are picked by mood or perceived importance, with no
+  global overview of all repositories needing attention, and no visible cross-repo
+  dependencies (worked example: manifest-by-convention moving from orchids to kauk).
+- Governing principle: **Orchard only presents what each repository's orchestrator has
+  already prepared** — it never derives, scans, or re-triages. Each orchestrator maintains
+  a simple parseable summary file ([[orchard-summary]]); Orchard reads and renders those.
+- Overlap to manage: [[github-board-sync]] is already a functional cross-repo board view
+  (GitHub issues + the Orchidarium user Project, cloud-triaged). Orchard is the LOCAL,
+  terminal-first, selection-and-dispatch counterpart reading local files; they share the
+  underlying board data and must not fork it.
 
-## Proposal
+## Proposal (the operator's UX walkthrough, 2026-07-20)
 
-Codename **Orchard**: extend agent messaging across repository boundaries. Scope to be set
-once the repo-scoped bus is proven in use.
+1. Launch `orchard` from anywhere. It presents the fleet: what projects exist, counts of
+   pressing / broken / blocked issues, prepared next tasks, cross-repo dependencies —
+   all from the orchestrators' summary files ([[orchard-summary]], [[orchard-view]]).
+2. The operator selects repositories to work on → one tmux session per selected repo;
+   window 1 is that repo's orchestrator, auto-launched, told the selection, and it
+   double-checks the choice against the live board. Choosing something new instead drops
+   into the normal orchestrator intake flow ([[orchard-launch]]).
+3. Task list agreed per repo → one window per architect; every coder the architect
+   dispatches appears as a stacked pane; on completion the window closes and focus
+   returns to the orchestrator ([[tmux-topology]]).
+4. A small, always-visible, navigable left sidebar shows every repo and job with live
+   state — waiting-for-input / working / complete, design-vs-development phase, close
+   state as a bonus ([[fleet-sidebar]]); short descriptive names are its prerequisite
+   ([[session-naming]]).
+5. Underneath: the orchestrator→architect handover is formalised so architects receive
+   build-ready sidecars with questions pre-asked ([[handover-contract]]), enabling cloud
+   agents to take the analyzable share of architect work ([[cloud-architect]]) — the
+   operator wants that pair delivered together, with strong gating.
 
 ## Testing
 
-To agree when the task is groomed — expected shape: an agent in one repository addresses an
-agent in another and the message is delivered, with broadcast still confined to its own repo.
-
-## Wall item promoted from the bus build (2026-07-19)
-
-- **Phase-two lean HELLO + lazy metadata fetch.** The bus announces identity eagerly at load,
-  which is fine at small n. Once membership is large and interest is sparse — the cross-repo
-  case — announcing everything to everyone stops paying. Fetch metadata on demand instead.
-  Left for Orchard because it only bites at Orchard's scale.
+Parent-level: the walkthrough above executed end-to-end across at least two repositories
+(orchids + one more), from `orchard` launch to a closed task returning focus — agreed per
+child at grooming.
