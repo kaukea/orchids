@@ -42,9 +42,33 @@ _base: `f65ad36`_
   closes into the file board — files stay canonical; the orchestrator pulls
   at boot and pushes after board writes.
 
+- 🏷️ Skill roles: every skill declares its place in the role DAG via a `roles:`
+  frontmatter list of slash-paths (Decision-003/005) — placements not
+  completeness, `general` explicit, multi-parent expressible. The
+  frontmatter-contract skill is renamed `doing-skills` → `authoring-skills` and
+  documents the contract; kauk validates the declarations when it reads them.
+
 ### 🐛 Bug fixes
 
 ---
+
+#### 🏷️ `f/role-dag-frontmatter` → `archive/role-dag-frontmatter`
+
+Every skill now declares its role placements in frontmatter: `roles:` is a list
+of slash-separated full paths from the Decision-003 role DAG, each a deliberate
+placement — a multi-parent skill may sit under a subset of its parents, `general`
+is explicit, and a missing key is an error (never read as "deliberately
+general"). The keystone `doing-skills` skill is renamed `authoring-skills`
+(Decision-003, role `general`) and now documents the `roles:` contract,
+referencing the vocabulary in `decisions.md` rather than restating it. All 26
+skills are declared per the tree — `coding-tofu` and `reverse-engineering-files`
+span two parents, `git-commit` spans `general` + `process/workflow`, and
+`write-to-s3` takes its provisional `security/forensics`. The legacy
+`manifest.conf` role is left in place until kauk reads frontmatter; enforcement
+is deferred to a kauk `validate` stub, not an orchids lint.
+
+_Board: [role-dag-frontmatter](docs/TODO.md.d/role-dag-frontmatter.md) ·
+decisions: Decision-003, Decision-005._
 
 #### 📋 `f/github-board-sync` → `archive/github-board-sync`
 
