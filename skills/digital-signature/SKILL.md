@@ -1,6 +1,7 @@
 ---
 name: digital-signature
 description: Seal a file or a forensic hash-manifest with a legally-recognized digital signature using the operator's government-issued smart-card certificate (via PKCS#11), plus an RFC-3161 qualified timestamp from a Timestamp Authority — the same cert+TSA mechanism used for PAdES PDF signing. Produces provable identity + provable time over exact bytes. Invoke to sign evidence manifests, captured-image hash lists, or any artefact that must be attributable and time-anchored.
+roles: [security]
 ---
 
 # Digital signature (smart card + RFC-3161 timestamp)

@@ -1,6 +1,7 @@
 ---
 name: groom
 description: Run a board-grooming pass — dispatch the prep-only groomer over the stalest opted-in tasks so their sidecars advance through the readiness pipeline without the operator driving each one. NOT a cron; a manual/on-demand trigger fired by the operator ("groom the board") or by the orchestrator when it notices the change signal (docs/decisions.md or a sidecar moved since the last swept SHA). Prep-only, commit-only, N=2 per pass.
+roles: [process/workflow]
 share: github
 compatibility: Requires git
 metadata:

@@ -1,6 +1,7 @@
 ---
 name: history-rewrite
 description: MUST be read in full and followed step-by-step before rewriting any
+roles: [process/workflow]
   repository's main into the canonical structure (per-feature f/ branches that never
   existed, anchor commits, archive/ tombstone tags, squash template, commit-count
   notes, optional operator QES on squashes). Two prior migrations failed because the

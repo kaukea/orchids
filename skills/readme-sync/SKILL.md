@@ -1,6 +1,7 @@
 ---
 name: readme-sync
 description: MUST be read at workflow completion when the work added or changed user-facing behaviour, CLI flags, build steps, or required developer tooling. Checks README.md is still aligned with the current feature set, usage examples, and developer instructions before the squash.
+roles: [process/workflow]
 metadata:
   share: github
   tags: [readme, documentation, workflow, end, sync, user-facing]

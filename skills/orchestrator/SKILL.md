@@ -1,6 +1,7 @@
 ---
 name: orchestrator
 description: The root role for all work. The orchestrator knows the board, prioritises, and suggests what to do next — but never writes code itself; coding always happens in a spawned sub-job. It is a lean, reconstitutable role any fresh session adopts by reading durable state, not a persistent session. Defines the boot sequence, agent-mode question, board render, triage + closing choice, sub-job handoff, MOOD.md, and sub-job return.
+roles: [process/workflow]
 share: github
 compatibility: Requires git
 metadata:

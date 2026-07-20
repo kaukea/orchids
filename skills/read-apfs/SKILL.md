@@ -1,6 +1,7 @@
 ---
 name: read-apfs
 description: Read an encrypted APFS / FileVault2 volume or disk image READ-ONLY for forensic analysis on Linux (no macOS). Covers container/volume/snapshot enumeration, the FileVault keybag chain (recovery key or passphrase → KEK → VEK), mounting with apfs-fuse, and — critically — the recurring FUSE-reader FALSE-EMPTY trap. Invoke whenever mounting or reading any APFS / FileVault drive or image. Pair with the chain-of-custody skill.
+roles: [security/forensics]
 ---
 
 # Read APFS / FileVault (read-only, forensic)

@@ -1,6 +1,7 @@
 ---
 name: agent-behaviour
 description: Always-on behavioural core for any agent working in these repositories. Read at session start alongside the AGENTS files. When something fails, suspect your own change first; trust other agents' work instead of re-deriving it; no coding before scope is defined, no finishing before the operator-agreed testing is complete.
+roles: [general]
 metadata:
   tags: [ behaviour, blame, trust, scope, testing, verification, epistemics ]
   share: github

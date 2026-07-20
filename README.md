@@ -68,7 +68,7 @@ storage.
 (`read-agents`, `agent-behaviour`), pass work between sessions without leaking
 chatter into history (`handover`), groom the board (`groom`, `orchestrator`),
 migrate a grown-wild repo into the canonical shape (`history-rewrite`), and
-teach agents to write new skills properly (`doing-skills`).
+teach agents to write new skills properly (`authoring-skills`).
 
 **Upgrades that catch every repo up.** When the package moves or reshapes a
 managed file, it ships a dated entry in `migrations/` — state-guarded

@@ -1,6 +1,7 @@
 ---
 name: machine-access
 description: Get into a locked / attacker-changed Mac READ-ONLY for a forensic data pull, without lowering security or modifying the machine. Covers the credential paths (FileVault recovery key = LOCAL reset on Intel/T2; PIV smart-card preboot on Apple Silicon; free in-session dscl -authonly credential testing), preboot vs recoveryOS, the SEP finite-attempt trap, and the "extract, don't mess" boundary. Pairs with icloud, disk-imaging, chain-of-custody.
+roles: [security/forensics]
 ---
 
 # Machine access (locked Mac, forensic, read-only)

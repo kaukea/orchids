@@ -1,6 +1,7 @@
 ---
 name: icloud
 description: Retrieve a user's OWN iCloud data (photos, Drive) off an already-signed-in Apple device before it is lost, WITHOUT touching account control — for when the account cannot be re-authenticated (burned/lost 2FA) but existing trusted sessions still work. Covers Photos "Download Originals", incremental exfiltration against a remote-wipe race, the signed-in-session-only constraint, and the do-NOT-touch-Apple-ID boundary. Pairs with machine-access, chain-of-custody.
+roles: [security/forensics]
 ---
 
 # iCloud data retrieval (signed-in session only)

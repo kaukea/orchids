@@ -1,6 +1,7 @@
 ---
 name: shortcut-file
 description: Read and emit Apple Shortcuts `.shortcut` files (iOS 15+) at the byte level on any platform — the AEA→Apple Archive→WFWorkflow-bplist layering, the action/parameter serialization shapes, and the signing/import reality. Invoke when parsing an exported shortcut, generating a `.shortcut` off-device, or debugging why a generated shortcut is rejected or misbehaves on import.
+roles: [development/file-formats]
 ---
 
 # Apple Shortcuts `.shortcut` file format

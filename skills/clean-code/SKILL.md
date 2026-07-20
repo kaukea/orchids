@@ -1,6 +1,7 @@
 ---
 name: clean-code
 description: Use for any code change in any language. Boundaries that keep agents from producing what they produce best — hundred-line spaghetti. Short methods, self-descriptive code with no comments, composition over imperative chaining, DRY, SOLID, composable functional style.
+roles: [development]
 metadata:
   tags: [ clean-code, quality, composition, solid, dry, functional, methods, style ]
   share: github

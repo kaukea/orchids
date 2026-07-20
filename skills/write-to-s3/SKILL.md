@@ -1,6 +1,7 @@
 ---
 name: write-to-s3
 description: Upload evidence or captured data to S3 in a secure, tamper-evident, custody-preserving way — client-side encryption (key held by the operator, plaintext never leaves the host), immutable Object-Lock (WORM) + versioning, in-transit sha256, from a clean AWS account (MFA, not tied to any compromised identity), with every S3 operation logged. Invoke to offload images/manifests to the cloud without exposing plaintext or breaking chain of custody. Assumes an active identity-layer adversary — treat the AWS account as attackable.
+roles: [security/forensics]
 ---
 
 # Write to S3 (secure, immutable, custody-preserving)

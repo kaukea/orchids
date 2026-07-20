@@ -1,6 +1,7 @@
 ---
 name: software-catalog
 description: MUST be read before editing provisioning/catalog.toml or the bake's catalog emitter — any time you add/remove/change a package's present/absent/deactivated state, or mark something for removal from the image. Encodes the dependency-graph rule for Debian/apt: purging a package force-removes its reverse-dependencies, so a "danger" that a kept package hard-depends on must be DEACTIVATED (mask the unit), never purged. Stops the class of bug where purging nfs-common/udisks2 cascaded away the whole RPi desktop.
+roles: [infrastructure]
 metadata:
   tags: [catalog, software-catalog, apt, deb, dependencies, purge, absent, present, deactivated, mask, provisioning, bake, cloud-init, cascade, reverse-depends, package]
 ---

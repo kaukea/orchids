@@ -1,6 +1,7 @@
 ---
 name: chain-of-custody
 description: Maintain a forensically sound, command-level chain-of-custody record whenever handling an evidence item (drive, disk image, SD/SIM card, phone, laptop volume) or running any command against it. Logs every command with authoritative systemd-journal timestamps, exit codes, and output hashes; registers evidence identity (make/model/serial/UUID/host); records write-protection applied; and appends to EVIDENCE-HANDLING-LOG.md with an honest-limitations note. Invoke BEFORE touching evidence and keep it running for the whole session.
+roles: [security/forensics]
 ---
 
 # Chain of custody

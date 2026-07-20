@@ -1,6 +1,7 @@
 ---
 name: reverse-engineering-files
 description: Reverse-engineer an unknown or opaque file / on-disk format so it can be read losslessly, and CAPTURE what you learn as a reusable `formats/<name>.md` doc + a `tools/` parser so no future session re-derives it. Invoke whenever you hit a file whose structure you don't fully understand (unknown extension, custom/renamed image, proprietary DB, binary blob, container, keychain, journal, index) BEFORE trusting any single tool's read of it. Pairs with read-apfs, chain-of-custody.
+roles: [development/file-formats, security/forensics]
 ---
 
 # Reverse-engineering file / on-disk formats

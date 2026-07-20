@@ -1,6 +1,7 @@
 ---
 name: workflow-complete
 description: Read and follow the moment a workflow closes — the user approved it with MAKE IT SO, or it is being abandoned. Defines the entire close procedure: documentation update, clean tree, marker tag, squash-merge, integrity verify, mandatory push to origin (commits + tag + notes), worktree removal, the mandatory handover write, and cancellation. The workflow skill defines everything up to the approval gate; this skill defines everything after it.
+roles: [process/workflow]
 tracked: true
 metadata:
   tags: [ workflow, complete, finish, end, merge, squash, tag, cleanup, cancel, handover ]

@@ -1,6 +1,7 @@
 ---
-name: doing-skills
+name: authoring-skills
 description: How to author, structure, and publish a skill for this fleet of repositories. Read before creating or materially restructuring any SKILL.md. Defines the frontmatter contract, the canonical section order (Intent, Checklist, Rules, worked example), the one-skill-one-concern rule, and the kauk publishing flow.
+roles: [general]
 metadata:
   tags: [ skills, authoring, skill, meta, template, frontmatter ]
   share: github
@@ -21,7 +22,8 @@ directory, and ship them with `kauk sync` (see the `kauk` skill).
 - [ ] Checklist items are observable, tickable steps — not restated prose
 - [ ] No duplication of `AGENTS.shared.md` / `AGENTS.files.md` — reference them (`§TODO`, `§Decisions`)
 - [ ] Nothing tool-specific (no Claude-only paths or commands) unless the skill is about that tool
-- [ ] Added to `manifest.conf` as `skill <name> <role>` (`dev` · `infra` · `org` · `all`)
+- [ ] `roles:` declares ≥1 placement from the role vocabulary (Decision-003); `general` is explicit
+- [ ] `manifest.conf` role (`dev` · `infra` · `org` · `all`) still set — legacy, until kauk reads `roles:`
 - [ ] `kauk sync` run on the operator's go
 
 ## Frontmatter contract
@@ -30,14 +32,25 @@ directory, and ship them with `kauk sync` (see the `kauk` skill).
 ---
 name: <folder-name>                  # MUST equal the directory name
 description: <when to load it — the trigger — then what it does, one flowing sentence(s).>
+roles: [ <slash-path>, … ]           # ≥1 placement in the role vocabulary; `general` is explicit
 metadata:
   tags: [ <grep-able trigger words> ]
   share: github                      # present on every fleet-shared skill
 ---
 ```
 
-The skill's role (`dev` · `infra` · `org` · `all`) lives in canonical `manifest.conf`,
-fixed by us; repos tune delivery in their `.ai.toml` (see the `kauk` skill).
+`roles:` places the skill in the role vocabulary — a list of slash-separated full
+paths (`roles: [development/tofu, infrastructure/tofu]`). Each path is a deliberate
+**placement**: a multi-parent skill MAY be placed under a subset of its parents, so
+per-route delivery is expressible. `general` is explicit (`roles: [general]`); a
+missing `roles:` key is an error, never read as "deliberately general". The
+vocabulary itself is defined in exactly one place — the role DAG in
+`docs/decisions.md` (Decision-003); declare against it, do not restate it here.
+kauk's reader validates the declarations when it consumes them.
+
+The legacy `manifest.conf` role (`dev` · `infra` · `org` · `all`) still drives kauk
+delivery for now and is left in place; `roles:` supersedes it, and its retirement is
+deferred until kauk reads frontmatter.
 
 The `description` is what the model sees when deciding whether to load the skill — write
 it as trigger-first ("Use whenever…", "MUST be read before…"), because that is the whole

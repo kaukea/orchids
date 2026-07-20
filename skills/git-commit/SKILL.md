@@ -1,6 +1,7 @@
 ---
 name: git-commit
 description: Use when committing files to git. It describes format and content to include in the commit messages that MUST be followed.
+roles: [general, process/workflow]
 share: github
 compatibility: Requires git
 metadata:

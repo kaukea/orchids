@@ -1,6 +1,7 @@
 ---
 name: forensic-acquisition
 description: Full end-to-end forensic acquisition of a storage device for evidence — evidence numbering, photographing the device (with the exhibit number in frame), documenting the media, write-blocking, imaging to E01 with acquisition+verification hashing, integrity disclosure, optional certified secure-erase of repurposed media, and the signed manifest/attestation. Invoke to acquire ANY drive/card/media as a numbered exhibit. Exhibit-01 (SanDisk SD card) is the worked template. Pairs with chain-of-custody, read-apfs, digital-signature, write-to-s3.
+roles: [security/forensics]
 ---
 
 # Forensic acquisition (numbered exhibit, ISO/IEC 27037)
