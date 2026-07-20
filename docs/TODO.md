@@ -76,3 +76,4 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · todo · idea · queued · sync · gh#18` [Dynamic skill delivery per role](TODO.md.d/dynamic-skill-delivery.md)
 - `feature · todo · idea · queued · sync · gh#19` [Multi-source namespacing](TODO.md.d/multi-source-namespacing.md)
 - `feature · todo · idea · blocked-on-answers · sync · gh#20` [Agents: external dependencies beyond in-package skills](TODO.md.d/agent-external-deps.md) ~agents-first-class ~multi-source-namespacing
+- `feature · todo · · queued · · gh#23` [Navigate work in progress across repositories and agents](TODO.md.d/navigate-work-in-progress-across-repositories-an.md)
