@@ -43,3 +43,48 @@ One full feature cycle (spawn → MAKE IT SO → THAT IS ALL/ALL IT IS → close
 end-to-end by bus messages: focus returns, the architect's pane closes, no
 architect-close.sh in the path, and /tmp/architect-close.log records nothing. A
 deliberately killed architect is detected rather than silently absent.
+
+## Result
+Result: done — branch f/hook-choreography @ 3d18aa74de3e51ca08403a43325fdbe1df9f164e (base 380fb54; main advanced to 19d37d3,
+housekeeper integrates at squash-merge). 6 commits: bus.py signal+metadata (🎉 anchor) ·
+bus-driven close wiring (bus.md/architect.md/orchestrator.md + architect-teardown.sh) ·
+retire Stop hook · same-window teardown bugfix · ARCHITECTURE.
+
+Built: architect emits bus lifecycle signals (`done`@gate, `finished`@countersign); orchestrator
+acts on `finished` — runs tools/architect-teardown.sh (focus-return + close the arch:<id> pane,
+found by TITLE) then dispatches the housekeeper. Operator's THAT IS ALL is the sole close gate;
+"close it" removed. Retired hooks/architect-close.sh + its Stop entry + /tmp leak + jq race.
+model+effort added to orchid:status (mutable), not identity. parent_session wired at spawn.
+Liveness = direct pane check, no scheduler.
+
+Tested (operator-agreed: integration proof accepted; first post-merge close = live confirmation):
+- bus.py signal (real isolated bus): directed-to-parent / broadcast-fallback / dead-parent-fallback /
+  invalid-state-reject — all pass, envelope {kind:lifecycle,state,feature_id} correct.
+- architect-teardown.sh (real tmux, same-window Decision-006 layout): arch pane closed, orch pane
+  spared, focus returned, safety-refusal correct, killed pane detectable.
+- FULL close ordering chained on real bus+tmux: finished → drain → teardown → orch alive / arch closed / focus back.
+- Caught+fixed a guard bug (arch_win==ret_win) that would have refused every real close.
+Untested pre-merge (impossible until synced): a live LLM following the new md prose — the first
+post-merge feature close is that confirmation.
+
+## Docs determinations (per file)
+- decisions.md: NOT written here — technical design decisions staged in the workstream log's
+  "Decisions (pending promotion)" for orchestrator promotion at ingestion (avoids number collision
+  with advanced main; decisions.md is the orchestrator's per shared rules).
+- CHANGELOG.md: EDITED — added the 🎭 "Close choreography on the bus" bullet (operator-gated: approved).
+- ARCHITECTURE.md: EDITED — triggers fired (component removed: architect-close.sh; added:
+  architect-teardown.sh; wiring changed: close path hook→bus). Updated the role table (architect
+  countersign→finished; housekeeper trigger no longer "close it") + repo-layout inventory.
+- README.md: SKIP (evidenced) — README describes the close/bus only at narrative altitude
+  ("the housekeeper runs the close", "every session loads a bus"); it names no Stop hook, no
+  handshake mechanism, no "close it". All those statements remain true, so nothing to align.
+
+## Follow-ups for the orchestrator (cross-task — not edited by me)
+- [[agent-metadata]]: FOLDED IN and satisfied here (model+effort on status; which-wins resolved by
+  keeping mutable metadata on status). `effort` ships null — no reasoning-effort env source exists
+  today; revisit if one appears. Orchestrator can mark agent-metadata done/superseded.
+- [[bus-liveness]]: close-scoped liveness delivered (direct pane check); the broad reachability
+  framework ("what evidences reachability after load / what acts on absence") remains its own task.
+- [[tmux-topology]]: its sidecar's "current mechanics this replaces: .return-window + the
+  architect-close Stop hook" is now partly stale — teardown is topology-agnostic (reads .return-window,
+  finds pane by arch:<id> title); window-per-architect can swap the teardown action without touching signals.

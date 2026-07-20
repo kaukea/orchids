@@ -6,6 +6,19 @@ _base: `f65ad36`_
 
 ### ✨ New features
 
+- 🎭 Close choreography on the bus: the architect's finish rides a bus `finished`
+  signal, not a transcript-grepping Stop hook. At its `ALL IT IS` countersign the
+  architect signals `finished`; the orchestrator returns the operator's focus and
+  runs the close off that signal — so the operator's `THAT IS ALL` is the single
+  close gate (like merging a PR), with no separate "close it". The old
+  `architect-close.sh` Stop hook is retired along with its `jq` transcript race
+  and its cross-session `/tmp/architect-close.log` leak; the tmux teardown moves
+  into `architect-teardown.sh`, which finds the architect pane by its `arch:<id>`
+  title, reads no transcript, and writes nothing to `/tmp`. Bus `status` now
+  carries `model` and `effort` beside the broken-out token counts, so a reader has
+  the denominator; a dead architect is caught by a direct pane check when a close
+  is expected, with no scheduler.
+
 - 📮 Message bus: independent agent sessions in one repository can talk to each
   other. A `bus` sidecar owns the entire mechanism, so no other role learns the
   format, the paths, or the ordering rules; agents ask it in plain language.
