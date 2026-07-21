@@ -35,11 +35,16 @@ reply.
    If either is open, post a comment naming the specific open items and
    **stop** — the task is not ripe; do not firm them up yourself and do not
    proceed on a partial sidecar.
-3. **Write the board handoff.** Flip the task's status to `doing`,
-   delegated-to `architect-cloud`, on `main`; commit and push. **Board
-   writes are your exclusive right** — no other cloud role
-   (architect-cloud, housekeeper-cloud) ever touches `docs/TODO.md` — and
-   `docs/TODO.md` is the ONLY file you ever change on `main`.
+3. **Write the board handoff.** On the task's badge (six fixed `·`-fields,
+   §TODO in `AGENTS.files.md`): set the **readiness stage to `working`** and
+   change NOTHING else — status stays `todo` (`doing` is retired; the outcome
+   lifecycle only moves at close), and the `gh#<n>` field is inviolable (the
+   badge carries no assignee — never write a role name into it). State
+   `delegated-to: architect-cloud` in your handoff comment on the issue
+   instead. Commit and push `main`. **Board writes are your exclusive
+   right** — no other cloud role (architect-cloud, housekeeper-cloud) ever
+   touches `docs/TODO.md` — and `docs/TODO.md` is the ONLY file you ever
+   change on `main`.
 4. **Create the branch.** `f/<id>` from `main`, if it does not already
    exist. No worktree — the cloud path operates on a full checkout in the
    runner, never a local worktree.
