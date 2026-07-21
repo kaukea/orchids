@@ -6,6 +6,13 @@ _base: `f65ad36`_
 
 ### ✨ New features
 
+- 🏷️ Session naming contract, enforced at launch: every `claude` spawn carries a
+  `--name` — `orchids / <human name>` for feature sessions (architect, ripener) and
+  the bare repository name `orchids` for the one-per-repo orchestrator (no slash-form,
+  no `Orchestrator` suffix). The human name derives from the feature id by a pure
+  `-`↔space swap, surfaced once as a `name` field on the bus identity so the sidebar
+  reads one field. Forward-only: tmux `arch:<id>` machine titles and existing hooks
+  are untouched (Decision-032).
 - 🎭 Close choreography on the bus: the architect's finish rides a bus `finished`
   signal, not a transcript-grepping Stop hook. At its `ALL IT IS` countersign the
   architect signals `finished`; the orchestrator returns the operator's focus and
