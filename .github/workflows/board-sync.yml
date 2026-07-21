@@ -18,20 +18,37 @@ jobs:
     # Actor gate: only the operator's own events run anything.
     if: github.event_name == 'workflow_dispatch' || github.event.sender.login == 'serialseb'
     runs-on: ubuntu-latest
+    env:
+      CALLABLOOM_APP_ID: ${{ secrets.CALLABLOOM_APP_ID }}
     steps:
+      - name: Mint callabloom app token
+        id: app-token
+        if: ${{ env.CALLABLOOM_APP_ID != '' }}
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CALLABLOOM_APP_ID }}
+          private-key: ${{ secrets.CALLABLOOM_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
       - uses: actions/checkout@v4
         with:
           repository: kaukea/orchids
           path: .board-pkg
       - name: Ingest GitHub-born changes into the board
         env:
-          GH_TOKEN: ${{ github.token }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
-          git config user.name "board-sync"
-          git config user.email "actions@github.com"
+          if [ -n "$APP_TOKEN" ]; then
+            bot_id=$(gh api "/users/callabloom%5Bbot%5D" --jq .id)
+            git config user.name "callabloom[bot]"
+            git config user.email "${bot_id}+callabloom[bot]@users.noreply.github.com"
+          else
+            git config user.name "board-sync"
+            git config user.email "actions@github.com"
+          fi
           python3 .board-pkg/tools/board_gh.py pull --repo-root .
           rm -rf .board-pkg
           git add docs/TODO.md docs/TODO.md.d/ 2>/dev/null || true

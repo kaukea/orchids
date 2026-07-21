@@ -77,10 +77,20 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.hop == 'plan')
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      CALLABLOOM_APP_ID: ${{ secrets.CALLABLOOM_APP_ID }}
     steps:
+      - name: Mint callabloom app token
+        id: app-token
+        if: ${{ env.CALLABLOOM_APP_ID != '' }}
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CALLABLOOM_APP_ID }}
+          private-key: ${{ secrets.CALLABLOOM_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
       # .claude/agents + .claude/skills are committed as absolute symlinks into the
       # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
       # in-repo sources so `claude --agent <role>` and skills resolve in CI.
@@ -105,7 +115,7 @@ jobs:
       - name: Resolve stream id
         id: stream
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           NUM: ${{ github.event.issue.number || inputs.issue }}
           IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
         run: |
@@ -126,9 +136,18 @@ jobs:
       - name: Install claude CLI
         run: npm install -g @anthropic-ai/claude-code
       - name: Git identity
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
-          git config user.name "cloud-path"
-          git config user.email "actions@github.com"
+          if [ -n "$APP_TOKEN" ]; then
+            bot_id=$(gh api "/users/callabloom%5Bbot%5D" --jq .id)
+            git config user.name "callabloom[bot]"
+            git config user.email "${bot_id}+callabloom[bot]@users.noreply.github.com"
+          else
+            git config user.name "cloud-path"
+            git config user.email "actions@github.com"
+          fi
       # A comment QUOTING a gate word must not fire the hop: the comment must BE
       # the gate token, alone (whitespace-trimmed). Dispatch runs carry no comment
       # and skip this check.
@@ -145,7 +164,7 @@ jobs:
       - name: orchestrator-cloud prologue
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
@@ -158,7 +177,7 @@ jobs:
       - name: architect-cloud PLAN
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
@@ -185,10 +204,20 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.hop == 'build')
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      CALLABLOOM_APP_ID: ${{ secrets.CALLABLOOM_APP_ID }}
     steps:
+      - name: Mint callabloom app token
+        id: app-token
+        if: ${{ env.CALLABLOOM_APP_ID != '' }}
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CALLABLOOM_APP_ID }}
+          private-key: ${{ secrets.CALLABLOOM_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
       # .claude/agents + .claude/skills are committed as absolute symlinks into the
       # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
       # in-repo sources so `claude --agent <role>` and skills resolve in CI.
@@ -213,7 +242,7 @@ jobs:
       - name: Resolve stream id
         id: stream
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           NUM: ${{ github.event.issue.number || inputs.issue }}
           IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
         run: |
@@ -234,9 +263,18 @@ jobs:
       - name: Install claude CLI
         run: npm install -g @anthropic-ai/claude-code
       - name: Git identity
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
-          git config user.name "cloud-path"
-          git config user.email "actions@github.com"
+          if [ -n "$APP_TOKEN" ]; then
+            bot_id=$(gh api "/users/callabloom%5Bbot%5D" --jq .id)
+            git config user.name "callabloom[bot]"
+            git config user.email "${bot_id}+callabloom[bot]@users.noreply.github.com"
+          else
+            git config user.name "cloud-path"
+            git config user.email "actions@github.com"
+          fi
       - name: Exact gate check
         if: github.event_name == 'issue_comment'
         env:
@@ -250,7 +288,7 @@ jobs:
       - name: architect-cloud BUILD
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
@@ -282,10 +320,20 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.hop == 'revise')
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      CALLABLOOM_APP_ID: ${{ secrets.CALLABLOOM_APP_ID }}
     steps:
+      - name: Mint callabloom app token
+        id: app-token
+        if: ${{ env.CALLABLOOM_APP_ID != '' }}
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CALLABLOOM_APP_ID }}
+          private-key: ${{ secrets.CALLABLOOM_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
       # .claude/agents + .claude/skills are committed as absolute symlinks into the
       # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
       # in-repo sources so `claude --agent <role>` and skills resolve in CI.
@@ -310,7 +358,7 @@ jobs:
       - name: Resolve stream id
         id: stream
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           NUM: ${{ github.event.issue.number || inputs.issue }}
           IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
         run: |
@@ -331,13 +379,22 @@ jobs:
       - name: Install claude CLI
         run: npm install -g @anthropic-ai/claude-code
       - name: Git identity
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
-          git config user.name "cloud-path"
-          git config user.email "actions@github.com"
+          if [ -n "$APP_TOKEN" ]; then
+            bot_id=$(gh api "/users/callabloom%5Bbot%5D" --jq .id)
+            git config user.name "callabloom[bot]"
+            git config user.email "${bot_id}+callabloom[bot]@users.noreply.github.com"
+          else
+            git config user.name "cloud-path"
+            git config user.email "actions@github.com"
+          fi
       - name: architect-cloud REVISE
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
@@ -360,10 +417,20 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.hop == 'close')
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      CALLABLOOM_APP_ID: ${{ secrets.CALLABLOOM_APP_ID }}
     steps:
+      - name: Mint callabloom app token
+        id: app-token
+        if: ${{ env.CALLABLOOM_APP_ID != '' }}
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CALLABLOOM_APP_ID }}
+          private-key: ${{ secrets.CALLABLOOM_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
       # .claude/agents + .claude/skills are committed as absolute symlinks into the
       # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
       # in-repo sources so `claude --agent <role>` and skills resolve in CI.
@@ -388,7 +455,7 @@ jobs:
       - name: Resolve stream id
         id: stream
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           NUM: ${{ github.event.issue.number || inputs.issue }}
           IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
         run: |
@@ -409,9 +476,18 @@ jobs:
       - name: Install claude CLI
         run: npm install -g @anthropic-ai/claude-code
       - name: Git identity
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
-          git config user.name "cloud-path"
-          git config user.email "actions@github.com"
+          if [ -n "$APP_TOKEN" ]; then
+            bot_id=$(gh api "/users/callabloom%5Bbot%5D" --jq .id)
+            git config user.name "callabloom[bot]"
+            git config user.email "${bot_id}+callabloom[bot]@users.noreply.github.com"
+          else
+            git config user.name "cloud-path"
+            git config user.email "actions@github.com"
+          fi
       - name: Exact gate check
         if: github.event_name == 'issue_comment'
         env:
@@ -425,7 +501,7 @@ jobs:
       - name: housekeeper-cloud CLOSE
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
