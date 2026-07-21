@@ -3,8 +3,9 @@
 
 ## Blockers
 
-- ⊘[[session-naming]] — operator: without short, descriptive, visible names "none of it
-  will work".
+- ~~⊘[[session-naming]] — operator: without short, descriptive, visible names "none of it
+  will work".~~ RESOLVED: session-naming is done (squash cfc7f28, archive/session-naming,
+  2026-07-21) — the naming contract is in force for new launches.
 
 ## Questions
 
