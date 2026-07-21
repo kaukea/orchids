@@ -779,3 +779,12 @@ Promoted from the cloud-architect stream (operator rulings, 2026-07-20/21):
   workflow header ("Allow Actions to create PRs" ON). The ruleset is DISABLED
   until the named kaukea GitHub App exists (the built-in Actions identity cannot
   be bypass-listed) — re-enabling rides the app follow-up.
+
+## [2026-07-21 12:39 CEST] Decision-038: Operator actions surface as end-of-reply bullets
+#tone #operator #output #actions
+
+Ruling (operator, 2026-07-21 — issued in the app-identifying architect session,
+confirmed directly to the orchestrator): actions expected FROM the operator must
+never be buried in long descriptions. Every agent collects them as concise
+bullet points at the END of the interaction, with clear indicators/links
+(paths, URLs, exact commands). Encoded in `AGENTS.shared.md` §Tone.

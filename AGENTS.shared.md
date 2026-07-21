@@ -155,6 +155,9 @@ These hold even when no skill is loaded:
   "streamlined", "for now").
 - **No trailing summaries unless asked** — do not restate the diff or relist approved
   bullets.
+- **Operator actions surface at the END** — anything the operator is expected to do is
+  never buried in long descriptions: collect it as concise bullet points at the end of
+  the interaction, with clear indicators/links (paths, URLs, exact commands).
 
 ---
 
