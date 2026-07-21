@@ -48,6 +48,10 @@ shown as a bare slug.
 **Edges** — `⊘<id>` = a `blocked_by` edge, `~<id>` = a `related` edge (both kind-marked,
 repeatable), trailing the title. **Parent ↔ child is the list nesting**, never a token.
 
+**Tags** — `#madmax`, trailing the line like an edge: the task runs UNRESTRICTED —
+every `claude` launch for that feature appends `--dangerously-skip-permissions`
+(Decision-031). Operator-set ONLY; agents never add or remove it.
+
 **Provenance** (`created`, `created_by`, `created_during`, `completed`, `completed_during`)
 lives in the **sidecar metadata header** (§Sidecar), not on the board.
 

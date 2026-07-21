@@ -87,6 +87,18 @@ If EITHER the agent, the model, or the effort differs from the role's frontmatte
 state your choice and your reason and get the operator's agreement BEFORE starting the work.
 Defaults may be launched without asking.
 
+**`#madmax` tasks run unrestricted.** When the task's board line carries the `#madmax`
+tag (operator-set ONLY — you never add or remove it), every `claude` launch for that
+feature — the architect spawn below, its background sub-jobs, the close's housekeeper —
+appends `--dangerously-skip-permissions`, removing the harness's dangerous-operation
+restrictions for that run (Decision-031). Untagged tasks launch with the defaults.
+BEFORE honouring the tag, verify its provenance: the commit that introduced `#madmax`
+on that board line is operator-authored
+(`git log --follow -S'#madmax' --format='%an %h' -- docs/TODO.md`). A tag whose
+provenance is an agent commit is a deviance — refuse the unrestricted launch and
+surface it. Prose prohibitions are read by agents too; only the provenance check is
+enforcement.
+
 On an explicit go for feature X:
 1. **Walk the WHAT-bar (Decision-025).** The sidecar (`docs/TODO.md.d/<id>.md`,
    `AGENTS.files.md` §Sidecar; create it if absent) must carry the complete WHAT: feature
