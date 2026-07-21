@@ -7,9 +7,11 @@ _None._
 
 ## Questions
 
-- Does the orchestrator write these at close from the feature's sidecar result, or does the
-  housekeeper write them under orchestrator instruction? (The housekeeper currently verifies
-  rather than authors.)
+- ~~Does the orchestrator write these at close, or the housekeeper under
+  instruction?~~ Settled (Decision-034, 2026-07-21): NEITHER re-derives. The
+  architect stages the CONTENT verbatim in its sidecar result while context is
+  hot; the orchestrator writes the FILE at ingest — placement, format, merge and
+  operator gate only, never rewriting. Housekeeper stays verify-only.
 
 ## Findings
 
@@ -26,9 +28,13 @@ _None._
 
 ## Proposal
 
-Move README.md and CHANGELOG.md to the orchestrator, alongside the board and decisions.
-Architects stop touching them; they report what changed in their sidecar result and the
-orchestrator writes the repo-level record at close.
+Per Decision-034: architects stop editing CHANGELOG.md and README.md. Their close
+gate instead STAGES the content — the changelog entry in their own words, the
+user-facing README delta — as blocks in the sidecar result. The orchestrator
+promotes both intact at ingest (canonical format, parallel-feature merge,
+readme-sync judgement, operator gate). Implementation is workflow-component
+(architect def close gate, AGENTS.shared Close gate, workflow-complete presence
+checks, handover ingest steps) — orchestrator builds directly on an operator go.
 
 ## Testing
 

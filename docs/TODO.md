@@ -55,7 +55,7 @@ Badge: `type · status · urgency · readiness · component · gh#`.
 - `feature · done · · complete/interactive · process ·` [Agent metadata: model, effort and token denominators on the bus](TODO.md.d/agent-metadata.md) ~message-bus
 - `feature · done · · complete · process ·` [Review model + effort per agent role; make effort frontmatter-pinnable like model](TODO.md.d/role-model-effort.md) ~agent-metadata ~role-dag-frontmatter
 - `bug · cancelled · urgent · complete · process ·` [~~Distribution is a hand-typed index: derive it from the tree, and fail loudly meanwhile~~](TODO.md.d/manifest-by-convention.md) ~role-dag-frontmatter
-- `feature · todo · critical · queued · process · gh#31` [Move README and CHANGELOG to the orchestrator](TODO.md.d/readme-changelog-ownership.md) ~injection-integrity
+- `feature · todo · critical · plan-ready · process · gh#31` [Move README and CHANGELOG to the orchestrator](TODO.md.d/readme-changelog-ownership.md) ~injection-integrity
 - `feature · todo · urgent · queued · process · gh#32` [Deviance detection: surface drift when it happens, not weeks later](TODO.md.d/deviance-detection.md) ⊘injection-integrity
 - `feature · functional · · complete/interactive · process ·` [Rules tuning: exit interviews feed statistical prompt optimization, A/B tested](TODO.md.d/rules-tuning.md) ~deviance-detection ~diagnostic-channel ~psychometric-discovery
 - `bug · todo · urgent · queued · process · gh#33` [Hooks are an unowned pool in one shared file: no per-repo surface, no provenance](TODO.md.d/hook-composition.md) ~manifest-by-convention
