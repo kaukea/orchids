@@ -6,6 +6,9 @@ _base: `f65ad36`_
 
 ### ✨ New features
 
+- 🪪 The cloud hops now speak as **`callabloom[bot]`** — a kaukea GitHub App (App ID 4354752)
+  minted per hop from org secrets, replacing the anonymous `github-actions` actor; falls back to
+  the built-in token when the secrets are absent (`cloud-path.yml` all hops + `board-sync.yml`).
 - 🏷️ Session naming contract, enforced at launch: every `claude` spawn carries a
   `--name` — `orchids / <human name>` for feature sessions (architect, ripener) and
   the bare repository name `orchids` for the one-per-repo orchestrator (no slash-form,
@@ -71,6 +74,21 @@ _base: `f65ad36`_
 ### 🐛 Bug fixes
 
 ---
+
+#### 🎉 `f/app-identifying` → `archive/app-identifying`
+
+The cloud hops gain a named identity: the kaukea-owned **callabloom** GitHub App
+(App ID 4354752), signing every comment, commit, push, PR and merge as
+`callabloom[bot]` — never the operator, never the anonymous built-in actor. A
+per-hop token mint (`actions/create-github-app-token@v3`, org secrets
+`CALLABLOOM_APP_ID`/`CALLABLOOM_PRIVATE_KEY`) is wired into all four
+`cloud-path.yml` hops and `board-sync.yml`, guarded so everything falls back to
+`github.token` where the secrets are absent. Live-fired on gh#23: the plan hop
+posted as `callabloom[bot]`. The original close-spine ruleset/bypass premise was
+overturned during the build and dropped; branch protection respawns as its own
+task.
+
+_See `docs/TODO.md.d/app-identifying.md`, Decision-039, Decision-040._
 
 #### 🏷️ `f/role-dag-frontmatter` → `archive/role-dag-frontmatter`
 
