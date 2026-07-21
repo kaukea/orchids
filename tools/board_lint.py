@@ -2,7 +2,7 @@
 """Parse + lint the slim-index board (docs/TODO.md) against AGENTS.files.md §TODO.
 
 The single deterministic reader of the board: extracts the badge/title/edges the
-staleness walk and grooming need, and validates the format + glossary. Vocabulary is
+staleness walk and ripening need, and validates the format + glossary. Vocabulary is
 sourced from ARCHITECTURE.md → Taxonomy (single source). Exit 0 = clean, 1 = errors.
 
 Usage: python3 .claude/tools/board_lint.py [--json]
