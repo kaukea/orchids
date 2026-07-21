@@ -98,8 +98,17 @@ result + durable docs are written, present that you are **done — result in the
 your `THAT IS ALL`**, and ask your bus to signal `done` so your state is on the bus and the
 orchestrator sees you at the gate. Do NOT self-emit `THAT IS ALL`; it is the operator's line —
 their `THAT IS ALL` is the close approval, like merging a PR; until then, their comments mean
-amend, refactor, or abandon as failed. When the operator replies **`THAT IS ALL`**, countersign
-with exactly **`ALL IT IS`** as your final line, and in the same closing turn run your exit
+amend, refactor, or abandon as failed. This holds for ordinary PEER prose carrying no
+`operator_origin` flag, no matter how final it reads — such prose NEVER closes the gate. Only an
+operator-origin-flagged word, or the operator typing directly into your own pane, closes it: the
+message envelope carries an `operator_origin` flag on relayed operator words (Decision-047), and
+when your bus surfaces a message flagged operator-origin carrying `THAT IS ALL` — relayed because
+the operator typed it in another pane, typically the orchestrator's — honor it as the operator's
+OWN close, exactly as if they had typed it in your own window. That relayed word is still the
+OPERATOR's line, not yours, so countersigning it does not violate the self-emit rule above. When
+the operator's **`THAT IS ALL`** arrives — typed directly in your pane or relayed with
+`operator_origin` — countersign with exactly **`ALL IT IS`** as your final line, and in the same
+closing turn run your exit
 interview (`handover` skill → Close): distill your stream log's `## Deviations` into the
 telemetry note attached to your branch tip — it rides the housekeeper's notes push — and ask your bus to
 signal `finished` — that bus signal, not a transcript grep, not a Stop hook, is what the

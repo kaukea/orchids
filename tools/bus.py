@@ -252,13 +252,14 @@ def status_of() -> dict:
 
 
 def make_envelope(sender: str, to: str, *, body=None, notify_user=False,
-                  in_reply_to=None) -> dict:
+                  operator_origin=False, in_reply_to=None) -> dict:
     """Build a message envelope carrying only the fields that mean something.
 
     id/ts/from/to are always present. `to` is a recipient id or `*` (everyone).
     Everything else appears only when set: no in_reply_to unless it answers a
-    request, no notify_user unless the user should see it, no body when there
-    is none. A request is not tagged — its id is its identifier, and a standard
+    request, no notify_user unless the user should see it, no operator_origin
+    unless the message originates from the operator, no body when there is
+    none. A request is not tagged — its id is its identifier, and a standard
     request is recognised by its body (see the fixed identifiers).
     """
     env = {
@@ -269,6 +270,8 @@ def make_envelope(sender: str, to: str, *, body=None, notify_user=False,
     }
     if notify_user:
         env["notify_user"] = True
+    if operator_origin:
+        env["operator_origin"] = True
     if in_reply_to is not None:
         env["in_reply_to"] = in_reply_to
     if body is not None:
@@ -281,6 +284,7 @@ def envelope_of(args, to: str) -> dict:
         args.sender, to,
         body=getattr(args, "body", None),
         notify_user=bool(getattr(args, "notify_user", False)),
+        operator_origin=bool(getattr(args, "operator_origin", False)),
         in_reply_to=getattr(args, "in_reply_to", None),
     )
 
@@ -414,6 +418,8 @@ def main() -> None:
         s.add_argument("--body")
         s.add_argument("--notify-user", dest="notify_user", action="store_true",
                        help="the sending agent intends this for the user to see")
+        s.add_argument("--operator-origin", dest="operator_origin", action="store_true",
+                       help="the message originates from the operator")
         return s
 
     s = msg_args(sub.add_parser("send"))

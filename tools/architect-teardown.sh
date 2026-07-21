@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Message-bus choreography teardown action.
 # Called by the ORCHESTRATOR on the architect's `finished` signal to return the
-# operator's tmux client to the orchestrator pane and close the architect's pane.
+# operator's tmux client to the orchestrator pane and close the architect's window.
 # Replaces the retired Stop hook — no transcript reading, no stdin, no scratch-file logging.
 # Best-effort: every tmux call is guarded, always exit 0.
 set -u
@@ -30,8 +30,9 @@ fi
 
 tx(){ tmux -S "$sock" "$@" 2>/dev/null || true; }
 
-# architect pane is found by TITLE — the orchestrator has no $TMUX_PANE for it
-arch=$(tx list-panes -a -F '#{pane_id} #{pane_title}' | awk -v t="arch:$id" '$2==t{print $1; exit}')
+# architect window is found by the stable @arch_id window user-option — pane
+# titles get clobbered live by claude, so they cannot be used as a handle.
+arch_win=$(tx list-windows -a -F '#{window_id} #{@arch_id}' | awk -v id="$id" '$2==id{print $1; exit}')
 
 # focus return — line 1 is a pane id %N (Decision-006) or legacy window id @N
 case "$ret" in
@@ -39,27 +40,24 @@ case "$ret" in
   *)  ret_win="$ret"; tx switch-client -t "$ret" || tx select-window -t "$ret" ;;
 esac
 
-arch_win=""
-[ -n "$arch" ] && arch_win=$(tx display-message -p -t "$arch" '#{window_id}')
-
-# SAFETY: never kill the return target. In Decision-006 the architect is a PANE
-# split into the orchestrator's OWN window, so it shares that window BY DESIGN —
-# killing that one pane closes it and leaves the orchestrator's pane. Refuse only
-# when the architect IS the return pane, or (legacy @window target) its whole
-# window is the return target. Comparing to a %pane ret never matches a @window.
-if [ -z "$arch" ]; then
-  echo "architect-teardown: no architect pane found for $id, not closing"
+# SAFETY: never kill the return target. The architect's window mounts both the
+# architect pane and its sidebar pane, so a window-level kill closes the whole
+# handle in one shot. Refuse only when no window resolved, or when that window
+# is (or contains) the return target — comparing against both the resolved
+# return window and the raw return-target string (legacy @window match).
+if [ -z "$arch_win" ]; then
+  echo "architect-teardown: no architect window found for $id, not closing"
   exit 0
 fi
-if [ "$arch" = "$ret" ]; then
-  echo "architect-teardown: architect pane equals return target, not closing"
+if [ "$arch_win" = "$ret_win" ]; then
+  echo "architect-teardown: architect window is the return target's window, not closing"
   exit 0
 fi
 if [ "$arch_win" = "$ret" ]; then
-  echo "architect-teardown: architect window is the return target, not closing"
+  echo "architect-teardown: architect window equals return target, not closing"
   exit 0
 fi
 
-tx kill-pane -t "$arch"
-echo "architect-teardown: returned to $ret, closed $arch"
+tx kill-window -t "$arch_win"
+echo "architect-teardown: returned to $ret, closed $arch_win"
 exit 0

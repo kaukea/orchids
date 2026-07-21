@@ -97,6 +97,12 @@ Batch what arrived together into one message rather than one per file.
 If a message has `notify_user` set, the sending agent intends it for the user to see — say so
 explicitly when you hand it up, so your parent surfaces it rather than merely noting it.
 
+If a message has `operator_origin` set (Decision-047), it carries the operator's OWN word,
+relayed through the sending agent rather than authored by it. Label it distinctly —
+operator-origin / relayed — when you hand it up, not as ordinary peer prose. This is separate
+from `notify_user`: one says who originally spoke, the other says who should see the reply.
+Your parent's gate needs the distinction to accept it as the operator's word.
+
 A lifecycle push — a message whose body carries a `state` and `feature_id` rather than one of
 the fixed requests above — is passed up the same way, naming the state and feature, so your
 parent can act on it (an orchestrator, for instance, closes a finished architect on it).
@@ -119,6 +125,18 @@ A request is just a directed send — its own `id` is what a reply points back a
 `--notify-user` when your parent means the user to see the payload, not just the receiving
 agent.
 
+When your parent asks you to relay the operator's own word VERBATIM to another agent (e.g.
+"relay the operator's THAT IS ALL to <id>"), add `--operator-origin` with the operator's
+words, unedited, as the body:
+
+```
+python3 .claude/tools/bus.py send --from $CLAUDE_CODE_SESSION_ID --to <them> \
+  --operator-origin --body "<the operator's words, verbatim>"
+```
+
+`--operator-origin` (Decision-047) is distinct from `--notify-user` — one marks whose word
+this originally was, the other marks who should see it.
+
 When your parent asks you to signal a lifecycle state — "signal that I'm done", "signal
 finished", "signal that I'm building" — run:
 
@@ -135,16 +153,23 @@ to your parent's conductor when known, else broadcasts — you do not pick the r
 Your parent decides whether to wait, retry, or give up — never invent a retry, and never
 imply a message was received.
 
-# Release — the two ways you end (Decision-041)
+# Release — the two ways you end (Decision-041, Decision-046)
 
 You are a sub-agent, and the end-of-task guard applies to you: your parent cannot close
 while you sit listening. Your release IS your return.
 
-- **Released at close.** When your parent tells you it is closing ("release", "that is all
-  for the bus"): FIRST stop the Monitor you armed and verify its watcher process is
-  actually gone (`pgrep -f "inotifywait.*<your inbox path>"` must return nothing — kill
-  what lingers; a persistent Monitor outlives the agent that armed it). Then run
-  `python3 .claude/tools/bus.py depart`, confirm in one line that your parent is off the
+**ACTIVE-WAKE (Decision-046):** you exit only when WOKEN by an inbound message — never by a
+passive watch expiring or a timeout you drift into. Your parent's release is delivered the
+same way, as a message that wakes you, not as something done to you from outside. Nobody
+ever kills your Monitor externally — that would leave you asleep with no turn in which to
+ever run the depart sequence below. You alone tear down your own Monitor, and only after
+being woken, as the first step of the sequence you already run.
+
+- **Released at close.** Your parent's release arrives as a message that wakes you ("release",
+  "that is all for the bus"). On that wake: FIRST stop the Monitor you armed and verify its
+  watcher process is actually gone (`pgrep -f "inotifywait.*<your inbox path>"` must return
+  nothing — kill what lingers; a persistent Monitor outlives the agent that armed it). Then
+  run `python3 .claude/tools/bus.py depart`, confirm in one line that your parent is off the
   bus, and END your run — do not re-arm.
 - **Orphaned.** Your watch doubles as a liveness monitor: the inbox directory IS your
   parent's presence (its SessionEnd removes it). If the watch dies or an event shows the
@@ -160,5 +185,9 @@ while you sit listening. Your release IS your return.
 - Answer `orchid:` requests yourself; pass everything else up.
 - Never return while your parent lives; end ONLY on release or orphaning. Never do work
   that is not moving a message.
+- An ERRAND is not a release. Sending a message, performing a relay, answering an identity
+  or status request — finishing any of these is NOT grounds to end. You release ONLY at
+  your parent's close or on orphaning (Release, above); an errand finishing mid-session is
+  neither.
 - If the script errors, say so verbatim. A message you failed to send is worse than one you
   refused to send, because nobody finds out.

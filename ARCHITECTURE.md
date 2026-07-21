@@ -94,6 +94,13 @@ session ──spawns──> bus sidecar ──announce──> every peer's inbox
   `orchid:activity:<text>` on each change, and `orchid:subagent:start|done:<label>`
   around a sub-agent — which the fleet sidebar renders. No new mechanism: these are
   plain broadcasts on the same bus.
+- **Operator approvals relay** as a distinct operator-origin class: an approval
+  typed outside an agent's own window (e.g. in the orchestrator pane) is forwarded
+  verbatim with an `operator_origin` flag, which a gate-waiting agent accepts as the
+  operator's own word — ordinary peer traffic never closes a gate (Decision-047). A
+  close reaches a bus as a **wake** (an inbound message resuming it), never a passive
+  timeout; on that wake the bus tears down its own inotify watch before departing
+  (Decisions 046, 041).
 
 ## The fleet sidebar
 
@@ -120,9 +127,11 @@ bus (per repo) ──observed──> sidebar_model ──Fleet──> sidebar.py
 - **Navigates** by matching the tmux window name — the bare repository name for a
   repository's orchestrator, `<repo> ▸ <human name>` for a feature (the
   session-naming display forms, Decision-032) — then switching the client to it.
-  Windows carry the human-readable identity; `arch:<id>` remains only as the pane
-  title, where teardown and reaping read it (pane titles are otherwise unreliable —
-  the live status-glyph indicator overwrites them).
+  Windows carry the human-readable identity. Teardown and reaping key off a stable
+  `@arch_id` tmux **window** user-option, set on the architect window at launch —
+  immune to the live status-glyph indicator that clobbers pane titles. `arch:<id>`
+  survives only as a non-load-bearing human hint on the pane title. `@arch_id` is
+  the small stable handle contract the sidebar mount also consumes.
 - Components in `tools/`: `sidebar.py` (renderer), `sidebar_model.py` (bus reader),
   `sidebar_nav.py` (navigation), `sidebar-mount.sh` (mount). Cross-repo repo
   discovery is deliberately an explicit repolist, deferring the fleet-wide

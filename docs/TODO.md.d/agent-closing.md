@@ -1,6 +1,8 @@
 - created: 2026-07-21
 - created_by: fable-5
 - created_during: orchestrator session (operator report)
+- completed: 2026-07-21
+- completed_during: f/agent-closing
 
 ## Blockers
 
@@ -71,6 +73,44 @@
   - One session's bus released itself after completing a relay errand, mid-parent-
     session — release belongs to the parent's close, not an errand's end.
 
+### Delivered — agent-closing corrective (2026-07-21, architect on f/agent-closing)
+
+Four deliverables, all committed on f/agent-closing (base 8203b6f):
+- D1 stable handle: architect windows gain a `@arch_id=<id>` tmux WINDOW user-option at
+  launch; `architect-teardown.sh` and orchestrator reaping resolve the window by
+  `@arch_id` and close at WINDOW granularity (taking the mounted sidebar pane with it) —
+  immune to the pane-title clobber. The `arch:<id>` pane title is kept only as a
+  non-load-bearing human hint. `@arch_id` is the small stable contract sidebar-fixes
+  consumes for mount idempotency.
+- D2 bus active-wake (Decision-046): `agents/bus.md` now frames release as an inbound
+  WAKE (never an external monitor-kill); the existing teardown + verify-watcher-dead
+  sequence stays. Orphan path left as the watch-dies exit (not a wake) by design.
+- D3 premature release: `agents/bus.md` gains an explicit "an errand's end is NEVER a
+  release" rule; release is pinned to parent close or orphaning only.
+- D4 operator relay (Decision-047): `operator_origin` envelope flag added to
+  `tools/bus.py` + `tools/message.schema.json` (present-and-true-only, mirrors
+  `notify_user`; `--operator-origin` on send/broadcast); `agents/bus.md` relays it
+  verbatim and surfaces it distinctly from peer prose; `agents/architect.md` Phase 4
+  honors an `operator_origin`-flagged `THAT IS ALL` as the operator's own close;
+  `agents/orchestrator.md` relays the operator's gate word typed in its own pane.
+  Operator ruled the relay stays LITERAL to Decision-047 (no conductor-only hardening)
+  — the security scanner's spoofable-bypass flag is an ACCEPTED, sanctioned trade-off
+  under the cooperative single-operator trust model (no bus message is authenticated).
+
+ARCHITECTURE determination: EDITED (`ARCHITECTURE.md`, commit 3660f27). Triggers fired —
+"how components connect" (teardown/reaping re-keyed onto `@arch_id`) and a new
+cross-cutting pattern (operator-origin relay data-flow). Recorded, not skipped.
+
+Result: **done** · branch `f/agent-closing` @ HEAD `3660f27` (6 commits; 🎉 anchor
+`d24f10a`, `Base: 8203b6f`) · Tested (agreed layered method): unittest suite 27/27
+(5 new operator_origin tests) + teardown tmux integration test PASS — both run by the
+architect in-session; the charter/behavior half (active-wake, premature-release,
+done-gate honoring, reaping) is UNVERIFIED until the next live close, stated plainly ·
+Tasks spawned: none · Proposed Decision-048 (the `@arch_id` handle ruling) and the
+operator-relay ruling are recorded in the workstream log for orchestrator promotion; a
+cross-file Decision-046/047 number collision in `skills/*.md` is flagged for the
+orchestrator to reconcile (not touched — decisions.md is the orchestrator's).
+
 ## Proposal
 
 Make close mean CLOSED, by charter text alone (Decision-041): a bus is released
@@ -92,3 +132,43 @@ Agreed shape (pending its live run): the NEXT feature close is the test —
 after `THAT IS ALL` / `ALL IT IS`, observe that no bus, pane, session, or
 sub-agent of the closed feature remains (tmux list-panes, bus roster). Until
 that observation, this stays open.
+
+Method agreed for the agent-closing corrective (operator, 2026-07-21): LAYERED —
+(a) unit test for the operator_origin flag; (b) a tmux integration test for the
+re-keyed teardown; (c) the charter/behavior half rides the next live close.
+Results:
+- (a) `python3 -m unittest discover -s tests` → 27/27 (5 new `operator_origin`
+  tests: envelope round-trip, schema validity, send + broadcast receive) — PASS,
+  run by the architect in-session.
+- (b) teardown tmux integration test — PASS, run by the architect on a scratch tmux
+  server: a window carrying `@arch_id=verify` but a clobbered `some-clobbered-session-
+  name` pane title was resolved via `@arch_id`, focus returned to the return pane, the
+  window killed, exit 0.
+- (c) active-wake, premature-release, done-gate honoring, and reaping are agent-behavior
+  changes provable only at a live close — UNVERIFIED-until-live, stated plainly. This
+  session's own self-teardown is the first live exercise of the re-keyed teardown.
+
+## Changelog entry
+
+### 🐛 Bug fixes
+
+- 🚪 Feature closes now actually complete. Teardown and reaping resolve the architect
+  window by a stable `@arch_id` tmux window user-option instead of the `arch:<id>` pane
+  title that `claude` clobbers live — so the close returns the operator's focus and kills
+  the architect window (with its mounted sidebar pane) instead of stalling. The bus now
+  exits only when woken by an inbound release message and tears down its own inotify
+  watcher before departing (never left asleep by an external monitor-kill), and an
+  errand's end is never mistaken for a release (Decisions 041/046).
+- 🖖 Operator approvals reach a gate from any pane. An approval typed outside the
+  architect's own window (typically the orchestrator pane) relays over the bus as a
+  distinct operator-origin message class the architect honors as the operator's own
+  `THAT IS ALL`; ordinary peer traffic still never closes a gate (Decision-047).
+
+## Readme delta
+
+No change — evidenced. README describes the gates at the contract level ("your comments
+are the gates", "no gate ever approves itself" — README.md:102-104; "your explicit
+approval" :57) and never documents which pane an approval is typed in. This corrective
+fixes internal delivery robustness (the close completes; an approval reaches the gate)
+without adding a documented user capability or changing a usage instruction, so no
+README section becomes inaccurate. Checked README.md:23,57,102-104.
