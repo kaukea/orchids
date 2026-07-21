@@ -117,9 +117,11 @@ bus (per repo) ──observed──> sidebar_model ──Fleet──> sidebar.py
   derived from `notify_user`/`blocked`), a flashing row when an agent waits on the
   operator, and a braille spinner on in-flight sub-agents. Role names appear
   nowhere; structure carries the role.
-- **Navigates** by tmux window name — `arch:<feature-id>` for a feature,
-  `orch:<repo>` for a repository's orchestrator — matched then switched to. Pane
-  titles are avoided because the live status-glyph indicator overwrites them.
+- **Navigates** by matching an *existing* tmux window name — `arch:<feature-id>`
+  for a feature — then switching to it. The sidebar sets no names of its own; a
+  repository/orchestrator row navigates only where such a window handle already
+  exists. Pane titles are avoided because the live status-glyph indicator
+  overwrites them.
 - Components in `tools/`: `sidebar.py` (renderer), `sidebar_model.py` (bus reader),
   `sidebar_nav.py` (navigation), `sidebar-mount.sh` (mount). Cross-repo repo
   discovery is deliberately an explicit repolist, deferring the fleet-wide

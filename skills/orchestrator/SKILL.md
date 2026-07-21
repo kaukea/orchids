@@ -207,9 +207,8 @@ not the session (Decision-049, renewal mechanism updated by Decision-071).
   repository name (`orchids`), never the two-part form or an `Orchestrator` suffix: there is exactly
   one orchestrator per repository, so its name *is* the repository (Decision-032).
   Always lands in the same-named orchestrator — resumed if alive, created if gone (crash,
-  expiry). This is for *starting work* and *recovery*, and opens a fresh window. Give that
-  window a stable name — `tmux rename-window "orch:<project>"` — so the sidebar can find
-  it, then mount the sidebar: `.claude/tools/sidebar-mount.sh`.
+  expiry). This is for *starting work* and *recovery*, and opens a fresh window. Mount the
+  sidebar into it: `.claude/tools/sidebar-mount.sh`.
 - **Renewal (`/compress`):** when you judge the session bloated, refresh `MOOD.md`, then
   tell the operator to type `/compress`. Compaction summarises context **in place** — it
   keeps **one durable session** (same id, same title, no UI sprawl) and continues, so the

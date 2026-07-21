@@ -95,8 +95,9 @@ smoke passing. Awaiting the operator's `THAT IS ALL`.
   stdlib reader (`tools/sidebar_model.py`) observes every configured repo's bus,
   attributes by sender, accumulates in memory; a curses renderer (`tools/sidebar.py`)
   draws the repo→feature→activity→sub-agent tree with status emoji, flash, and spinner,
-  with keyboard nav via `tools/sidebar_nav.py` (matches tmux WINDOW names `arch:<id>` /
-  `orch:<repo>`); `tools/sidebar-mount.sh` splits the pinned left pane at
+  with keyboard nav via `tools/sidebar_nav.py` (matches the EXISTING `arch:<id>` tmux
+  window name; sets no names of its own — a repo/orchestrator row navigates only where a
+  window handle already exists); `tools/sidebar-mount.sh` splits the pinned left pane at
   orchestrator/architect launch (idempotent, strictly best-effort).
 - Fan-out: discovery 6 explorers (0 inline); build 6 builders (S1–S6), plus the
   ARCHITECTURE.md edit inline (architect, per Decision-034). Above s-size; builders used
