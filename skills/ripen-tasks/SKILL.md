@@ -34,7 +34,7 @@ is trigger-agnostic, so adding a schedule later changes only how it is kicked of
    Ripenable = a parked task (`status` todo|functional); `done`/`cancelled` are terminal.
    **Cost cap: N=2 per pass** — never fan the ripener over the whole board at once.
 2. **Dispatch the ripener** on each chosen `<id>` — `Agent` tool `subagent_type: ripener` (or
-   `claude --bg --agent ripener --name "orchids / ${id//-/ }"`), one task per ripener — the
+   `claude --bg --agent ripener --name "orchids ▸ ${id//-/ }"`), one task per ripener — the
    `--name` carries the feature's human name (id with `-` → spaces), never the role. The
    ripener is **prep-only**: it
    advances the stage, fleshes the sidecar, projects the readiness badge, runs `board_lint.py`,

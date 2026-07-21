@@ -136,7 +136,7 @@ On an explicit go for feature X:
    git worktree add .claude/worktrees/<id> -b f/<id> main
    printf '%s\n%s\n' "$orch" "${TMUX%%,*}" > .claude/worktrees/<id>/.return-window  # pane + tmux socket
    tmux new-window -n "arch:<id>" -c .claude/worktrees/<id> \
-     "ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect --name \"orchids / ${id//-/ }\" 'Boot: read your sidecar and begin discovery.'"
+     "ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect --name \"orchids ▸ ${id//-/ }\" 'Boot: read your sidecar and begin discovery.'"
    tmux select-pane -T "arch:<id>"
    ```
    The initial prompt is part of the spawn — a fresh session waits silently for its first

@@ -204,7 +204,7 @@ not the session (Decision-049, renewal mechanism updated by Decision-071).
 
 - **Summon (`orch`):** the operator runs the `orch` wrapper (`bin/orch`), which does
   `claude --resume "<project>" || claude --name "<project>"` — the session name is the bare
-  repository name (`orchids`), never a slash-form or an `Orchestrator` suffix: there is exactly
+  repository name (`orchids`), never the two-part form or an `Orchestrator` suffix: there is exactly
   one orchestrator per repository, so its name *is* the repository (Decision-032).
   Always lands in the same-named orchestrator — resumed if alive, created if gone (crash,
   expiry). This is for *starting work* and *recovery*, and opens a fresh window.
