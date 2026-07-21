@@ -1,0 +1,443 @@
+# cloud-path — event-driven cloud architect spine (Decision-027,
+# docs/TODO.md.d/cloud-architect.md). Roles resolve issue -> feature-id themselves
+# from the board's gh# badges; this workflow stays dumb: detect, gate, invoke.
+#
+# Gate vocabulary (operator comments, actor-gated to serialseb only):
+#   ENGAGE / ⚙          -> hop 1: orchestrator-cloud prologue + architect-cloud PLAN
+#   MAKE IT SO / 🖖      -> hop 2: architect-cloud BUILD
+#   THAT IS ALL / 🚪     -> hop 3: housekeeper-cloud CLOSE
+#   any other PR comment -> architect-cloud REVISE
+#
+# `issue_comment` only fires from the repository's DEFAULT branch — a copy of this
+# file living on a feature branch is invisible to GitHub's event dispatcher until it
+# merges. Until `cloud-path.yml` reaches main, exercise each hop by hand via
+# `workflow_dispatch` (inputs: hop, issue) against the feature branch ref.
+#
+# Pushes made with the built-in GITHUB_TOKEN do not retrigger other workflows — this
+# is GitHub's own loop-prevention default, not a bug in this file.
+#
+# PREREQUISITES (org kaukea): repo/org secret CLAUDE_CODE_OAUTH_TOKEN (claude
+# setup-token), and Settings → Actions → General → Workflow permissions →
+# "Allow GitHub Actions to create and approve pull requests" ENABLED — without it
+# the BUILD hop parks at PR creation (GitHub Actions is not permitted to create
+# or approve pull requests).
+#
+# THE close-spine CHECK (ruleset 19333120) is not computed by automation — it IS
+# a closing role's judgment, published as a status. It may be set success ONLY
+# by: housekeeper-cloud after its docs gate passes (charter step 5), a lane's
+# own close gate passing (e.g. the orchestrator's board-round close), or the
+# operator directly. Publishing it without a passed close gate is forgery of
+# the merge gate, not a workaround.
+
+name: cloud-path
+
+on:
+  issue_comment:
+    types: [created]
+  # Registration ping: GitHub only registers (and lets you dispatch) a workflow it
+  # has seen in an event — a file sitting on a feature branch is invisible. A push
+  # touching this file registers it; the run itself is a no-op (every job's `if`
+  # matches only issue_comment / workflow_dispatch).
+  push:
+    paths:
+      - .github/workflows/cloud-path.yml
+  workflow_dispatch:
+    inputs:
+      hop:
+        description: Hop to run
+        required: true
+        type: choice
+        options:
+          - plan
+          - build
+          - revise
+          - close
+      issue:
+        description: Issue number
+        required: true
+        type: number
+
+concurrency:
+  group: cloud-path-${{ github.event.issue.number || inputs.issue }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  plan:
+    # Comment on an ISSUE (not PR) with ENGAGE/⚙, or a matching manual dispatch.
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.comment.user.login == 'serialseb' &&
+       !github.event.issue.pull_request &&
+       (contains(github.event.comment.body, 'ENGAGE') || contains(github.event.comment.body, '⚙'))) ||
+      (github.event_name == 'workflow_dispatch' && inputs.hop == 'plan')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # .claude/agents + .claude/skills are committed as absolute symlinks into the
+      # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
+      # in-repo sources so `claude --agent <role>` and skills resolve in CI.
+      - name: Wire repo agents and skills
+        run: |
+          rm -rf .claude/agents .claude/skills
+          mkdir -p .claude
+          cp -r agents .claude/agents
+          cp -r skills .claude/skills
+      - name: Cache npm tarballs
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-claude-cli-v1
+      # The cloud work log: the runner-side analogue of .git/the-works/ — rolling
+      # session logs a hop leaves for its successors. run_id-suffixed keys +
+      # prefix restore give append semantics (caches are immutable); eviction
+      # makes this a relay, not an archive — the close hop promotes leftovers to
+      # the sidecar before merge. Lives OUTSIDE the workspace: uncommittable.
+      # The stream id is the ISSUE number always: a PR comment's issue.number is
+      # the PR's — resolve it to the linked issue or the stream splits mid-feature.
+      - name: Resolve stream id
+        id: stream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ github.event.issue.number || inputs.issue }}
+          IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
+        run: |
+          n="$NUM"
+          if [ -n "$IS_PR" ]; then
+            fixed=$(gh pr view "$NUM" -R "$GITHUB_REPOSITORY" --json body --jq '.body' \
+              | grep -oiE '(fixes|closes) #[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+            [ -n "$fixed" ] && n="$fixed"
+          fi
+          echo "id=$n" >> "$GITHUB_OUTPUT"
+      - name: Restore cloud work log
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+          restore-keys: |
+            the-works-${{ steps.stream.outputs.id }}-
+      - name: Install claude CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Git identity
+        run: |
+          git config user.name "cloud-path"
+          git config user.email "actions@github.com"
+      # A comment QUOTING a gate word must not fire the hop: the comment must BE
+      # the gate token, alone (whitespace-trimmed). Dispatch runs carry no comment
+      # and skip this check.
+      - name: Exact gate check
+        if: github.event_name == 'issue_comment'
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          b="$(printf %s "$COMMENT_BODY" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          case "$b" in
+            'ENGAGE'|'⚙'|'⚙️') echo "exact gate: ENGAGE" ;;
+            *) echo "comment mentions but is not the gate — no-op"; touch /tmp/cloud-halt ;;
+          esac
+      - name: orchestrator-cloud prologue
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ -f /tmp/cloud-halt ]; then
+            echo "gate check halted — skipping prologue"
+            exit 0
+          fi
+          claude -p --agent orchestrator-cloud --permission-mode bypassPermissions \
+            "Hop: PLAN prologue. Issue #${ISSUE_NUMBER}. Comment: ${COMMENT_BODY}"
+      - name: architect-cloud PLAN
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ -f /tmp/cloud-halt ]; then
+            echo "prologue halted — skipping PLAN"
+            exit 0
+          fi
+          claude -p --agent architect-cloud --permission-mode bypassPermissions \
+            "Hop: PLAN. Issue #${ISSUE_NUMBER}. Comment: ${COMMENT_BODY}"
+      - name: Save cloud work log
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+
+  build:
+    # Comment on an ISSUE (not PR) with MAKE IT SO/🖖, or a matching manual dispatch.
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.comment.user.login == 'serialseb' &&
+       !github.event.issue.pull_request &&
+       (contains(github.event.comment.body, 'MAKE IT SO') || contains(github.event.comment.body, '🖖'))) ||
+      (github.event_name == 'workflow_dispatch' && inputs.hop == 'build')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # .claude/agents + .claude/skills are committed as absolute symlinks into the
+      # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
+      # in-repo sources so `claude --agent <role>` and skills resolve in CI.
+      - name: Wire repo agents and skills
+        run: |
+          rm -rf .claude/agents .claude/skills
+          mkdir -p .claude
+          cp -r agents .claude/agents
+          cp -r skills .claude/skills
+      - name: Cache npm tarballs
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-claude-cli-v1
+      # The cloud work log: the runner-side analogue of .git/the-works/ — rolling
+      # session logs a hop leaves for its successors. run_id-suffixed keys +
+      # prefix restore give append semantics (caches are immutable); eviction
+      # makes this a relay, not an archive — the close hop promotes leftovers to
+      # the sidecar before merge. Lives OUTSIDE the workspace: uncommittable.
+      # The stream id is the ISSUE number always: a PR comment's issue.number is
+      # the PR's — resolve it to the linked issue or the stream splits mid-feature.
+      - name: Resolve stream id
+        id: stream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ github.event.issue.number || inputs.issue }}
+          IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
+        run: |
+          n="$NUM"
+          if [ -n "$IS_PR" ]; then
+            fixed=$(gh pr view "$NUM" -R "$GITHUB_REPOSITORY" --json body --jq '.body' \
+              | grep -oiE '(fixes|closes) #[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+            [ -n "$fixed" ] && n="$fixed"
+          fi
+          echo "id=$n" >> "$GITHUB_OUTPUT"
+      - name: Restore cloud work log
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+          restore-keys: |
+            the-works-${{ steps.stream.outputs.id }}-
+      - name: Install claude CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Git identity
+        run: |
+          git config user.name "cloud-path"
+          git config user.email "actions@github.com"
+      - name: Exact gate check
+        if: github.event_name == 'issue_comment'
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          b="$(printf %s "$COMMENT_BODY" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          case "$b" in
+            'MAKE IT SO'|'🖖'|'MAKE IT SO 🖖') echo "exact gate: MAKE IT SO" ;;
+            *) echo "comment mentions but is not the gate — no-op"; touch /tmp/cloud-halt ;;
+          esac
+      - name: architect-cloud BUILD
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ -f /tmp/cloud-halt ]; then
+            echo "gate check halted — skipping BUILD"
+            exit 0
+          fi
+          claude -p --agent architect-cloud --permission-mode bypassPermissions \
+            "Hop: BUILD. Issue #${ISSUE_NUMBER}. Comment: ${COMMENT_BODY}"
+      - name: Save cloud work log
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+
+  revise:
+    # Comment on a PR containing NONE of the gate tokens (gate tokens win first).
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.comment.user.login == 'serialseb' &&
+       github.event.issue.pull_request &&
+       !contains(github.event.comment.body, 'ENGAGE') &&
+       !contains(github.event.comment.body, '⚙') &&
+       !contains(github.event.comment.body, 'MAKE IT SO') &&
+       !contains(github.event.comment.body, '🖖') &&
+       !contains(github.event.comment.body, 'THAT IS ALL') &&
+       !contains(github.event.comment.body, '🚪')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.hop == 'revise')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # .claude/agents + .claude/skills are committed as absolute symlinks into the
+      # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
+      # in-repo sources so `claude --agent <role>` and skills resolve in CI.
+      - name: Wire repo agents and skills
+        run: |
+          rm -rf .claude/agents .claude/skills
+          mkdir -p .claude
+          cp -r agents .claude/agents
+          cp -r skills .claude/skills
+      - name: Cache npm tarballs
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-claude-cli-v1
+      # The cloud work log: the runner-side analogue of .git/the-works/ — rolling
+      # session logs a hop leaves for its successors. run_id-suffixed keys +
+      # prefix restore give append semantics (caches are immutable); eviction
+      # makes this a relay, not an archive — the close hop promotes leftovers to
+      # the sidecar before merge. Lives OUTSIDE the workspace: uncommittable.
+      # The stream id is the ISSUE number always: a PR comment's issue.number is
+      # the PR's — resolve it to the linked issue or the stream splits mid-feature.
+      - name: Resolve stream id
+        id: stream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ github.event.issue.number || inputs.issue }}
+          IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
+        run: |
+          n="$NUM"
+          if [ -n "$IS_PR" ]; then
+            fixed=$(gh pr view "$NUM" -R "$GITHUB_REPOSITORY" --json body --jq '.body' \
+              | grep -oiE '(fixes|closes) #[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+            [ -n "$fixed" ] && n="$fixed"
+          fi
+          echo "id=$n" >> "$GITHUB_OUTPUT"
+      - name: Restore cloud work log
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+          restore-keys: |
+            the-works-${{ steps.stream.outputs.id }}-
+      - name: Install claude CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Git identity
+        run: |
+          git config user.name "cloud-path"
+          git config user.email "actions@github.com"
+      - name: architect-cloud REVISE
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          claude -p --agent architect-cloud --permission-mode bypassPermissions \
+            "Hop: REVISE. Issue #${ISSUE_NUMBER}. Comment: ${COMMENT_BODY}"
+      - name: Save cloud work log
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+
+  close:
+    # Comment on a PR with THAT IS ALL/🚪, or a matching manual dispatch.
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.comment.user.login == 'serialseb' &&
+       github.event.issue.pull_request &&
+       (contains(github.event.comment.body, 'THAT IS ALL') || contains(github.event.comment.body, '🚪'))) ||
+      (github.event_name == 'workflow_dispatch' && inputs.hop == 'close')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # .claude/agents + .claude/skills are committed as absolute symlinks into the
+      # kauk-managed .ai/ clone, which does not exist on a runner — overlay the
+      # in-repo sources so `claude --agent <role>` and skills resolve in CI.
+      - name: Wire repo agents and skills
+        run: |
+          rm -rf .claude/agents .claude/skills
+          mkdir -p .claude
+          cp -r agents .claude/agents
+          cp -r skills .claude/skills
+      - name: Cache npm tarballs
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-claude-cli-v1
+      # The cloud work log: the runner-side analogue of .git/the-works/ — rolling
+      # session logs a hop leaves for its successors. run_id-suffixed keys +
+      # prefix restore give append semantics (caches are immutable); eviction
+      # makes this a relay, not an archive — the close hop promotes leftovers to
+      # the sidecar before merge. Lives OUTSIDE the workspace: uncommittable.
+      # The stream id is the ISSUE number always: a PR comment's issue.number is
+      # the PR's — resolve it to the linked issue or the stream splits mid-feature.
+      - name: Resolve stream id
+        id: stream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ github.event.issue.number || inputs.issue }}
+          IS_PR: ${{ github.event.issue.pull_request && 'yes' || '' }}
+        run: |
+          n="$NUM"
+          if [ -n "$IS_PR" ]; then
+            fixed=$(gh pr view "$NUM" -R "$GITHUB_REPOSITORY" --json body --jq '.body' \
+              | grep -oiE '(fixes|closes) #[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+            [ -n "$fixed" ] && n="$fixed"
+          fi
+          echo "id=$n" >> "$GITHUB_OUTPUT"
+      - name: Restore cloud work log
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}
+          restore-keys: |
+            the-works-${{ steps.stream.outputs.id }}-
+      - name: Install claude CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Git identity
+        run: |
+          git config user.name "cloud-path"
+          git config user.email "actions@github.com"
+      - name: Exact gate check
+        if: github.event_name == 'issue_comment'
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          b="$(printf %s "$COMMENT_BODY" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          case "$b" in
+            'THAT IS ALL'|'🚪'|'THAT IS ALL 🚪') echo "exact gate: THAT IS ALL" ;;
+            *) echo "comment mentions but is not the gate — no-op"; touch /tmp/cloud-halt ;;
+          esac
+      - name: housekeeper-cloud CLOSE
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ -f /tmp/cloud-halt ]; then
+            echo "gate check halted — skipping CLOSE"
+            exit 0
+          fi
+          claude -p --agent housekeeper-cloud --permission-mode bypassPermissions \
+            "Hop: CLOSE. Issue #${ISSUE_NUMBER}. Comment: ${COMMENT_BODY}"
+      - name: Save cloud work log
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cloud-works
+          key: the-works-${{ steps.stream.outputs.id }}-${{ github.run_id }}

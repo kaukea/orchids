@@ -32,6 +32,33 @@ build approval are human-only, always.
 Isolation is per-dispatch (native worktrees), not a per-repo mode. One writer
 per task, always.
 
+## The cloud path
+
+The same pipeline ridden on GitHub events instead of a local session
+(Decision-027): the feature is an issue, the gates are operator comments, the
+close is a squash-merged PR.
+
+`.github/workflows/cloud-path.yml` stays dumb — detect, gate, invoke. Every hop
+cold-starts a headless role (`claude -p --agent <role>`) on a runner; state
+lives only in the issue thread and the sidecar on `f/<id>`, so no hop ever
+waits. Comments are actor-gated to the operator. Gate vocabulary: `ENGAGE`/⚙
+kicks off, `MAKE IT SO`/🖖 builds, `THAT IS ALL`/🚪 closes; any other operator
+PR comment revises.
+
+| Cloud role | Model | Hop | Scope & boundary |
+|---|---|---|---|
+| orchestrator-cloud | haiku | `ENGAGE` → prologue | Resolves issue → task id (board `gh#` badge), checks the sidecar is ripe, flips the board to `doing` (its only `main` write, `docs/TODO.md` alone), creates `f/<id>`. Never plans or builds. |
+| architect-cloud | opus | PLAN · BUILD · REVISE | Authors the tech plan and plan comment; on `MAKE IT SO` builds, tests, authors close docs, opens the PR (`Fixes #n`); revises on review comments. Never merges, never writes the board, never self-emits a gate. |
+| housekeeper-cloud | haiku | `THAT IS ALL` → close | Verifies the close-docs gate, amends, tags `archive/<id>`, `gh pr merge --squash`, commit-count note. The only role merging feature work into `main`; engages once, post-approval. |
+
+Runners have no kauk: each job overlays `agents/` and `skills/` into `.claude/`
+(the committed symlinks point into the untracked `.ai/` clone). Auth is the
+operator's subscription OAuth token (`CLAUDE_CODE_OAUTH_TOKEN` secret).
+`issue_comment` fires only from the default branch — pre-merge, hops are
+exercised via `workflow_dispatch` (inputs: hop, issue). Intake and ripening run
+as manual issue comments until the ripener charter lands; operator-less
+statistical kick-off is deferred with it.
+
 ## The message bus
 
 A cross-cutting channel between top-level sessions, orthogonal to the pipeline —

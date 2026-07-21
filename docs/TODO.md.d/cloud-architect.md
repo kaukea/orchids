@@ -35,6 +35,54 @@
 - The [[github-board-sync]] lane (issues mirror, Orchidarium Project, board-sync
   workflow) already gives the issue substrate and a cloud-triage precedent.
 
+- **Live-fire record (2026-07-21, session-naming / gh#34):** hop 0 ingest ✓ ·
+  plan hop refused an unripe stub then fully passed post-ripening (prologue
+  handoff, branch, tech plan comment) ✓ · build hop passed and correctly PARKED
+  at PR creation on the org policy (now a documented prerequisite) ✓ · revise
+  hop reconciled the branch to the mid-build-frozen naming contract, catching
+  sites the build missed ✓ · close hop refused 3× on missing/wrong-vocabulary
+  gate (charter integrity; never merged, never guessed) — mechanical close
+  artifacts proven on the demo PR (grey button → `close-spine` → squash) and via
+  operator-approved repair. Defects found live and fixed in-branch: checkout
+  skew (board reads pinned to origin/main), refusal not halting the job,
+  substring gates (exact-form now), handoff badge drift (retired vocabulary),
+  work-log stream split (PR vs issue number) and lost-on-failure saves.
+- **Enforcement:** `close-spine` repository ruleset (id 19333120) greys the
+  merge button until the close hop publishes the check — gates as mechanism,
+  not vocabulary (operator: "operators will click the green button").
+- **README:** edited (cloud-path paragraph in the off-terminal story) — commit
+  1e2eb94. **ARCHITECTURE:** edited (new "The cloud path" section — trigger
+  fired: new substrate, new roles, new connection) — commit f9506f4.
+  **CHANGELOG:** promotion DEFERRED by the operator (2026-07-21) — the entry
+  was authored, then withdrawn per the operator gate; it promotes in a later
+  release round. Not a gap.
+- **Follow-ups for the board** (orchestrator promotes): intake dedup on
+  gh-ingest (duplicate stub for an existing task) · readiness ORIGIN stamping
+  after a cloud MAKE IT SO (no role writes the board post-handoff) · hop
+  wall-time measurement + resolved-id/branch hints in dispatch · REVISE
+  dispatch lacks a comment input (role coped by reading the PR thread) ·
+  cloud-path `--name` adoption per the naming contract · WATCH (half-fired):
+  close-spine catches ALL PRs into main — the orchestrator's board-round PR
+  #58 stranded BLOCKED; operator unblocking + adding repository-admin bypass
+  (explicit "merge with bypass", no bare green button); orchestrator lane told
+  to publish the check at its own close gate. Direct-push semantics VERIFIED
+  (orchestrator, 2026-07-21): rulesets DO gate direct pushes — its board push
+  was rejected; board-sync ingest and local close pushes are broken until the
+  bypass list carries Repository admin + the GitHub Actions app (operator
+  applying). close-spine semantics made canon in the workflow header: the
+  check IS a closing role's published judgment; setting it without a passed
+  close gate is forgery · named app identity for the hops (operator-ruled
+  follow-up, 2026-07-21): a kaukea-owned GitHub App — operator's name + orchid
+  logo, `[bot]` suffix is GitHub-mandatory — minted per hop via
+  actions/create-github-app-token behind an optional secret (fallback:
+  github-actions); replaces anonymous bot comments AND exempts PR creation
+  from the Actions policy AND becomes the clean ruleset bypass actor — now
+  LOAD-BEARING: verified (operator, 2026-07-21) that the built-in GitHub
+  Actions identity CANNOT be bypass-listed on a repo ruleset, so close-spine
+  is switched to Disabled until the app exists; re-enabling it with the app
+  on the bypass list is part of this follow-up ·
+  nested-line projection gap (already filed by the orchestrator).
+
 ## Proposal
 
 First slice = the FULL PATH (operator, 2026-07-20): a GitHub issue carries the feature;
@@ -45,8 +93,53 @@ housekeeper amends and merges the PR. The local worktree spine is untouched. HOW
 Actions wiring, kick-off mechanics, the PR close path — is the architect's tech plan,
 not pre-decided here (Decision-025/027).
 
+### Agreed plan (frozen 2026-07-20, operator MAKE IT SO)
+
+HOW, agreed with the operator:
+
+- **Runtime:** hand-rolled headless CLI in GitHub Actions (`claude -p --agent <role>`),
+  NOT the official claude-code-action — full control of role charters and gates.
+- **Auth:** subscription OAuth token as repo secret `CLAUDE_CODE_OAUTH_TOKEN`
+  (operator runs `claude setup-token`; external gate before live-fire).
+- **Gate vocabulary** (comments, actor-gated to serialseb): kick-off = `ENGAGE` and/or
+  ⚙️ · build gate = `MAKE IT SO` extended with 🖖 · close gate = `THAT IS ALL`
+  extended with 🚪.
+- **No orchestrator bypass:** hop 1 opens with a cloud-orchestrator prologue (board
+  status → doing, delegated-to link, sidecar handoff check) before the architect runs;
+  board writes keep their single writer. Operator-less statistical kick-off stays
+  deferred with ripener automation.
+- **Spine** (event-driven hops, no waiting jobs; state = issue thread + sidecar on
+  branch `f/<id>`; no worktree, per the ratified design):
+  hop 1 `ENGAGE` → prologue, branch, architect plan, plan comment ·
+  hop 2 `MAKE IT SO` → resume, build, test, close docs, open PR (`Fixes #n`), PR
+  review comments re-summon for revision ·
+  hop 3 `THAT IS ALL` on the PR → housekeeper verifies docs, amends,
+  `gh pr merge --squash`, `archive/<id>` tag + commit-count note.
+- **Deliverables:** `agents/orchestrator-cloud.md` (prologue-only charter),
+  `agents/architect-cloud.md`, `agents/housekeeper-cloud.md`,
+  `.github/workflows/cloud-path.yml`, ARCHITECTURE cloud-path component, CHANGELOG.
+- **Deferred:** ripener automation; autonomous-origin self-authorized MAKE IT SO;
+  general comment→sidecar ingestion; consuming-repo rollout + cross-owner privacy fix
+  (Decision-013 fallout); Orchidarium field updates from cloud hops.
+
 ## Testing
 
-To agree when the first slice is scoped; must include one real feature taken through
-the cloud path with every gate honoured (no self-approved MAKE IT SO, no self-approved
-close).
+Agreed (operator, 2026-07-20): live-fire — one real feature through the full cloud
+path on kaukea/orchids with every gate honoured (no self-approved MAKE IT SO, no
+self-approved close). Target re-ruled (operator, 2026-07-21) after the first live hops: the
+sidebar task (`fleet-sidebar`, gh#23) proved genuinely blocked on
+`session-naming` — so **`session-naming` itself rides the live-fire**: its open
+questions ARE the intake round on its issue, and shipping it unblocks the
+sidebar for a follow-up cloud run. Flow: orchestrator projects it to an issue,
+operator answers the intake questions as comments, sidecar ripens, `ENGAGE` →
+gates given live. (Original target and the three refusal runs — auth 401 ×2,
+not-ripe guard — are recorded in `## Findings`.)
+
+TESTED (2026-07-21): the live-fire ran to completion — see the live-fire
+record in `## Findings`. Every gate was operator-given; no agent
+self-approved MAKE IT SO or the close; the close hop's three refusals under
+imperfect gate evidence are part of the passing result.
+
+Result: done · branch f/cloud-architect · live-fire passed on session-naming
+(gh#34, PR #38, squash cfc7f283, archive/session-naming) · follow-ups listed
+in Findings for board promotion.

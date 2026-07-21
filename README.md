@@ -87,6 +87,12 @@ phone and an actor-gated workflow folds it back into the file board before the
 next session even starts (`tools/board_gh.py` — files stay canonical, GitHub
 is the couch-friendly view).
 
+**And the pipeline itself rides GitHub too.** On the package repo the same
+spine runs on issue comments (`cloud-path` workflow): the feature is an issue,
+and your comments are the gates — `ENGAGE`/⚙ kicks off the plan, `MAKE IT
+SO`/🖖 builds and opens the PR, `THAT IS ALL`/🚪 sends the housekeeper to
+squash-merge it. Only your comments count, and no gate ever approves itself.
+
 ## What it is not
 
 orchids is **data only** — no code, no installer. Distribution is
