@@ -71,9 +71,36 @@ _base: `f65ad36`_
   frontmatter-contract skill is renamed `doing-skills` → `authoring-skills` and
   documents the contract; kauk validates the declarations when it reads them.
 
+- 🧭 **Fleet sidebar** — a pinned left pane now appears in every orchestrator and
+  architect window, showing a live, cross-repository tree of work: each repository,
+  the features under it, what each is doing right now, and any in-flight sub-agents,
+  sourced entirely from the message bus. Rows carry a status emoji (running, standby,
+  completed, failed), flash when an agent is waiting on the operator, and can be
+  selected with the arrow keys and Enter to jump straight to that work's tmux window.
+  Which repositories it aggregates is listed in `~/.config/orchids/sidebar-repos`
+  (one path per line) or the `ORCHIDS_SIDEBAR_REPOS` environment variable; with
+  neither, it shows the current repository.
+
 ### 🐛 Bug fixes
 
 ---
+
+#### 🧭 `worktree-fleet-sidebar` → `archive/fleet-sidebar`
+
+The fleet sidebar (gh#23): a bus-driven, always-visible navigation pane. Agents
+broadcast `orchid:activity:<text>` and `orchid:subagent:start|done:<label>` as
+ordinary dynamic bus messages (no bus mechanism change, Decision-044); a stdlib
+reader (`tools/sidebar_model.py`) aggregates every repolist repo's bus
+(Decision-043), a curses renderer (`tools/sidebar.py`) draws the
+repo→feature→activity→sub-agent tree with status emoji, flash and spinner, and
+`tools/sidebar_nav.py` + `tools/sidebar-mount.sh` provide window navigation and
+the idempotent pinned-pane mount. Also completes the tmux window-name half of
+session-naming (Decision-045). Built via the native `--worktree` flags as an
+experiment, hence the non-standard branch name; tested 22/22 unit + 2-repo/3-job
+smoke, closed under operator waiver with corrective follow-up `sidebar-fixes`.
+
+_Board: `docs/TODO.md.d/fleet-sidebar.md` · `docs/TODO.md.d/sidebar-fixes.md` ·
+Decisions-043/044/045/046._
 
 #### 🎉 `f/app-identifying` → `archive/app-identifying`
 

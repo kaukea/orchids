@@ -39,6 +39,16 @@ are, and how much context they have left before they need handing over. You'll
 see it as a `messages · …` line in your pane. You never address agents yourself;
 it's how they reach each other, not you.
 
+**And you get to watch.** A fleet sidebar mounts automatically as a pinned left
+pane in every orchestrator and architect window: a live tree of every
+repository, the features under it, what each one is doing *right now*, and any
+sub-agents in flight — all read straight off the bus (agents broadcast
+`orchid:activity:<text>` and `orchid:subagent:start|done:<label>` as ordinary
+messages; no extra machinery). Rows carry a status emoji, flash when something
+is waiting on **you**, and arrow keys + Enter jump you straight to that work's
+tmux window. It shows the current repository by default; list more in
+`~/.config/orchids/sidebar-repos` (one path per line) or `ORCHIDS_SIDEBAR_REPOS`.
+
 ## Skills: the knowledge that travels with you
 
 Fix a lesson once, and every repo knows it on the next sync.
