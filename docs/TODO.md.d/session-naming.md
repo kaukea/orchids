@@ -79,53 +79,6 @@ on:
 Enforcement is forward-only: launch sites (orchestrator architect spawn, cloud path,
 future spawns) adopt `--name`; nothing is retro-renamed.
 
-## Tech plan
-
-The HOW behind the frozen Proposal (Decision-025 — WHAT stays in Proposal, files are
-not pre-decided here). orchids is a data package: "launch sites" are the spawn
-instructions in the agent/skill docs plus the one bus helper in `tools/`.
-
-**One derivation, quoted everywhere.** id↔human is a pure string swap: human =
-`id` with `-`→` `, id = human with ` `→`-`. It round-trips because board ids are
-kebab (no spaces) and human names are only ever derived, never authored. bash sites
-inline `${id//-/ }`; Python surfaces it once in the bus.
-
-**Launch sites that adopt `--name "<repo> / <human name>"` (forward-only, no retro
-renames):**
-
-- Local architect spawn — `agents/orchestrator.md` `tmux split-window … claude
-  --agent architect`: add `--name "orchids / ${id//-/ }"`.
-- Orchestrator root session — `skills/orchestrator/SKILL.md` summon line
-  `claude --resume … || claude --name …`: the pair moves from `<project>
-  Orchestrator` to `<repo> / orchestrator` (resume key and name must stay identical,
-  so the same session is found/created). Its human name is its role, `orchestrator`.
-- Ripener spawn — `skills/ripen-tasks/SKILL.md` `claude --bg --agent ripener`:
-  adopt the same `--name` (feature-tied launch). Noted: the frozen Testing method
-  only exercises orchestrator + architect.
-- Cloud path — the `claude -p --agent architect-cloud` / orchestrator-cloud launches
-  live on the unlanded `f/cloud-architect` branch, not here; the `--name` requirement
-  travels with them (forward note, no edit on this branch).
-
-**Not renamed:** tmux machine titles `arch:<id>` stay verbatim (teardown matches on
-them). Subagents (builder, housekeeper via the Agent tool / `--bg`) inherit the
-parent's bus identity and have no navigable pane — out of scope.
-
-**Bus surfaces the name.** `tools/bus.py` `identity_of()` gains a derived `name`
-(human name from `feature_id`), so the sidebar and any bash consumer read one field
-instead of re-deriving. Identity already carries `feature_id`/`worktree`; `name` joins
-them as a birth-record field (model/effort stay out — Decision-028).
-
-**Testing, made runnable in the headless cloud runner** (refines the frozen method,
-which assumes a live tmux UI the runner has not got):
-
-- automated in the runner — a check script asserts (a) id→human→id round-trips for
-  every `docs/TODO.md.d/*.md` id; (b) `bus.py identity` emits the derived `name` for a
-  set `feature_id`; (c) each edited launch line carries `--name "<repo> / …"`; (d) the
-  `select-pane -T "arch:<id>"` line is unchanged.
-- operator-manual — the actual "claude UI lists `<repo> / <human name>`" visual check
-  needs a real interactive spawn the headless runner cannot inspect; left for the
-  operator (or a local run) and called out as such, not self-approved.
-
 ## Testing
 
 Spawn an orchestrator and an architect: the claude UI lists
