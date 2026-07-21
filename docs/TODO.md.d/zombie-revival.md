@@ -10,10 +10,12 @@
 - ~~Is revival universal, or scoped to roles worth reviving?~~ Answered (operator,
   2026-07-21): WHITELISTED child→parent scenarios only — architect → orchestrator for
   now. Subagents are irrelevant by construction (same session id as their parent).
-- How does the SessionStart guard distinguish the OPERATOR's manual resume of a dead
-  session (always allowed) from an agent's CLI bypass? Candidate discriminator: agent
-  launches carry the parent-session environment marker; the operator's terminal does
-  not.
+- ~~How does the SessionStart guard distinguish the operator's manual resume from an
+  agent's CLI bypass?~~ Resolved (operator, 2026-07-21): it doesn't — no discriminator
+  is built. The guard applies uniformly; the operator overrides anything by
+  definition, so when blocked they mint the token by hand (one deliberate command).
+  A "detect the human" heuristic would be a spoofable ambient hole; an explicit
+  override is not.
 
 ## Findings
 
