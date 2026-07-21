@@ -135,9 +135,11 @@ On an explicit go for feature X:
    id=<id>                                          # feature id; human name = id with '-' → spaces
    git worktree add .claude/worktrees/<id> -b f/<id> main
    printf '%s\n%s\n' "$orch" "${TMUX%%,*}" > .claude/worktrees/<id>/.return-window  # pane + tmux socket
-   tmux new-window -n "arch:<id>" -c .claude/worktrees/<id> \
-     "ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect --name \"orchids ▸ ${id//-/ }\" 'Boot: read your sidecar and begin discovery.'"
-   tmux select-pane -T "arch:<id>"
+   win=$(tmux new-window -P -F '#{window_id}' -n "orchids ▸ ${id//-/ }" -c .claude/worktrees/<id> \
+     "ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect --name \"orchids ▸ ${id//-/ }\" 'Boot: read your sidecar and begin discovery.'")
+   tmux set-window-option -t "$win" automatic-rename off  # window shows the session name, not the program
+   tmux select-pane -t "$win" -T "arch:<id>"              # arch:<id> stays the pane-TITLE handle teardown/reaping match
+   .claude/tools/sidebar-mount.sh "$win"                  # mount the fleet sidebar into the new window
    ```
    The initial prompt is part of the spawn — a fresh session waits silently for its first
    message, and a trigger the operator must remember to type is a trigger forgotten
@@ -205,6 +207,18 @@ behind. Pane and session hygiene is YOURS entirely (operator, 2026-07-21): obser
 live (`tmux list-panes -a`), reap the dead and the stray — duplicate role sessions included —
 and never turn a cleanup into an operator question. Check only when a
 close is expected and the architect is silent — no polling loop, no scheduler.
+
+# Activity broadcasting
+On every meaningful activity change, ask your bus to broadcast `orchid:activity:<wording>` — a
+short label of what you're doing right now (`orchid:activity:Triaging`,
+`orchid:activity:Prioritising`, `orchid:activity:Questioning`, `orchid:activity:Dispatching`).
+When the activity is a question to the operator or an operator-gate — you are now waiting on
+them — send that broadcast with the bus's `notify_user` flag set; that flag (or a lifecycle
+`blocked` signal) is what the sidebar reads to flash "waiting on user". While a subagent (a
+dispatched `ripener`, the `housekeeper`, an architect spawn you're tracking) is in flight, ask
+your bus to broadcast `orchid:subagent:start:<label>` when you dispatch it and
+`orchid:subagent:done:<label>` when it returns, `<label>` being its short work-label — EXCEPT
+your own bus sidecar, which is never surfaced this way.
 
 # Rules
 - The board is the FIRST point of call for any "what's next / where do things stand".

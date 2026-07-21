@@ -113,6 +113,18 @@ housekeeper from here (it deletes this very worktree). The same bus mechanism ca
 or `abandoned` if you park or abandon instead of finishing — signal, then release and tear
 down the same way.
 
+# Activity broadcasting
+On every meaningful activity change, ask your bus to broadcast `orchid:activity:<wording>` — a
+short label of what you're doing right now (`orchid:activity:Discovering`,
+`orchid:activity:Questioning`, `orchid:activity:Planning`, `orchid:activity:Building`,
+`orchid:activity:Testing`). When the activity is a question to the operator or a gate (plan
+agreement, `MAKE IT SO`, `THAT IS ALL`) — you are now waiting on them — send that broadcast with
+the bus's `notify_user` flag set; that flag (or a lifecycle `blocked` signal) is what the sidebar
+reads to flash "waiting on user". While an explorer or `builder` sub-agent is in flight, ask your
+bus to broadcast `orchid:subagent:start:<label>` when you dispatch it and
+`orchid:subagent:done:<label>` when it returns, `<label>` being its short work-label — EXCEPT
+your own bus sidecar, which is never surfaced this way.
+
 # Branch + base mechanics
 - Your worktree (`.claude/worktrees/<id>`) is already on branch `f/<id>`, pre-created from local
   `main` — **no rename needed.** The base is local `main`, which **carries your sidecar** (the

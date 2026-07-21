@@ -90,6 +90,43 @@ session ──spawns──> bus sidecar ──announce──> every peer's inbox
   mutable — context occupancy and token spend) are answered by the sidecar off the
   parent's transcript, so they cost the parent no context and keep answering while
   it is busy or wedged.
+- Agents also **broadcast their live activity** as ordinary dynamic messages —
+  `orchid:activity:<text>` on each change, and `orchid:subagent:start|done:<label>`
+  around a sub-agent — which the fleet sidebar renders. No new mechanism: these are
+  plain broadcasts on the same bus.
+
+## The fleet sidebar
+
+A pinned left pane in every orchestrator and architect window, mounted at launch
+(`tools/sidebar-mount.sh`, idempotent and strictly best-effort). One renderer per
+mount, all showing the same global picture.
+
+```
+bus (per repo) ──observed──> sidebar_model ──Fleet──> sidebar.py (curses)
+                                                            │ Enter
+                                                            └─> sidebar_nav ──> tmux switch
+```
+
+- **Reads the bus as a pure observer** across every repository named in a repolist
+  (`$ORCHIDS_SIDEBAR_REPOS` or `~/.config/orchids/sidebar-repos`, else the current
+  repo) — never mutating a bus file. State is attributed by message sender and
+  accumulated in memory, so it survives the bus's ephemerality; updates are
+  event-driven (inotify), never polled.
+- **Renders** a repo → feature → activity → sub-agent tree with a status emoji
+  ({running, standby, completed, failed} mapped from lifecycle signals; waiting
+  derived from `notify_user`/`blocked`), a flashing row when an agent waits on the
+  operator, and a braille spinner on in-flight sub-agents. Role names appear
+  nowhere; structure carries the role.
+- **Navigates** by matching the tmux window name — the bare repository name for a
+  repository's orchestrator, `<repo> ▸ <human name>` for a feature (the
+  session-naming display forms, Decision-032) — then switching the client to it.
+  Windows carry the human-readable identity; `arch:<id>` remains only as the pane
+  title, where teardown and reaping read it (pane titles are otherwise unreliable —
+  the live status-glyph indicator overwrites them).
+- Components in `tools/`: `sidebar.py` (renderer), `sidebar_model.py` (bus reader),
+  `sidebar_nav.py` (navigation), `sidebar-mount.sh` (mount). Cross-repo repo
+  discovery is deliberately an explicit repolist, deferring the fleet-wide
+  discovery decision to Orchard.
 
 ## The sidecar contract
 
@@ -132,7 +169,7 @@ symlink, everyone), `template` (install-time copy, then project-owned),
 agents/            five pipeline roles + bus sidecar (→ .claude/agents/)
 skills/<name>/     SKILL.md packages (→ .claude/skills/, per role)
 hooks/             bus-init.sh · bus-end.sh (→ .claude/hooks/)
-tools/             board_lint.py · board_stale.py · bus.py · architect-teardown.sh (→ .claude/tools/)
+tools/             board_lint.py · board_stale.py · bus.py · architect-teardown.sh · sidebar.py · sidebar_model.py · sidebar_nav.py · sidebar-mount.sh (→ .claude/tools/)
 templates/         AGENTS.md (template) · CLAUDE.md (prefix block)
 migrations/        dated structural-upgrade instructions (YYYY-MM-DD-<slug>.md); applied
                    per clone against the .git/the-works/migrated watermark

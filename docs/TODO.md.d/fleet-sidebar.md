@@ -67,3 +67,83 @@ Two repos, three jobs in mixed states: sidebar shows all three correctly (includ
 one waiting-for-input surfaced within seconds AND flashing), keyboard navigation lands
 on the right session/window/pane, and a completed job's row updates when its window
 closes.
+
+## Result
+
+Result: done (pending operator manual visual pass) — built, unit-tested, end-to-end
+smoke passing. Awaiting the operator's `THAT IS ALL`.
+
+- Branch: `worktree-fleet-sidebar` @ `711d761`. Base `1a9be79` (anchor `234a9a8`,
+  `Base:` trailer). No merge commits; squash-merge is the housekeeper's.
+- Commits: `7bdb8bd` activity broadcast wiring · `7d62f20` nav · `5f3a517` bus reader ·
+  `c8acc6e` mount · `af8dd5e` renderer · `1560a58` tests · `711d761` architecture.
+- Method (operator-agreed): pytest-style unit tests + operator manual visual pass.
+  - Unit tests: `python3 -m unittest discover -s tests` → **23/23 OK**, run by the
+    architect (not just the builder). pytest is not installed here; tests are stdlib
+    `unittest` and pytest-collectible.
+  - End-to-end smoke (architect-run, throwaway 2-repo/3-job fixture through the real
+    reader→model→renderer): repos aggregated; widget-x running 🟢 + sub-agent spinner,
+    report-gen standby 🟡, auth-flow waiting ⏳ that blanks on the flash-off frame →
+    **PASS**.
+  - OUTSTANDING (operator's part of the agreed method, needs a live TTY): the visual
+    flash animation, live keyboard up/down + Enter navigation landing on the right
+    window, and a row updating when a job's window closes. The feature stays OPEN
+    until the operator confirms this pass.
+- What was built: a new bus surface was NOT added (operator ruling) — agents broadcast
+  dynamic `orchid:activity:<text>` and `orchid:subagent:start|done:<label>` messages on
+  the existing bus (`agents/orchestrator.md`, `architect.md`, `ripener.md`). A Python
+  stdlib reader (`tools/sidebar_model.py`) observes every configured repo's bus,
+  attributes by sender, accumulates in memory; a curses renderer (`tools/sidebar.py`)
+  draws the repo→feature→activity→sub-agent tree with status emoji, flash, and spinner,
+  with keyboard nav via `tools/sidebar_nav.py` (matches the tmux window NAME —
+  `<repo>` for an orchestrator, `<repo> ▸ <human>` for a feature); `tools/sidebar-mount.sh`
+  splits the pinned left pane at orchestrator/architect launch (idempotent, strictly
+  best-effort).
+- Post-done amend (operator-directed): the tmux WINDOW NAMES now carry the session-naming
+  display forms — orchestrator window = bare repo (`orchids`), architect window =
+  `<repo> ▸ <human>` (`orchids ▸ fleet sidebar`); no `claude`, no visible `arch:<id>`. This
+  completes the tmux-window-name side of session-naming (which had done only `claude --name`).
+  `arch:<id>` is kept as the pane TITLE (teardown/reaping handle). Applied live to current
+  windows and baked into the spawn recipes (`agents/orchestrator.md`,
+  `skills/orchestrator/SKILL.md`). Nav repointed to the friendly names; tests updated (22/22).
+- Fan-out: discovery 6 explorers (0 inline); build 6 builders (S1–S6), plus the
+  ARCHITECTURE.md edit inline (architect, per Decision-034). Above s-size; builders used
+  throughout, none of the six build steps done inline.
+- Known limitations (non-blocking): reader dedup is cross-scan by message id (real
+  envelopes use uuid4, so same-scan collisions can't occur); a repolist entry with no
+  bus activity shows an empty repo row. Cross-repo repo-discovery is an explicit
+  repolist by design — the fleet-wide discovery decision is left to Orchard.
+- Related tasks: `cloud-event-feed` was blocked on this initial run and is now
+  unblockable; `cross-repo-bus` / `orchard-view` carry the deferred repo-discovery
+  decision. (Board updates are the orchestrator's.)
+
+## Changelog entry
+
+### Added
+- **Fleet sidebar** — a pinned left pane now appears in every orchestrator and
+  architect window, showing a live, cross-repository tree of work: each repository,
+  the features under it, what each is doing right now, and any in-flight sub-agents,
+  sourced entirely from the message bus. Rows carry a status emoji (running, standby,
+  completed, failed), flash when an agent is waiting on the operator, and can be
+  selected with the arrow keys and Enter to jump straight to that work's tmux window.
+  Which repositories it aggregates is listed in `~/.config/orchids/sidebar-repos`
+  (one path per line) or the `ORCHIDS_SIDEBAR_REPOS` environment variable; with
+  neither, it shows the current repository.
+
+## Readme delta
+
+- Document the fleet sidebar: what it shows (the live repo→feature→activity→sub-agent
+  tree from the bus), that it mounts automatically as a pinned left pane in
+  orchestrator and architect windows, keyboard up/down + Enter to navigate to a row's
+  window, and how to choose which repositories it aggregates
+  (`~/.config/orchids/sidebar-repos`, one repo path per line, or `ORCHIDS_SIDEBAR_REPOS`).
+- Note the sidebar's data source: agents broadcast `orchid:activity:<text>` (and
+  `orchid:subagent:start|done:<label>`) on the message bus; the sidebar renders it. No
+  new bus mechanism — ordinary dynamic messages.
+
+## Architecture
+
+Updated `ARCHITECTURE.md` on-branch (commit `711d761`): new "The fleet sidebar" section
+(component, data-flow bus→sidebar→tmux, repolist discovery), a bus-section note on the
+new dynamic activity/sub-agent messages, and the `tools/` layout listing. Triggers fired
+— a component added and a new data-flow — so the edit was required, not skipped.

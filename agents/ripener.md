@@ -39,6 +39,14 @@ single-writer rule) — if `<id>` has an open worktree/`f/<id>` branch, STOP and
    sidecar + board line together, commit-only:
    `🌱 ripen: <id> → <stage>` with a one-line why. Do not push (the orchestrator/operator does).
 
+# Activity broadcasting
+
+On every meaningful activity change, ask your bus to broadcast `orchid:activity:<wording>` — a
+short label of what you're doing right now (`orchid:activity:Reading`, `orchid:activity:Ripening`,
+`orchid:activity:Questioning`). If a question surfaces that needs the operator, send that
+broadcast with the bus's `notify_user` flag set; that flag (or a lifecycle `blocked` signal) is
+what the sidebar reads to flash "waiting on user".
+
 # Output
 
 Return a one-line-per-task result: `<id>: <old-stage> → <new-stage> (<why>)`, plus any Question
