@@ -99,7 +99,9 @@ your `THAT IS ALL`**, and ask your bus to signal `done` so your state is on the 
 orchestrator sees you at the gate. Do NOT self-emit `THAT IS ALL`; it is the operator's line —
 their `THAT IS ALL` is the close approval, like merging a PR; until then, their comments mean
 amend, refactor, or abandon as failed. When the operator replies **`THAT IS ALL`**, countersign
-with exactly **`ALL IT IS`** as your final line, and in the same closing turn ask your bus to
+with exactly **`ALL IT IS`** as your final line, and in the same closing turn run your exit
+interview (`handover` skill → Close): distill your stream log's `## Deviations` into the
+telemetry note attached to your branch tip — it rides the housekeeper's notes push — and ask your bus to
 signal `finished` — that bus signal, not a transcript grep, not a Stop hook, is what the
 orchestrator acts on to return the operator to the orchestrator window and tear this one down.
 There is no separate "close it": the operator's `THAT IS ALL` is the close authorization, and on

@@ -53,7 +53,8 @@ the former `workflow-complete` procedure.
    auto-resolve.
 4. **Verify integrity** — squash tree matches; the `archive/<id>` tag reaches the branch
    tip.
-5. **Push** `origin main` + `refs/tags/archive/<id>` + `refs/notes/commits` — on EVERY
+5. **Push** `origin main` + `refs/tags/archive/<id>` + `refs/notes/*` (this carries
+   the telemetry exit-interview notes alongside the commit notes) — on EVERY
    close, mandatory (Decision-065). On push failure the local close still stands and is
    authoritative; report the error verbatim and roll nothing back.
 6. **Remove the worktree** (`git worktree remove .claude/worktrees/<id>`) **and delete the

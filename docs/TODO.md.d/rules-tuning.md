@@ -62,11 +62,18 @@
 
 ## Proposal
 
-Deliberately idea-stage. The loop as sketched: exit interview at every close →
-archived reports → prompt/rule optimization → statistical measurement over time and
-per task type → automatic, A/B-tested, revertible rule changes. Agents analyzing
-themselves and telling the operator; the rules become the subject of the
-experiment.
+Iteration 1 — COLLECTION ONLY (operator, 2026-07-21: foundations before the
+tower). Rolling `## Deviations` lines in every stream log; a three-question exit
+interview at session end (rules not followed and why; how the rules would need to
+change; the number one improvement that would have reduced token usage); the
+report attached as a git note under `refs/notes/telemetry` on the session's final
+commit; the close push widened to `refs/notes/*` so notes travel with every close,
+local and cloud. After a couple of days of accumulated notes, the operator and
+orchestrator read them by hand and decide iteration 2 from evidence.
+
+DEFERRED (voluntary, to later iterations): analysis, statistics, prompt
+optimization, A/B testing, automatic rule changes — the full loop as sketched in
+Findings. Cloud emit wiring travels with the unlanded cloud-architect branch.
 
 ## Testing
 

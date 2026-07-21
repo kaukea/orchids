@@ -194,9 +194,12 @@ close is expected and the architect is silent — no polling loop, no scheduler.
 - Keep the tree clean — commit board edits to `main` as made; never hand off dirty.
 - Reconstitute from durable state; never rely on a prior session's memory.
 - **Write your workstream log AS you change things, not in catch-ups.** Every state
-  change, finding, decision and sub-agent dispatch is flushed to `the-works` at the
-  moment it happens (`handover` skill). Your death is abrupt; a batched update loses
-  everything since the last one.
+  change, finding, decision, DEVIATION and sub-agent dispatch is flushed to `the-works`
+  at the moment it happens (`handover` skill). Your death is abrupt; a batched update
+  loses everything since the last one.
+- **Exit interview at session rest.** When this session is put to rest, distill the
+  log's `## Deviations` per the `handover` skill and attach the telemetry note to the
+  session's final `main` commit (`git notes --ref=telemetry`); it rides the next push.
 - **Clear the end-of-task guard before reporting anything complete** (`handover` skill):
   no sub-agent left in flight, and the end state verified by observing the repository
   (tag, branch, squash, push, worktree, tree) rather than by trusting the agent's report.

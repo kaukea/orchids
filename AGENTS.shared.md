@@ -70,6 +70,9 @@ operator), update each file whose condition is met:
   artifact: a dated entry ships in the same branch → `AGENTS.files.md` §Migrations
 - [ ] **WORKSTREAM LOG** — final `## State` (outcome) appended, durable findings
   flushed to the sidecar, stream marked `_closed` → `handover` skill
+- [ ] **EXIT INTERVIEW** — the log's `## Deviations` distilled into a telemetry
+  note on the session's final commit (`git notes --ref=telemetry`) → `handover`
+  skill
 
 A workflow is never closed before its Testing gate (below) has been met.
 

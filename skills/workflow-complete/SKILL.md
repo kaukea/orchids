@@ -136,7 +136,7 @@ check have passed, push three things to `origin` in one shot: the squashed `main
 `archive/<feature-id>` tombstone tag, and the commit-count git note CI reads for versioning.
 
 ```sh
-git push origin main "refs/tags/archive/<feature-id>" refs/notes/commits
+git push origin main "refs/tags/archive/<feature-id>" "refs/notes/*"
 ```
 
 This is not optional and not conditional — every workflow close ends by publishing the merged history,

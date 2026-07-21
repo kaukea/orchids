@@ -55,6 +55,11 @@ Appended when established, not at close: verified facts, measurements, results.
 ## Dead ends
 Paths tried and failed, and WHY — so no successor retries them.
 
+## Deviations
+One line AT THE MOMENT a rule bends, never recalled later: `<rule> · <what
+happened instead> · <why>`. Rolling capture like everything else in the log —
+the exit interview (Close, below) distills these; it never has to remember.
+
 ## Decisions (pending promotion)
 Rulings agreed with the operator this session, awaiting promotion to
 docs/decisions.md at ingest. Sanitized wording — they will be committed.
@@ -124,8 +129,28 @@ As part of the close housework (`workflow-complete`):
 
 1. Append the final `## State`: outcome `done` | `reverted` | `wip`, merged SHA
    or tombstone tag.
-2. Flush sanitized durable findings into the stream's committed sidecar.
-3. `touch <stream-dir>/_closed` — the marker the hook announces to the parent.
+2. **Exit interview** (rules-tuning telemetry — collection only in this
+   iteration). Distill the log's `## Deviations` into a small SANITIZED report
+   answering three questions: which rules you did not follow and why; how the
+   rules would need to change for you to be compliant; the number one
+   improvement that would have reduced your token usage. Attach it to the
+   session's final commit — an architect uses its branch tip (reachable forever
+   via the `archive/` tag), a top-level session its last `main` commit:
+
+       git notes --ref=telemetry add -m "<report>" <final-commit-sha>
+
+   Report shape (parseable, technical content only — no quotes, no secrets):
+
+       session: <id> · agent: <role> · date: <YYYY-MM-DD> · feature: <id|none>
+       deviations:
+         - rule: <which rule> · what: <what happened instead> · why: <reason>
+           change: <how the rule would need to change to be complied with>
+       token_saver: <the single improvement that would have cut token usage most>
+
+   No deviations is itself a report — send `deviations: none` rather than
+   nothing, so silence stays distinguishable from a missed interview.
+3. Flush sanitized durable findings into the stream's committed sidecar.
+4. `touch <stream-dir>/_closed` — the marker the hook announces to the parent.
 
 ## Ingest (parent — or the top-level session itself)
 
@@ -137,7 +162,10 @@ stream awaits ingestion. The ingester MUST:
 2. **Promote**: `## Decisions (pending promotion)` → `docs/decisions.md`
    (canonical format); remaining/follow-up work → the TODO; any standing
    constraint (still true, nameable reader, expiry trigger) → a one-line
-   constraint on the relevant TODO item.
+   constraint on the relevant TODO item. If the stream carries `## Deviations`
+   lines but no telemetry note (the session died before its exit interview),
+   distill and attach the note on its behalf, marked `distilled_by: <ingester>`
+   — degraded but never lost, and the miss itself is telemetry.
 3. **Archive the stream directory** the moment ingestion is done — move it to
    `$(git rev-parse --git-common-dir)/the-works/_ingested/<stream>/` (still
    uncommittable; outside the hook's announcement glob). PROVISIONAL retention:
