@@ -63,9 +63,12 @@ operator), update each file whose condition is met:
 
 - [ ] **TODO** — done / new / follow-up tasks recorded → `AGENTS.files.md` §TODO
 - [ ] **decisions** — append any design/spec decision made → `AGENTS.files.md` §Decisions
-- [ ] **CHANGELOG** — append entry, operator-gated → `AGENTS.files.md` §Changelog
+- [ ] **CHANGELOG** — entry STAGED verbatim in the sidecar result; the orchestrator
+  places it at ingest, operator-gated (Decision-034) → `AGENTS.files.md` §Changelog
 - [ ] **ARCHITECTURE** — only if a trigger below fired → `AGENTS.files.md` §Architecture
-- [ ] **README** — only if a user-facing or tooling change → `readme-sync` skill
+- [ ] **README** — user-facing delta staged in the sidecar result (or an evidenced
+  no-change determination); the orchestrator applies it via the `readme-sync` skill
+  at ingest (Decision-034)
 - [ ] **MIGRATION** — only if the work moved, renamed, or reformatted a managed
   artifact: a dated entry ships in the same branch → `AGENTS.files.md` §Migrations
 - [ ] **WORKSTREAM LOG** — final `## State` (outcome) appended, durable findings

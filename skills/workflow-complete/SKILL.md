@@ -31,9 +31,12 @@ pollutes history.
 - [ ] Memory and documentation files must be reviewed to reflect the current state of the project, discarding
       out-of-date information.
 - [ ] Agreed work, follow-up work, and future work must be updated on the board (`docs/TODO.md` + sidecars, `AGENTS.files.md` §TODO).
-- [ ] An entry must be added to `CHANGELOG.md` for the workflow. Format and the
-      per-feature operator gate are defined in `AGENTS.files.md` → §Changelog.
-- [ ] `README.md` reviewed via the `readme-sync` skill — load that skill before considering the workflow complete.
+- [ ] The `## Changelog entry` is STAGED verbatim in the sidecar result — do NOT
+      edit `CHANGELOG.md`; the orchestrator places it at ingest, operator-gated
+      (Decision-034; format `AGENTS.files.md` → §Changelog).
+- [ ] The `## Readme delta` (user-facing changes) is staged in the sidecar result,
+      or an evidenced no-change determination recorded — do NOT edit `README.md`;
+      the orchestrator applies it via `readme-sync` at ingest (Decision-034).
 
 ## Clean tree
 

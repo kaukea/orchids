@@ -39,4 +39,7 @@ checks, handover ingest steps) — orchestrator builds directly on an operator g
 ## Testing
 
 A feature closes without its architect having edited either file, and both are correct
-afterwards.
+afterwards. Wired 2026-07-21 (all six contract points: architect def, close gates in
+AGENTS.shared + workflow-complete, housekeeper presence checks, handover ingest,
+§Sidecar/§Changelog formats); marked functional pending the agreed live confirmation —
+the NEXT feature close runs the staged path end to end (session-naming is nearest).

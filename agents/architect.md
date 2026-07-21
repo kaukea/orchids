@@ -131,11 +131,14 @@ orchestrator promotes then archives the stream after reading), NEVER into the co
 sidecar. Rulings agreed mid-feature go to the log's `## Decisions (pending promotion)`
 — the board and `docs/decisions.md` are the orchestrator's to write, not yours.
 
-**You AUTHOR the durable docs — the housekeeper only verifies.** While the feature context is
-hot, write each to its home: `decisions.md` (any design decision + its rationale),
-`CHANGELOG.md` (the outcome bullet, operator-gated), `TODO` (status + any follow-ups). For
-**README and ARCHITECTURE**, record in the sidecar, per file, EITHER the edit you made OR a
-one-line evidenced reason-to-skip tied to the diff (which ARCHITECTURE trigger you checked and
-why none fired; why README is still aligned) — **never a silent omission.** "Doesn't mention
-this feature, skipping" is not an answer; the evidenced determination is. The housekeeper will
-only confirm this and fill a *proven* gap — a blank is a gap, not a skip.
+**You STAGE the repo-level docs — the orchestrator files them (Decision-034).** While the
+feature context is hot, write into your sidecar result, VERBATIM and sanitized: a
+`## Changelog entry` block (the outcome in your own words — you know why the change was made
+the way it was; the operator gate happens at ingest) and, when the change is user-facing, a
+`## Readme delta` block (what a user can now do differently). You do NOT edit `CHANGELOG.md`
+or `README.md` — the orchestrator places your words unrewritten at ingest, merged across
+parallel features, so nothing collides at the squash. **ARCHITECTURE stays yours on-branch**:
+record in the sidecar EITHER the edit you made OR a one-line evidenced reason-to-skip tied to
+the diff (which trigger you checked and why none fired) — **never a silent omission.** The
+housekeeper confirms the staged blocks and the ARCHITECTURE determination are present and
+fills a *proven* gap — a blank is a gap, not a skip.

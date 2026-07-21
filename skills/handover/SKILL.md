@@ -165,7 +165,12 @@ stream awaits ingestion. The ingester MUST:
    constraint on the relevant TODO item. If the stream carries `## Deviations`
    lines but no telemetry note (the session died before its exit interview),
    distill and attach the note on its behalf, marked `distilled_by: <ingester>`
-   — degraded but never lost, and the miss itself is telemetry.
+   — degraded but never lost, and the miss itself is telemetry. Promote the
+   staged repo-level docs (Decision-034): the sidecar result's `## Changelog
+   entry` → `CHANGELOG.md` (canonical format, merged across parallel closes,
+   operator-gated per feature) and its `## Readme delta` → `README.md` via the
+   `readme-sync` skill. Promote INTACT — the entry lands in the author's words
+   or not at all; the ingester places and formats, never rewrites.
 3. **Archive the stream directory** the moment ingestion is done — move it to
    `$(git rev-parse --git-common-dir)/the-works/_ingested/<stream>/` (still
    uncommittable; outside the hook's announcement glob). PROVISIONAL retention:

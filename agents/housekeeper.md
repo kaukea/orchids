@@ -38,7 +38,10 @@ the former `workflow-complete` procedure.
    durable docs while context was hot and reported each in the sidecar close-gate; you check by
    PRESENCE, not content (Decision-023): the named commits exist on the branch (`git log`), the
    named files/sections exist at the branch tip (`git ls-tree`, a targeted `grep`), the
-   operator-gated `CHANGELOG.md` entry is in the tip. Do NOT re-read document contents that a
+   staged `## Changelog entry` — and `## Readme delta` or its evidenced no-change
+   determination — are in the sidecar result (Decision-034: `CHANGELOG.md` and `README.md`
+   themselves are the orchestrator's to write at ingest; a branch that edited either is a
+   deviance to report). Do NOT re-read document contents that a
    presence check confirms. Deep-read ONLY where (a) the architect recorded a reason-to-skip —
    for **README and ARCHITECTURE** confirm the per-file determination is evidenced and tied to
    the diff; a blank (no edit AND no evidenced skip) is a GAP you must close, not a skip you may

@@ -162,6 +162,11 @@ header field with no value.
 `Blockers ↔ Testing` mirror the workflow entry/exit gates; `Questions ↔ Proposal` are
 ask ↔ answer.
 
+**Staged repo-level docs (Decision-034)** — at close, the sidecar result additionally
+carries a `## Changelog entry` block (the outcome verbatim, in the author's words) and,
+for user-facing changes, a `## Readme delta` block. The feature's agent never edits
+`CHANGELOG.md`/`README.md`; the orchestrator promotes these blocks intact at ingest.
+
 **Stage projection** — the task's `readiness = stage × origin` (stage ∈ `queued` /
 `working` / `blocked-on-answers` / `plan-ready` / `complete`; §TODO) is *projected* onto the
 board badge from the sidecar, so board render and triage never open sidecars in steady state.
@@ -293,9 +298,11 @@ Structure:
   board / sidecar / `decisions.md` entries.
 
 **Operator gate** — promotion of a feature that reached `done`/`functional` is NOT
-automatic: at workflow end the agent MUST ask the operator explicitly per feature
+automatic: at ingest the ORCHESTRATOR asks the operator explicitly per feature
 ("Feature `<id>` reached `functional` — are we ready to amend the CHANGELOG?").
-Operator can defer individual features.
+Operator can defer individual features. The entry TEXT is staged verbatim by the
+feature's agent in its sidecar result (Decision-034) — the orchestrator places,
+formats and merges; it never rewrites.
 
 ---
 
