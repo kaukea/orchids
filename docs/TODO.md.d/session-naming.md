@@ -45,12 +45,20 @@
 The naming contract — strict, fully derivable, enforced at every launch site from now
 on:
 
-- **feature id**: kebab-case, all lowercase, the INVERSE of the git-imperative —
-  git says "Eat carrots", the feature id is `eating-carrots` (gerund first; settled
-  2026-07-21 over the earlier object-first example). Unique on the board; the sidecar
+- **feature id**: kebab-case, all lowercase, DECLARATIVE in style — it names what
+  the workstream IS, never commands what to do. Git speaks imperative ("Eat
+  carrots" — an order to the codebase); a feature name declares the thing or the
+  activity ("eating carrots", "session naming", "fleet sidebar" — noun phrases).
+  This is a difference of MOOD, not word order: there is NO string transform from a
+  commit subject to a name — the id is authored by asking "what is this work?",
+  which is why it resembles part of the sidecar short title. The sidebar is the
+  test: `orchids / <name>` must read as something that is happening, never as a
+  barked order. The style call is enforced at AUTHORING time — intake and the
+  ripener check it; no lint can judge mood. Unique on the board; the sidecar
   filename. Forward-only — existing ids stay.
-- **human name**: the feature id with hyphens as spaces ("eating carrots") — derived,
-  never authored separately, so it cannot drift.
+- **human name**: the feature id with hyphens as spaces ("eating carrots") — this
+  swap is the ONLY mechanical rule in the contract; derived, never authored
+  separately, so it cannot drift.
 - **claude session name**: for WORKSTREAM sessions (architects, ripeners),
   `<repository> / <human name>` (e.g. `orchids / session naming`), passed with
   `--name` at every `claude` launch — this is what makes the claude UI navigable.
