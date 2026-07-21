@@ -25,9 +25,47 @@ PROJECT_OWNER = "serialseb"
 ACTIVE = {"todo", "doing", "blocked", "paused"}
 CLOSED = {"done", "functional", "cancelled"}
 LINE_RE = re.compile(
-    r"^- `(?P<badge>[^`]*)` \[(?P<title>.+?)\]"
+    r"^(?P<indent>\s*)- `(?P<badge>[^`]*)` \[(?P<title>.+?)\]"
     r"\((?P<path>TODO\.md\.d/[\w-]+\.md)\)(?P<edges>.*)$"
 )
+
+# Label vocabulary — mirror of AGENTS.files.md §TODO (single source there).
+LABEL_DEFS = {
+    "board":              ("6f42c1", "Projected from the file board"),
+    "\u2728 feature":     ("1d76db", "additive capability"),
+    "\U0001f41b bug":     ("d73a4a", "corrective work"),
+    "\u267b\ufe0f refactor": ("cfd3d7", "restructure, no behaviour change"),
+    "\U0001f9f9 housekeeping": ("bfdadc", "cleanup, removal, doc tidy"),
+    "\U0001f3c1 completion": ("c2e0c6", "takes a functional feature to done"),
+    "\U0001f525 critical": ("b60205", "urgency: critical"),
+    "\U0001f352 nice-to-have": ("fef2c0", "urgency: nice to have"),
+    "\U0001f4ad idea":    ("fbca04", "urgency: idea (daydream)"),
+    "\u2699\ufe0f area/process": ("0e8a16", "area: process machinery"),
+    "\U0001f504 area/sync": ("5319e7", "area: sync / distribution"),
+    "\U0001f393 area/skills": ("0052cc", "area: skills"),
+    "\U0001f4e2 area/publication": ("006b75", "area: publication"),
+    "\U0001f4cb todo":    ("ededed", "progress: not started"),
+    "\U0001f6a7 doing":   ("f9d0c4", "progress: being built"),
+    "\u2705 done":        ("0e8a16", "progress: done or functional"),
+    "\u26d4 blocked":     ("000000", "blocked by another open task"),
+    "\u26fd\U0001f918 madmax": ("e99695", "runs unrestricted (operator-set only)"),
+    "\u2601\ufe0f cloud": ("c5def5", "was built in the cloud"),
+    "\U0001f6f0\ufe0f analyzable": ("bfd4f2", "can go to the cloud"),
+    "\U0001f6cb\ufe0f house-bound": ("d4c5f9", "local-only from inception"),
+}
+TYPE_LABELS = {"feature": "\u2728 feature", "bug": "\U0001f41b bug",
+               "refactor": "\u267b\ufe0f refactor",
+               "housekeeping": "\U0001f9f9 housekeeping",
+               "completion": "\U0001f3c1 completion"}
+URGENCY_LABELS = {"critical": "\U0001f525 critical",
+                  "nice-to-have": "\U0001f352 nice-to-have",
+                  "idea": "\U0001f4ad idea"}
+AREA_LABELS = {"process": "\u2699\ufe0f area/process", "sync": "\U0001f504 area/sync",
+               "skills": "\U0001f393 area/skills",
+               "publication": "\U0001f4e2 area/publication"}
+TAG_LABELS = {"madmax": "\u26fd\U0001f918 madmax", "cloud": "\u2601\ufe0f cloud",
+              "analyzable": "\U0001f6f0\ufe0f analyzable",
+              "house-bound": "\U0001f6cb\ufe0f house-bound"}
 
 
 def sh(*args, check=True):
@@ -46,6 +84,10 @@ class Task:
     def __init__(self, idx: int, m: re.Match):
         self.idx, self.title, self.path, self.edges = \
             idx, m["title"], m["path"], m["edges"]
+        self.depth = len(m["indent"]) // 2
+        self.blocked_by = re.findall(r"\u2298([a-z0-9-]+)", self.edges)
+        self.tags = re.findall(r"#([a-z0-9-]+)", self.edges)
+        self.children = []
         parts = [p.strip() for p in m["badge"].split("·")]
         parts += [""] * (6 - len(parts))
         (self.type, self.status, self.urgency,
@@ -57,7 +99,7 @@ class Task:
         badge = " · ".join([self.type, self.status, self.urgency,
                             self.readiness, self.component, gh])
         badge = re.sub("  +", " ", badge).rstrip()
-        return f"- `{badge}` [{self.title}]({self.path}){self.edges}"
+        return f"{'  ' * self.depth}- `{badge}` [{self.title}]({self.path}){self.edges}"
 
 
 class Board:
@@ -75,11 +117,17 @@ class Board:
         return m.group(1)
 
     def tasks(self):
-        out = []
+        out, stack = [], {}
         for i, line in enumerate(self.lines):
             m = LINE_RE.match(line)
-            if m:
-                out.append(Task(i, m))
+            if not m:
+                continue
+            t = Task(i, m)
+            stack[t.depth] = t
+            parent = stack.get(t.depth - 1)
+            if t.depth > 0 and parent:
+                parent.children.append(t)
+            out.append(t)
         return out
 
     def write(self, task: Task):
@@ -113,6 +161,9 @@ def issue_body(board: Board, t: Task) -> str:
     q = sidecar_questions(board.root, t.path)
     if q and q.lower().strip("- .") not in {"none", "none known yet"}:
         lines += ["", "### Open questions", q]
+    if t.children:
+        subs = [f"- {'#' + str(c.gh) if c.gh else c.title}" for c in t.children]
+        lines += ["", "### Sub-tasks"] + subs
     return "\n".join(lines)
 
 
@@ -122,38 +173,79 @@ def list_board_issues(repo: str, state="all"):
                    "--json", "number,title,state,body,url") or []
 
 
-def ensure_label(repo: str):
-    subprocess.run(["gh", "label", "create", "board", "-R", repo,
-                    "-c", "#6f42c1", "-d", "Projected from the file board"],
-                   capture_output=True, text=True)
+def ensure_labels(repo: str):
+    for name, (color, desc) in LABEL_DEFS.items():
+        subprocess.run(["gh", "label", "create", name, "-R", repo,
+                        "-c", f"#{color}", "-d", desc, "--force"],
+                       capture_output=True, text=True)
+
+
+def labels_for(t: Task, by_id: dict) -> list:
+    labels = ["board"]
+    if t.type in TYPE_LABELS:
+        labels.append(TYPE_LABELS[t.type])
+    if t.urgency in URGENCY_LABELS:
+        labels.append(URGENCY_LABELS[t.urgency])
+    if t.component in AREA_LABELS:
+        labels.append(AREA_LABELS[t.component])
+    if t.status in ("done", "functional"):
+        labels.append("\u2705 done")
+    elif t.readiness.split("/")[0] == "working":
+        labels.append("\U0001f6a7 doing")
+    else:
+        labels.append("\U0001f4cb todo")
+    if any(b in by_id and by_id[b].status not in ("done", "cancelled")
+           for b in t.blocked_by):
+        labels.append("\u26d4 blocked")
+    labels += [TAG_LABELS[tag] for tag in t.tags if tag in TAG_LABELS]
+    return labels
+
+
+def set_labels(repo: str, number: int, labels: list):
+    args = ["api", "-X", "PUT", f"repos/{repo}/issues/{number}/labels"]
+    for l in labels:
+        args += ["-f", f"labels[]={l}"]
+    gh_json(*args)
 
 
 def push(board: Board, with_project: bool):
-    ensure_label(board.repo)
+    ensure_labels(board.repo)
     existing = {i["number"]: i for i in list_board_issues(board.repo)}
+    tasks = board.tasks()
+    by_id = {t.path.split("/")[-1][:-3]: t for t in tasks}
     created, updated, closed = 0, 0, 0
-    for t in board.tasks():
+    # pass 1 — every active task gets an issue (children included), so pass 2
+    # can link parents to child issue numbers.
+    for t in tasks:
         if t.status in ACTIVE and t.gh is None:
             out = sh("gh", "issue", "create", "-R", board.repo,
                      "--title", t.title, "--label", "board",
-                     "--body", issue_body(board, t))
+                     "--body", "(projecting\u2026)")
             t.gh = int(out.strip().rsplit("/", 1)[1])
             board.write(t)
             created += 1
-        elif t.gh is not None and t.gh in existing:
+    # pass 2 — bodies, labels, state.
+    for t in tasks:
+        if t.gh is None:
+            continue
+        if t.status in ACTIVE:
+            body = issue_body(board, t)
+            issue = existing.get(t.gh)
+            if issue is None or issue["body"] != body or issue["title"] != t.title:
+                sh("gh", "issue", "edit", "-R", board.repo, str(t.gh),
+                   "--title", t.title, "--body", body)
+                if issue is not None:
+                    updated += 1
+            set_labels(board.repo, t.gh, labels_for(t, by_id))
+            if issue is not None and issue["state"] != "OPEN":
+                sh("gh", "issue", "reopen", "-R", board.repo, str(t.gh))
+        elif t.status in CLOSED and t.gh in existing:
             issue = existing[t.gh]
-            if t.status in CLOSED and issue["state"] == "OPEN":
+            set_labels(board.repo, t.gh, labels_for(t, by_id))
+            if issue["state"] == "OPEN":
                 sh("gh", "issue", "close", "-R", board.repo, str(t.gh),
                    "-c", f"Board: task reached `{t.status}`.")
                 closed += 1
-            elif t.status in ACTIVE:
-                body = issue_body(board, t)
-                if issue["body"] != body or issue["title"] != t.title:
-                    sh("gh", "issue", "edit", "-R", board.repo, str(t.gh),
-                       "--title", t.title, "--body", body)
-                    updated += 1
-                if issue["state"] != "OPEN":
-                    sh("gh", "issue", "reopen", "-R", board.repo, str(t.gh))
     board.save()
     print(f"push {board.repo}: {created} created, {updated} updated, "
           f"{closed} closed")
@@ -175,13 +267,12 @@ FIELDS_QUERY = """query($id:ID!){node(id:$id){... on ProjectV2{
   ... on ProjectV2SingleSelectField{id name options{id name}}}}}}}"""
 
 SELECT_FIELDS = {
-    "Status": ["todo", "doing", "blocked", "paused", "functional",
-               "done", "cancelled"],
-    "Urgency": ["urgent", "high", "low", "idea"],
+    "Status": ["todo", "functional", "done", "cancelled"],
+    "Urgency": ["critical", "nice-to-have", "idea"],
     "Readiness": ["queued", "working", "blocked-on-answers", "plan-ready",
                   "complete"],
 }
-TEXT_FIELDS = ["Component"]
+TEXT_FIELDS = ["Area"]
 
 
 def ensure_project():

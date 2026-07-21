@@ -1,5 +1,7 @@
 - created: 2026-07-21
 - created_by: fable-5
+- completed: 2026-07-21
+- completed_during: orchestrator session
 - created_during: orchestrator session
 
 ## Blockers
@@ -29,3 +31,7 @@ top-level tasks, and report (not silently skip) any line that fails to parse.
 
 `push` on a board with nested unbadged children creates their issues and writes the
 badges back; a dry run reports every line it would skip.
+
+### Resolution (2026-07-21)
+
+Fixed 2026-07-21 in the tags-and-labels build: LINE_RE is indentation-tolerant, children project as issues (18 created), parent issues link children by number (verified on the orchard parent, gh#25).

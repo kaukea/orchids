@@ -24,8 +24,8 @@ group; list nesting is the parent → child hierarchy:
 ```markdown
 ## <functionality>
 
-- `type · status · urgency · readiness · component · gh#<n>` [Short title](TODO.md.d/<id>.md) ⊘<blocked-id> ~<related-id>
-  - `type · status · urgency · readiness · component · gh#<n>` [Child title](TODO.md.d/<child-id>.md)
+- `type · status · urgency · readiness · area · gh#<n>` [Short title](TODO.md.d/<id>.md) ⊘<blocked-id> ~<related-id>
+  - `type · status · urgency · readiness · area · gh#<n>` [Child title](TODO.md.d/<child-id>.md)
 ```
 
 **The badge** — the leading code-span is the whole machine payload: six `·`-separated fields,
@@ -35,9 +35,9 @@ parsed `badge.split('·').map(s => s.trim())`.
 |---|---|
 | `type` | bug · feature · refactor · housekeeping · completion |
 | `status` | *(outcome lifecycle)* todo · functional · done · cancelled |
-| `urgency` | *(empty = normal)* critical · urgent · low · idea |
+| `urgency` | *(empty = normal)* critical · nice-to-have · idea |
 | `readiness` | `<stage>` or `<stage>/<origin>` (see below) |
-| `component` | a component from the ARCHITECTURE.md Taxonomy (leaf tasks only) |
+| `area` | an area from the ARCHITECTURE.md Taxonomy (leaf tasks only) |
 | `gh#<n>` | GitHub-mirror issue number; empty until the mirror binds it |
 
 **The title link** — `[Short title](TODO.md.d/<id>.md)` does triple duty: the text is the
@@ -48,9 +48,15 @@ shown as a bare slug.
 **Edges** — `⊘<id>` = a `blocked_by` edge, `~<id>` = a `related` edge (both kind-marked,
 repeatable), trailing the title. **Parent ↔ child is the list nesting**, never a token.
 
-**Tags** — `#madmax`, trailing the line like an edge: the task runs UNRESTRICTED —
-every `claude` launch for that feature appends `--dangerously-skip-permissions`
-(Decision-031). Operator-set ONLY; agents never add or remove it.
+**Tags** — `#<tag>` tokens trailing the line like edges. The tag vocabulary (one
+source; projected to GitHub as emoji labels by `board_gh.py`, Decision-035):
+
+| tag | label | meaning | set by |
+|---|---|---|---|
+| `#madmax` | ⛽🤘 madmax | runs UNRESTRICTED — every `claude` launch for the feature appends `--dangerously-skip-permissions` (Decision-031; git-provenance enforced) | operator ONLY |
+| `#cloud` | ☁️ cloud | reporting: it WAS built in the cloud | the cloud flow |
+| `#analyzable` | 🛰️ analyzable | CAN go to the cloud | triage |
+| `#house-bound` | 🛋️ house-bound | local-only from inception | triage |
 
 **Provenance** (`created`, `created_by`, `created_during`, `completed`, `completed_during`)
 lives in the **sidecar metadata header** (§Sidecar), not on the board.
@@ -97,16 +103,16 @@ our `bug` to fix, even when the symptom surfaces outside our code.
 
 - **`parent` is the sole hierarchy field**, rendered as list nesting. The old `subtasks`
   forward field and its checkbox mirroring are **retired**. `blocked_by` / `related` are edges.
-- A **leaf** task (no children) MUST carry exactly one `component`; a **spanning parent**
+- A **leaf** task (no children) MUST carry exactly one `area`; a **spanning parent**
   carries none and rolls up readiness/urgency from its children. `functionality` = the heading.
-- `functionality` and `component` draw their controlled vocabulary from the ARCHITECTURE.md
+- `functionality` and `area` draw their controlled vocabulary from the ARCHITECTURE.md
   **Taxonomy** — agents do not invent values.
 
 ### Lints
 
-- **value ∈ glossary** — every `functionality` / `component` is in the Taxonomy table.
-- **leaf-has-component** — a childless task carries exactly one component; a parent carries
-  none (leaf-without-component = error; parent-with-component = error).
+- **value ∈ glossary** — every `functionality` / `area` is in the Taxonomy table.
+- **leaf-has-area** — a childless task carries exactly one area; a parent carries
+  none (leaf-without-area = error; parent-with-area = error).
 - **no-orphan-subtasks** — no `subtasks:` field survives; every `parent` / `⊘blocked_by` /
   `~related` id resolves to a real board entry.
 - **badge well-formed** — six `·`-separated fields; `type` / `status` in enum; `readiness`
@@ -138,7 +144,7 @@ carries the task's provenance, which the slim board badge deliberately omits:
 - completed_during: <workstream feature-id>               # required iff status ∈ {done, cancelled}
 ```
 
-The `id` is the file basename; `type`, `status`, `urgency`, `readiness`, `component`, `gh#`
+The `id` is the file basename; `type`, `status`, `urgency`, `readiness`, `area`, `gh#`
 live on the board badge (§TODO) — the sidecar never restates them (single source). Omit any
 header field with no value.
 

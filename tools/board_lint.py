@@ -29,7 +29,7 @@ TYPES = {'bug', 'feature', 'refactor', 'housekeeping', 'completion'}
 STATUSES = {'todo', 'functional', 'done', 'cancelled'}
 STAGES = {'queued', 'working', 'blocked-on-answers', 'plan-ready', 'complete'}
 ORIGINS = {'interactive', 'autonomous'}
-URGENCIES = {'', 'critical', 'urgent', 'low', 'idea'}
+URGENCIES = {'', 'critical', 'nice-to-have', 'idea'}
 
 
 def load_glossary():
@@ -107,7 +107,7 @@ def main():
         is_leaf = tid not in has_child
         if is_leaf:
             if t['fn'] not in gloss or comp not in gloss.get(t['fn'], set()):
-                errors.append(f"{tid}: component {comp!r} not in {t['fn']} taxonomy")
+                errors.append(f"{tid}: area {comp!r} not in {t['fn']} taxonomy")
         elif comp:
             errors.append(f"{tid}: spanning parent must have empty component, got {comp!r}")
         if not os.path.exists(os.path.join(SIDECARS, tid + '.md')):

@@ -1,5 +1,7 @@
 - created: 2026-07-21
 - created_by: Sebastien Lambla
+- completed: 2026-07-21
+- completed_during: orchestrator session
 
 ## Blockers
 
@@ -37,3 +39,7 @@ stays canonical; projection direction per the round-trip answer.
 To agree when ripened — expected shape: a board line carrying a tag and an
 urgency projects to an issue wearing the matching emoji labels; the label set on
 GitHub equals what the board line says, for every projected issue.
+
+### Resolution (2026-07-21)
+
+Built and live-verified 2026-07-21 (Decision-035): 21 labels ensured, all issues relabelled exactly from their board lines (18 created, 15 updated, 3 closed; project 45 rows); gh#23 carries board/feature/area-process/todo/blocked, gh#34 carries bug/area-process/doing.

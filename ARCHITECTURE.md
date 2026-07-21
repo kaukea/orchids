@@ -118,10 +118,10 @@ docs/              orchids' own board (TODO.md + sidecars)
 
 The controlled vocabulary the board draws from (`AGENTS.files.md` §TODO): the
 functionality is the board heading's first word; each leaf task carries exactly
-one of its components. `board_lint.py` enforces membership from this table —
+one of its areas. `board_lint.py` enforces membership from this table —
 the single source; agents do not invent values.
 
-| Functionality | Components |
+| Functionality | Areas |
 |---|---|
 | **Publication** | publication |
 | **Process** | process |

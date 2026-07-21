@@ -49,7 +49,7 @@ restructuring one, read its section there — do NOT invent a format from memory
 | the-works/\<stream\>/\<session\>.md *(workstream logs)* | `.git/the-works/` (git-common-dir) — uncommittable | one per session, ROLLING — created at session start, updated as work progresses · stream marked `_closed` at finish · promoted then ARCHIVED to `_ingested/` by the ingester | no — hook announces closed streams | `handover` skill |
 | migrations/\<YYYY-MM-DD\>-\<slug\>.md | package root | authored in the same branch as any move/rename/reformat of a managed artifact · applied when the hook reports pending | no — hook-triggered | `AGENTS.files.md` §Migrations |
 
-The functionality/component taxonomy lives in the project's `ARCHITECTURE.md`; agents do
+The functionality/area taxonomy lives in the project's `ARCHITECTURE.md`; agents do
 not invent new values. Pull task and decision content from these files before model memory
 or chat-only context.
 
