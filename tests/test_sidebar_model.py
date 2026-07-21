@@ -139,6 +139,22 @@ class WaitingTests(_BusFixtureTestCase):
         self.assertTrue(feature.waiting)
         self.assertEqual(feature.status, "waiting")
 
+    def test_terminal_lifecycle_clears_waiting(self):
+        self._architect("arch-sticky3", "feat-sticky3")
+        self._put("arch-sticky3", "arch-sticky3-act", "arch-sticky3",
+                  "orchid:activity:need input",
+                  ts="2026-01-01T00:00:01.000000+00:00", notify_user=True)
+        # a finished session is resolved: the stale waiting flash must clear
+        # and the row must show its completed status, not the hourglass
+        self._put("arch-sticky3", "arch-sticky3-lc", "arch-sticky3",
+                  lifecycle_body("finished", feature_id="feat-sticky3"),
+                  ts="2026-01-01T00:00:02.000000+00:00")
+
+        fleet = sidebar_model.build_model([self.repo])
+        feature = fleet.repos[0].features[0]
+        self.assertFalse(feature.waiting)
+        self.assertEqual(feature.status, "completed")
+
 
 class AttributionTests(_BusFixtureTestCase):
     def test_activity_attributed_to_sender_not_folder(self):

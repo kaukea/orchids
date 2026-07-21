@@ -223,7 +223,16 @@ def _apply_message(state: _SessionState, msg: dict) -> None:
             state.active_subagents.discard(label)
 
 
+# a finished/abandoned session is resolved — it must never keep flashing a
+# stale "waiting on operator" hourglass. last_notify_user (set by the last
+# activity broadcast) is otherwise only cleared by a NEW activity broadcast,
+# which a closing session does not always emit before it signals terminal.
+_TERMINAL_LIFECYCLE = {"finished", "abandoned"}
+
+
 def _waiting_of(state: _SessionState) -> bool:
+    if state.lifecycle_state in _TERMINAL_LIFECYCLE:
+        return False
     return state.last_notify_user or state.lifecycle_state == "blocked"
 
 
