@@ -97,10 +97,8 @@ renames):**
   --agent architect`: add `--name "orchids / ${id//-/ }"`.
 - Orchestrator root session — `skills/orchestrator/SKILL.md` summon line
   `claude --resume … || claude --name …`: the pair moves from `<project>
-  Orchestrator` to the **bare repository name** `<project>` (resume key and name must
-  stay identical, so the same session is found/created). NOT slash-form and NOT an
-  `orchestrator` suffix — there is one orchestrator per repository, so its session
-  name *is* the repository (operator amendment 2026-07-21, Decision-032).
+  Orchestrator` to `<repo> / orchestrator` (resume key and name must stay identical,
+  so the same session is found/created). Its human name is its role, `orchestrator`.
 - Ripener spawn — `skills/ripen-tasks/SKILL.md` `claude --bg --agent ripener`:
   adopt the same `--name` (feature-tied launch). Noted: the frozen Testing method
   only exercises orchestrator + architect.
@@ -134,32 +132,3 @@ Spawn an orchestrator and an architect: the claude UI lists
 `<repo> / <human name>` for each; the id→human-name derivation round-trips for every
 board id; the bus identity carries the same name; `tmux list-panes` still matches the
 teardown's `arch:<id>` lookup.
-
-## Result
-
-Result: BUILT & tested (automated gate green) — branch `f/session-naming`, awaiting
-operator review. Four launch sites now enforce the contract, forward-only:
-
-- `agents/orchestrator.md` — architect spawn gains `--name "orchids / ${id//-/ }"`
-  (an `id=<id>` capture added so the human name derives in-shell); the
-  `select-pane -T "arch:<id>"` teardown line is byte-for-byte unchanged.
-- `skills/orchestrator/SKILL.md` — root summon becomes the **bare** repo name
-  `claude --resume "<project>" || claude --name "<project>"` (operator amendment:
-  NOT `<repo> / orchestrator`; one orchestrator per repo, name = repo).
-- `skills/ripen-tasks/SKILL.md` — ripener `--bg` launch gains
-  `--name "orchids / ${id//-/ }"` (feature human name, never the role).
-- `tools/bus.py` `identity_of()` — gains a derived `name` (`feature_id` with
-  `-`→space), so the sidebar/any bash consumer reads one field.
-
-Automated test method (refined for the headless runner), all four assertions green:
-(a) 57/57 board ids round-trip id→human→id; (b) `bus.py identity` in a linked
-worktree emits `name: "carrots eating"` for `feature_id: carrots-eating`;
-(c) each edited launch line carries `--name`; (d) the `arch:<id>` line is unchanged.
-`bus.py` compiles; the non-worktree case yields `name: None` (no crash).
-
-Deferred / not self-approved: the operator-manual visual check (the claude UI actually
-lists `<repo> / <human name>`) needs a live interactive spawn the headless runner
-cannot inspect — left for the operator or a local run. Out of scope per operator
-ruling: SessionStart hook/`.pending-subjob` titling, epics/parent chains, retro
-renames. The `<project> Orchestrator` string in the SKILL's mainline-`/branch`
-section is that untouched hook mechanism — a forward item, not this branch's edit.

@@ -140,15 +140,11 @@ def identity_of() -> dict:
     top = git("rev-parse", "--show-toplevel")
     worktree = Path(top).name if top else None
     linked = "/worktrees/" in git("rev-parse", "--git-dir")
-    feature_id = worktree if linked else None
     return {
         "session_id": whoami(),
         "agent_type": os.environ.get("CLAUDE_CODE_AGENT") or None,
         "worktree": worktree,
-        "feature_id": feature_id,
-        # Human name = feature id with '-' → spaces; derived once here so the sidebar
-        # and any bash consumer read one field instead of re-deriving (Decision-032).
-        "name": feature_id.replace("-", " ") if feature_id else None,
+        "feature_id": worktree if linked else None,
         "parent_session": os.environ.get("ORCHID_PARENT_SESSION") or None,
     }
 
