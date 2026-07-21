@@ -65,9 +65,13 @@
   close-spine catches ALL PRs into main — the orchestrator's board-round PR
   #58 stranded BLOCKED; operator unblocking + adding repository-admin bypass
   (explicit "merge with bypass", no bare green button); orchestrator lane told
-  to publish the check at its own close gate. Direct-push semantics STILL
-  unverified — next board push answers; if rejected, add the Actions app to
-  the bypass list · nested-line projection gap (already filed by the
+  to publish the check at its own close gate. Direct-push semantics VERIFIED
+  (orchestrator, 2026-07-21): rulesets DO gate direct pushes — its board push
+  was rejected; board-sync ingest and local close pushes are broken until the
+  bypass list carries Repository admin + the GitHub Actions app (operator
+  applying). close-spine semantics made canon in the workflow header: the
+  check IS a closing role's published judgment; setting it without a passed
+  close gate is forgery · nested-line projection gap (already filed by the
   orchestrator).
 
 ## Proposal

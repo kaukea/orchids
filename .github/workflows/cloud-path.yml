@@ -21,6 +21,13 @@
 # "Allow GitHub Actions to create and approve pull requests" ENABLED — without it
 # the BUILD hop parks at PR creation (GitHub Actions is not permitted to create
 # or approve pull requests).
+#
+# THE close-spine CHECK (ruleset 19333120) is not computed by automation — it IS
+# a closing role's judgment, published as a status. It may be set success ONLY
+# by: housekeeper-cloud after its docs gate passes (charter step 5), a lane's
+# own close gate passing (e.g. the orchestrator's board-round close), or the
+# operator directly. Publishing it without a passed close gate is forgery of
+# the merge gate, not a workaround.
 
 name: cloud-path
 
