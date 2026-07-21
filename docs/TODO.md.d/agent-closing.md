@@ -172,3 +172,18 @@ approval" :57) and never documents which pane an approval is typed in. This corr
 fixes internal delivery robustness (the close completes; an approval reaches the gate)
 without adding a documented user capability or changing a usage instruction, so no
 README section becomes inaccurate. Checked README.md:23,57,102-104.
+
+### First live observation (orchestrator, 2026-07-21 21:5x, this feature's own close)
+
+- PASS — bus half: the architect's bus released, departed, and its inbox
+  watcher was verifiably gone (pgrep observation; remaining watchers all
+  belonged to live sessions).
+- FAIL — window half: the architect window survived with the live session in
+  it; NO `@arch_id` was observed on the window despite the stream log's
+  bootstrap claim, so the patched teardown found no window and exited without
+  killing. Cause reads as a missed bootstrap on a pre-fix window, not a defect
+  in the delivered path (future windows get `@arch_id` from the amended launch
+  recipe). Orchestrator reaped as the dead-agent fallback (window-granular).
+- Next observation: the sidebar-fixes close — its window carries a bootstrapped
+  `@arch_id=sidebar-fixes` (readback verified), so it exercises the delivered
+  teardown end-to-end.

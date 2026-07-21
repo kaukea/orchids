@@ -907,3 +907,27 @@ close, where an approval typed in the orchestrator pane had no path to the
 architect's done gate. Chosen over the alternatives of charter-only
 redirection ("type it in the architect's window") and tmux keystroke
 injection. Mechanics land with the agent-closing corrective.
+
+## [2026-07-21 21:59 CEST] Decision-048: Teardown, reaping and mount key off the @arch_id window user-option
+#teardown #panes #close #agent-closing #arch-id #tmux #reaping #sidebar
+
+Ruling (operator, 2026-07-21, via the agent-closing corrective): the stable
+handle for an architect window is a tmux WINDOW user-option `@arch_id=<id>`,
+set at launch. `architect-teardown.sh` and orchestrator reaping resolve the
+window by `@arch_id` and close at WINDOW granularity — the mounted sidebar
+pane dies with it. The `arch:<id>` pane title survives only as a
+non-load-bearing human hint: claude clobbers pane titles live with the
+session name, which is exactly what broke title-keyed teardown and reaping.
+`@arch_id` is also the contract sidebar-fixes consumes for mount idempotency.
+Refines Decisions 028/036/045 (which had made the pane title the handle).
+
+## [2026-07-21 21:59 CEST] Decision-049: The operator-origin relay stays literal — spoofability is an accepted trade-off
+#bus #approval #operator-relay #security #trust-model #agent-closing
+
+Ruling (operator, 2026-07-21): the operator-origin relay is implemented
+LITERALLY per Decision-047 — any `operator_origin`-flagged message is honored
+at a gate; no conductor-only hardening. The flag is convention, not
+cryptography: on a cooperative single-operator fleet where NO bus message is
+authenticated, the spoofable-bypass finding raised by the security scan is an
+ACCEPTED, operator-sanctioned trade-off. Peer prose without the flag still
+never closes a gate.
