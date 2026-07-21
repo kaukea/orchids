@@ -184,7 +184,7 @@ The close is done, the stream is marked closed. Switching sessions is operator-d
 parent only ingests when it is foregrounded, so the final act is a reminder — not an
 action you can take:
 
-> Closed. Run `/resume "<project> Orchestrator"` (or `orch`) to return — the parent will
+> Closed. Run `/resume "<project>"` (or `orch`) to return — the parent will
 > ingest this handover automatically.
 
 This applies to both the success and cancellation paths.

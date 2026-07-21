@@ -148,7 +148,8 @@ coder, not the orchestrator (Decision-046). Coding begins there, never here.
 
 **Mainline `/branch` identity (do this or the fork is mistitled).** A mainline `/branch`
 fork shares the main checkout, so the `SessionStart` hook cannot tell it from the
-orchestrator by location — it would title the sub-job `<project> Orchestrator`. Before
+orchestrator by location — it would title the sub-job `<project>` (the orchestrator's own
+name — Decision-032). Before
 telling the operator to run `/branch`, write the task's `{#id}` (the leaf feature-id) to
 `.claude/.pending-subjob.local`:
 
@@ -202,7 +203,9 @@ The orchestrator is renewed, never repaired — its state lives in docs + git + 
 not the session (Decision-049, renewal mechanism updated by Decision-071).
 
 - **Summon (`orch`):** the operator runs the `orch` wrapper (`bin/orch`), which does
-  `claude --resume "<project> Orchestrator" || claude --name "<project> Orchestrator"`.
+  `claude --resume "<project>" || claude --name "<project>"` — the session name is the bare
+  repository name (`orchids`), never a slash-form or an `Orchestrator` suffix: there is exactly
+  one orchestrator per repository, so its name *is* the repository (Decision-032).
   Always lands in the same-named orchestrator — resumed if alive, created if gone (crash,
   expiry). This is for *starting work* and *recovery*, and opens a fresh window.
 - **Renewal (`/compress`):** when you judge the session bloated, refresh `MOOD.md`, then

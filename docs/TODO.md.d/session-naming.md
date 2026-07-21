@@ -79,9 +79,117 @@ on:
 Enforcement is forward-only: launch sites (orchestrator architect spawn, cloud path,
 future spawns) adopt `--name`; nothing is retro-renamed.
 
+## Tech plan
+
+The HOW behind the frozen Proposal (Decision-025 — WHAT stays in Proposal, files are
+not pre-decided here). orchids is a data package: "launch sites" are the spawn
+instructions in the agent/skill docs plus the one bus helper in `tools/`.
+
+**One derivation, quoted everywhere.** id↔human is a pure string swap: human =
+`id` with `-`→` `, id = human with ` `→`-`. It round-trips because board ids are
+kebab (no spaces) and human names are only ever derived, never authored. The swap is
+order-agnostic — the gerund-first rule governs how a NEW id is authored, not the code.
+bash sites inline `${id//-/ }`; Python surfaces it once in the bus.
+
+**Launch sites that adopt `--name "<repo> / <human name>"` (forward-only, no retro
+renames):**
+
+- Local architect spawn — `agents/orchestrator.md` `tmux split-window … claude
+  --agent architect`: add `--name "orchids / ${id//-/ }"`.
+- Orchestrator root session — `skills/orchestrator/SKILL.md` summon line
+  `claude --resume … || claude --name …`: the pair moves from `<project>
+  Orchestrator` to the **bare repository name** `<project>` (resume key and name must
+  stay identical, so the same session is found/created). NOT slash-form and NOT an
+  `orchestrator` suffix — there is one orchestrator per repository, so its session
+  name *is* the repository (operator amendment 2026-07-21, Decision-032).
+- Ripener spawn — `skills/ripen-tasks/SKILL.md` `claude --bg --agent ripener`:
+  adopt the same `--name` (feature-tied launch). Noted: the frozen Testing method
+  only exercises orchestrator + architect.
+- Cloud path — the `claude -p --agent architect-cloud` / orchestrator-cloud launches
+  live on the unlanded `f/cloud-architect` branch, not here; the `--name` requirement
+  travels with them (forward note, no edit on this branch).
+
+**Role-noun references reconciled (naming round froze after the build; REVISE hop).**
+The contract's "agent names appear NOWHERE / one orchestrator per repo" retires the
+orchestrator's old `<project> Orchestrator` name at every remaining reference, not just
+the summon line:
+
+- `skills/workflow-complete/SKILL.md` close-return reminder — resumed the orchestrator
+  by `"<project> Orchestrator"`; now the bare `"<project>"` (a resume is a launch site;
+  the old string would send the operator to a non-existent second session).
+- `skills/orchestrator/SKILL.md` `/branch` mistitle note — described the `SessionStart`
+  hook titling a fork `<project> Orchestrator`; corrected to the orchestrator's own bare
+  name `<project>` (doc consistency only; the hook itself stays unbuilt per scope).
+
+**Subagents: hidden sessions, bus-visible rows.** Subagents (builder, housekeeper via
+the Agent tool / `--bg`) inherit the parent's bus identity and are never named sessions
+— but they ARE sidebar-visible through the bus's existing on-change activity broadcast
+(`announce` on start, `depart` on end, `signal` on lifecycle change). This is the
+pinned activity-broadcast requirement, satisfied by the existing bus mechanism — no new
+hook (operator scope ruling). tmux machine titles `arch:<id>` stay verbatim (teardown
+matches on them).
+
+**Bus surfaces the name.** `tools/bus.py` `identity_of()` gains a derived `name`
+(human name from `feature_id`), so the sidebar and any bash consumer read one field
+instead of re-deriving. Identity already carries `feature_id`/`worktree`; `name` joins
+them as a birth-record field (model/effort stay out — Decision-028).
+
+**Testing, made runnable in the headless cloud runner** (refines the frozen method,
+which assumes a live tmux UI the runner has not got):
+
+- automated in the runner — a check script asserts (a) id→human→id round-trips for
+  every `docs/TODO.md.d/*.md` id; (b) `bus.py identity` emits the derived `name` for a
+  set `feature_id`; (c) each edited launch line carries `--name "<repo> / …"`; (d) the
+  `select-pane -T "arch:<id>"` line is unchanged.
+- operator-manual — the actual "claude UI lists `<repo> / <human name>`" visual check
+  needs a real interactive spawn the headless runner cannot inspect; left for the
+  operator (or a local run) and called out as such, not self-approved.
+
 ## Testing
 
 Spawn an orchestrator and an architect: the claude UI lists
 `<repo> / <human name>` for each; the id→human-name derivation round-trips for every
 board id; the bus identity carries the same name; `tmux list-panes` still matches the
 teardown's `arch:<id>` lookup.
+
+## Result
+
+Result: BUILT (91a2a38) + REVISED against the frozen naming contract — branch
+`f/session-naming`, awaiting operator review. Four launch sites enforce the contract
+forward-only; the REVISE hop reconciled the branch to the naming round that froze
+after the build (gerund-first ids, agent names nowhere, subagents hidden but
+bus-visible, on-change activity broadcast).
+
+Launch sites (build):
+
+- `agents/orchestrator.md` — architect spawn gains `--name "orchids / ${id//-/ }"`
+  (an `id=<id>` capture added so the human name derives in-shell); the
+  `select-pane -T "arch:<id>"` teardown line is byte-for-byte unchanged.
+- `skills/orchestrator/SKILL.md` — root summon becomes the **bare** repo name
+  `claude --resume "<project>" || claude --name "<project>"` (Decision-032: one
+  orchestrator per repo, name = repo; no slash-form, no `Orchestrator` suffix).
+- `skills/ripen-tasks/SKILL.md` — ripener `--bg` launch gains
+  `--name "orchids / ${id//-/ }"` (feature human name, never the role).
+- `tools/bus.py` `identity_of()` — gains a derived `name` (`feature_id` with
+  `-`→space), so the sidebar / any bash consumer reads one field.
+
+Reconciled in the REVISE hop (role-noun sites the build missed):
+
+- `skills/workflow-complete/SKILL.md` — the close-return reminder resumed the
+  orchestrator by `"<project> Orchestrator"`; now the bare `"<project>"` (Decision-032).
+- `skills/orchestrator/SKILL.md` — the `/branch` mistitle note said the hook would
+  title a fork `<project> Orchestrator`; corrected to the orchestrator's own bare
+  name `<project>`.
+- Subagent visibility clarified: subagents stay unnamed sessions but ARE sidebar-
+  visible via the bus's existing on-change activity broadcast (`announce`/`depart`/
+  `signal`) — the pinned requirement is satisfied by the existing bus mechanism, no
+  new hook (operator scope ruling).
+
+Automated test gate (headless-runner method), all assertions green:
+(a) board ids round-trip id→human→id; (b) `bus.py identity` emits the derived `name`;
+(c) each edited launch line carries `--name`; (d) the `arch:<id>` line is unchanged.
+
+Deferred / not self-approved: the operator-manual visual check (the claude UI actually
+lists `<repo> / <human name>`) needs a live interactive spawn the headless runner
+cannot inspect. Out of scope per operator ruling: SessionStart hook / `.pending-subjob`
+titling build-out, epics / parent chains, retro renames.
