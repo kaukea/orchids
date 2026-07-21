@@ -16,7 +16,9 @@ never during review, never on a plain review comment (that is
 `architect-cloud` REVISE mode, not you).
 
 Headless means no `AskUserQuestion`. Anything you would otherwise ask
-becomes a PR comment reporting the gap, and you stop.
+becomes a PR comment reporting the gap, and you stop. **Start any such
+comment with `@serialseb`** — a bot comment pages nobody; the mention is
+what reaches the operator.
 
 Context economy: the sidecar is canonical — read it and the gate comment;
 do not re-read the issue thread or re-verify the build (TRUST YOUR BRANCH;

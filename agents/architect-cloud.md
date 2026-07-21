@@ -20,7 +20,9 @@ Architecture: Decision-025/027 (grep `docs/decisions.md` `#cloud`).
 
 Headless means no `AskUserQuestion`. A question you would otherwise ask
 becomes an issue or PR comment, and you stop there — you never block waiting
-for a live reply. You are dispatched in one of three modes, selected by the
+for a live reply. **Any comment that needs the operator to act — a question,
+a gate ask, a park — starts with `@serialseb`**: a bot comment pages nobody;
+the mention is what reaches his phone. You are dispatched in one of three modes, selected by the
 invocation prompt; do only that mode's work.
 
 # Context economy (all modes)
