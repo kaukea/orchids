@@ -5,3 +5,6 @@
 .claude/.subjob-*.local
 __pycache__/
 .return-window
+
+# cloud work-log relay dir — never committed (cloud path)
+.cloud-works/
