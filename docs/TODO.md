@@ -53,6 +53,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
   - `completion · done · · complete/interactive · process ·` [callabloom: the cloud hops' named app identity](TODO.md.d/app-identifying.md) ~cloud-architect
   - `feature · todo · · blocked-on-answers · process ·` [Branch protection as code: operator approval to merge, callabloom excepted](TODO.md.d/branch-protecting.md) ~app-identifying
   - `feature · todo · · blocked-on-answers · process ·` [Mr. Rabbit: serialized merge ordering owns changelog order, closes the loop](TODO.md.d/merge-ordering.md) ~branch-protecting ~cloud-architect
+  - `housekeeping · todo · · queued · process ·` [Merge queue investigating: does GitHub's native queue serve the fleet?](TODO.md.d/merge-queue-investigating.md) ~merge-ordering ~branch-protecting
   - `refactor · todo · · blocked-on-answers · process ·` [Launcher subagent: extract worktree creation and agent launch from the orchestrator](TODO.md.d/launcher-subagent.md) ~merge-ordering
   - `feature · todo · · queued · process ·` [Delta commenting: agents converse in threads — acknowledge, advise, refine](TODO.md.d/delta-commenting.md)
   - `feature · todo · idea · queued · process ·` [Routine NL-trigger: an Anthropic routine dispatches the cloud path](TODO.md.d/routine-triggering.md) ~merge-ordering
@@ -107,20 +108,3 @@ Badge: `type · status · urgency · readiness · area · gh#`.
 - `feature · todo · idea · queued · sync · gh#18` [Dynamic skill delivery per role](TODO.md.d/dynamic-skill-delivery.md)
 - `feature · todo · idea · queued · sync · gh#19` [Multi-source namespacing](TODO.md.d/multi-source-namespacing.md)
 - `feature · todo · idea · blocked-on-answers · sync · gh#20` [Agents: external dependencies beyond in-package skills](TODO.md.d/agent-external-deps.md) ~agents-first-class ~multi-source-namespacing
-- `feature · todo · · queued · · gh#93` [Decision-005: Roles declare as slash-path placements; `general` is explicit](TODO.md.d/decision-005-roles-declare-as-slash-path-placeme.md)
-- `feature · todo · · queued · · gh#92` [Decision-004: Agent dependencies — agent→agent edges are declared, in a `requirements:` map](TODO.md.d/decision-004-agent-dependencies-agent-agent-edge.md)
-- `feature · todo · · queued · · gh#91` [Decision-003: The orchids role vocabulary](TODO.md.d/decision-003-the-orchids-role-vocabulary.md)
-- `feature · todo · · queued · · gh#90` [Decision-002: Delivery is driven by a task-oriented role DAG declared in the definitions](TODO.md.d/decision-002-delivery-is-driven-by-a-task-orient.md)
-- `feature · todo · · queued · · gh#89` [Decision-001: History migration is an orchestrator charter, gated by the AGENTS.md `repository:` field](TODO.md.d/decision-001-history-migration-is-an-orchestrato.md)
-- `feature · todo · · queued · · gh#126` [Decision-038: Operator actions surface as end-of-reply bullets](TODO.md.d/decision-038-operator-actions-surface-as-end-of-.md)
-- `feature · todo · · queued · · gh#125` [Decision-037: The cloud path is canon — runtime, gates, handoff, and its work log](TODO.md.d/decision-037-the-cloud-path-is-canon-runtime-gat.md)
-- `feature · todo · · queued · · gh#124` [Decision-036: The tmux topology — window per architect; subagents hidden, peekable](TODO.md.d/decision-036-the-tmux-topology-window-per-archit.md)
-- `feature · todo · · queued · · gh#123` [Decision-035: One tag vocabulary, board and GitHub — labels are the projection](TODO.md.d/decision-035-one-tag-vocabulary-board-and-github.md)
-- `feature · todo · · queued · · gh#122` [Decision-034: Changelog and README — content staged at the source, file written at the hub](TODO.md.d/decision-034-changelog-and-readme-content-staged.md)
-- `feature · todo · · queued · · gh#121` [Decision-033: Batch the pushes — a push is a workload trigger, not a save](TODO.md.d/decision-033-batch-the-pushes-a-push-is-a-worklo.md)
-- `feature · todo · · queued · · gh#120` [Decision-032: One orchestrator per repository; its session name is the repository](TODO.md.d/decision-032-one-orchestrator-per-repository-its.md)
-- `feature · todo · · queued · · gh#119` [Decision-031: Automode by default; #madmax unrestricts a task's launches](TODO.md.d/decision-031-automode-by-default-madmax-unrestri.md)
-- `feature · todo · · queued · · gh#118` [Decision-030: The gate vocabulary — operator words, and nothing else, trigger](TODO.md.d/decision-030-the-gate-vocabulary-operator-words-.md)
-- `feature · todo · · queued · · gh#117` [Decision-029: Duplicates fold into the older entry; rulings supersede the newer way](TODO.md.d/decision-029-duplicates-fold-into-the-older-entr.md)
-- `feature · todo · · queued · · gh#116` [Decision-028: The close is bus-driven — lifecycle signals replace the finishing hooks](TODO.md.d/decision-028-the-close-is-bus-driven-lifecycle-s.md)
-- `feature · todo · · queued · · gh#115` [Decision-027: The pipeline is orchestrator → ripener → architect; cloud rides issues and PRs, starting now](TODO.md.d/decision-027-the-pipeline-is-orchestrator-ripene.md)
