@@ -105,6 +105,20 @@ The operator's itemized list, verbatim in substance:
         harness's own dialog never reaches the bus. Make it mechanical: a
         hook on the harness's notification/question event auto-broadcasts
         the waiting-on-operator flag, independent of model diligence.
+    (c) **Mechanics REFINED** (operator via orchestrator, 2026-07-22,
+        operator-origin relay, req 5479001fc484): the ask path is a typed
+        QUESTION MESSAGE on the bus (question text + numbered options); the
+        renderer is a TOKEN-FREE SCRIPT, not an agent. On a question
+        message, it draws a native tmux `display-popup` (numbered options)
+        over the operator's CURRENT window, captures the keypress, and
+        returns the answer over the bus to the asking session. The ❓
+        sidebar marker consumes the same message. The harness Notification
+        hook (12b) stays as backstop for harness-native prompts that bypass
+        this path. THIS IS A TRIAL — build it lean; fleet-wide forbidding of
+        the question tools happens only after the operator sees it work
+        live. **Test requirement**: a LIVE round trip — an agent asks over
+        the bus, the popup renders wherever the operator is, the answer
+        arrives back at the asker.
 10. **Project header rendering**: the project title centered over a
     background GRADIENT rendered with half-block cells (▀▄), in the
     traditional orchid colour (the classic orchid #DA70D6 family) — except
