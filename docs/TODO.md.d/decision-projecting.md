@@ -7,6 +7,13 @@
 
 ## Questions
 
+- ~~Duplicate/superseded close mechanics?~~ RULED (operator, 2026-07-22):
+  NATIVE — the UI closes as duplicate, so the API does too: the close
+  mutation's duplicate state with its duplicate-of reference. Body-note
+  ("Superseded by #N"/"Duplicate of #N") remains the FALLBACK only if the
+  API path proves narrower than the UI. Superseded decisions close
+  not-planned with the superseded-by reference.
+
 - **Duplicate close reason: native `state_reason=DUPLICATE`, or a body-note
   fallback like the merged `~related` gap?** field-projecting (merged
   d010887, Decision-053) confirmed GitHub has no native equivalent for
