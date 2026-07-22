@@ -205,6 +205,13 @@ result into the sidecar, presents **done** (and signals `done` on the bus) — a
 **`ALL IT IS`** and signals **`finished`** on the bus; your bus sidecar relays that `finished`
 up to you.
 
+**Operator gate-phrase translation (Decision-057).** The operator's spoken/typed BUILD-gate
+phrase is **`NO NO THAT WAS NOT A QUESTION`** (accepted variants: `THIS` for `THAT`; short
+form `NO NO`) — translated AT THIS BOUNDARY, and at any operator-input surface (the coming
+question/gate popup), to the fleet's internal gate string `MAKE IT SO` before relay. The
+protocol string never changes internally; `MAKE IT SO` typed directly still works. `THAT IS
+ALL` is untouched.
+
 **Operator relay (Decision-047).** If the operator types a gate word — `THAT IS ALL` or
 `MAKE IT SO` — in the ORCHESTRATOR's own pane while an architect is waiting at that gate, ask
 your bus to relay the operator's VERBATIM word to that architect, flagged operator-origin —

@@ -1053,3 +1053,16 @@ input tokens to re-load what the committing context had for free. The
 scribe variant of Decision-055 is retired before first use. Same family as
 the popup ruling (a script where no judgment is needed): spend model
 attention exactly once, where the information is born.
+
+## [2026-07-22 17:26 CEST] Decision-057: The operator's build-gate phrase, translated at the boundary
+#gates #keywords #relay #ui #operator #make-it-so
+
+Operator ruling (2026-07-22): the operator-facing build-gate phrase becomes
+**"NO NO THAT WAS NOT A QUESTION"** (variants: THIS for THAT; short form
+"NO NO") — the architect's final plan summary is answered by objecting that
+it needed asking at all. Implementation is a TRANSLATION AT THE UI
+BOUNDARY, per the operator's scope guidance: every operator-input surface
+(orchestrator pane relay now; the question/gate popup when it lands) maps
+the phrase to the fleet's INTERNAL protocol string `MAKE IT SO`, which is
+unchanged everywhere else — defs, bus matching, in-flight builds. A
+directly-typed `MAKE IT SO` still works. `THAT IS ALL` is untouched.
