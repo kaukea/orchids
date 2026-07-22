@@ -28,13 +28,18 @@
 
 ## Proposal
 
-Per Decision-068: an agent closes its OWN window whenever it is ready,
-broadcasting `on-closing` then `on-closed`; five seconds after `on-closing`
-without an `on-closed`, ONE designated bus-listening agent kills the
-process/window and broadcasts the death on its behalf (an agent may request
-longer grace at announce time). The housekeeper's worktree removal waits on
-`on-closed`/kill-broadcast, already chartered. Sidebar eviction consumes the
-same signals (already built).
+Per Decision-068 and its addendum: `on-closing` OPENS the agent's cleanup
+phase — it tells its subagents to go, and each subagent tears down its OWN
+monitors and resources (cascading self-cleanup). `on-closed` is emitted only
+when the agent is ready to close its window. NOBODY observes the window
+itself — supervision consumes signals about what agents are doing and
+advertising, never tmux state; the window is an implementation detail. ONE
+designated bus-listening agent watches on-closing/on-closed and kills any
+agent exceeding its allocated time (five seconds default from on-closing;
+longer only if requested at announce), broadcasting the death on its
+behalf. The housekeeper's worktree removal waits on `on-closed`/kill-
+broadcast, already chartered. Sidebar eviction consumes the same signals
+(already built).
 
 ## Testing
 

@@ -1182,3 +1182,17 @@ kills it and broadcasts the death on its behalf. The HOUSEKEEPER never
 removes a worktree before the agent's on-closed (or the kill) has been
 observed — retry-until-free was insufficient; the ordering is now a hard
 precondition.
+
+## [2026-07-22, addendum to Decision-068] The lifecycle signals mean work, not windows
+#lifecycle #close #on-closing #on-closed #supervision
+
+Operator clarification, same day: **on-closing** opens the agent's own
+cleanup phase — it tells its subagents to go, and EACH SUBAGENT is
+responsible for tearing down its own monitors and resources (cascading
+self-cleanup, as previously discussed). **on-closed** is emitted only when
+the agent is ready to close its window — and nobody observes the window
+itself: observers care about what an agent is DOING and ADVERTISING it is
+doing, never about tmux state. That inversion is what makes supervision
+possible at all: ONE agent listens to on-closing/on-closed and kills any
+agent that exceeds its allocated time — signals are the truth, the window
+is an implementation detail.
