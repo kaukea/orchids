@@ -226,7 +226,15 @@ def _popup_read_main(question: str, options: list[str], answer_file: str) -> Non
     try:
         tty.setraw(fd)
         while True:
-            ch = sys.stdin.read(1)
+            # os.read(fd, 1), NOT sys.stdin.read(1): Python's io.TextIOWrapper
+            # sits on a BufferedReader that can still hold a keypress back
+            # until more bytes (or a newline) arrive, even after tty.setraw()
+            # takes the fd out of canonical mode — a well-known gotcha that
+            # makes a raw-mode reader silently behave like it's waiting for
+            # Enter. Reading the fd directly bypasses that buffering, so a
+            # single option keypress registers immediately (item 12d).
+            raw = os.read(fd, 1)
+            ch = raw.decode("ascii", errors="ignore")
             idx = match_option_key(ch, len(options))
             if idx is not None:
                 break
