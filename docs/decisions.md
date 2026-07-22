@@ -849,8 +849,8 @@ the orchestrator decide on its own to launch a cloud agent — every cloud
 launch requires the operator's explicit authorization. While the operator is
 present, the local architect path is the default.
 
-## [2026-07-21 19:42 CEST] Decision-043: Fleet sidebar aggregates via an explicit repolist — Orchard's discovery deferred
-#fleet-sidebar #sidebar #cross-repo #repolist #orchard #discovery
+## [2026-07-21 19:42 CEST] Decision-043: ~~Fleet sidebar aggregates via an explicit repolist — Orchard's discovery deferred~~ *superseded by Decision-061*
+#fleet-sidebar #sidebar #cross-repo #repolist #orchard #discovery #supersession
 
 Ruling (operator, 2026-07-21): the fleet sidebar aggregates cross-repo via an
 EXPLICIT repolist config (`~/.config/orchids/sidebar-repos`, one path per line,
@@ -1095,3 +1095,38 @@ phrases "NO NO THAT WAS NOT A QUESTION" (THIS/THAT; simply "THAT WAS NOT A
 QUESTION"; "NO NO") and "BY ALL MEANS, MOVE AT A GLACIAL PACE" (simply
 "MOVE AT A GLACIAL PACE"). Coding END = THAT IS ALL, unchanged, no
 synonyms. Keywords to become configurable in a future task.
+
+## [2026-07-22 17:45 CEST] Decision-058: The sidebar status vocabulary is six static states
+#sidebar #status #vocabulary #sidebar-polish
+
+From the sidebar-polish build (operator, direct): six distinct static
+states — working / waiting / idle / awaiting-another-agent / done /
+failed — done and failed never sharing a glyph, idle distinct from
+awaiting. Supersedes the "three live plus one parked" draft of the
+original item 9. No animation anywhere (item 1).
+
+## [2026-07-22 17:45 CEST] Decision-059: Human names are authored at intake, never grammar-converted at runtime
+#naming #titles #board #sidebar-polish
+
+From the sidebar-polish build (operator, direct): the declarative human
+name (imperative-vs-declarative, session-naming contract) is AUTHORED when
+the ledger entry is created — the board's short title / sidecar H1 — and
+every title call site reads that; mechanical hyphen-replace survives only
+pre-intake. No runtime grammar-conversion code exists.
+
+## [2026-07-22 17:45 CEST] Decision-060: Agent self-exit lifecycle — two closing messages, a declared grace, then the orchestrator kills
+#lifecycle #close #sidebar #reaping #sidebar-polish
+
+From the sidebar-polish build (operator, direct), the real fix for stale
+sidebar rows: agents END via a lifecycle contract — two closing messages
+and a declared grace period (default 10s); past the window the
+orchestrator kills the process and broadcasts the death. Distinct from
+bus-singleton (which reaps stray bus sidecars, not whole agents).
+
+## [2026-07-22 17:45 CEST] Decision-061: Decision-043 superseded — the sidebar discovers repos via the registry
+#sidebar #orchard #registry #supersession
+
+Decision-043's explicit repolist (Orchard discovery deferred) is
+SUPERSEDED by the sidebar-polish item-7 build: repos appear via the
+`.ai.toml`-triggered registry automatically, hidden conversationally,
+persisted across remounts.

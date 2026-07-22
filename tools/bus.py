@@ -33,9 +33,43 @@ Usage:
   bus.py receive [id]                          drain: JSON array, oldest first
   bus.py identity                              immutable facts about this session
   bus.py status                                mutable state: occupancy and spend
-  bus.py announce                              broadcast identity (session start)
+  bus.py announce [--exit-grace-seconds N]     broadcast identity (session start);
+                                                N = seconds this agent needs to
+                                                finish + exit once it starts
+                                                leaving (default 10)
   bus.py depart                                broadcast departure (session end)
   bus.py signal --state S [--to ID]            lifecycle push (to parent, else broadcast)
+  bus.py signal --state S --on-behalf-of ID     same, but `from` is ID, not the caller —
+                                                orchestrator-only, for signaling a
+                                                killed agent's own terminal state
+  bus.py ask --question Q --option A --option B [...] [--multi]
+             [--title T] [--summary S]
+                                                broadcast a question (sidebar-polish item 12,
+                                                round 2 UX in item 12g); blocks until an answer
+                                                addressed back to this session arrives, then
+                                                prints ONE JSON object to stdout and exits.
+
+                                                This is a THREE-WAY outcome (four-way with
+                                                --multi) — the caller MUST branch on which key
+                                                is present, never assume a single shape:
+                                                  {"index": N, "option": "..."}
+                                                      single-select (default): this option chosen
+                                                  {"indices": [...], "options": [...]}
+                                                      --multi: this set chosen, Enter-confirmed
+                                                  {"continue": true}
+                                                      operator pressed Escape — this means "keep
+                                                      discussing before deciding", NOT declined
+                                                      or cancelled; treat as pause-and-keep-talking
+                                                  {"gate": "MAKE IT SO" | "THAT IS ALL"}
+                                                      operator typed one of the two always-
+                                                      available gate phrases, bypassing the
+                                                      specific question entirely
+
+                                                --multi: digits TOGGLE membership instead of
+                                                committing instantly; Enter confirms. Default
+                                                (no --multi) is unchanged: instant-on-digit.
+                                                --title/--summary: optional short framing shown
+                                                prominently above the question in the popup.
   bus.py root                                  print the bus root
 """
 import argparse
@@ -43,9 +77,13 @@ import json
 import os
 import subprocess
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from feature_name import feature_name as _feature_name  # noqa: E402
 
 # Standard request bodies the sidecar answers itself, without waking its parent:
 # a message whose body is one of these is a pull for that information. Closed set,
@@ -111,6 +149,12 @@ def estimates_for(model: str | None, spend: dict, occupancy: int) -> dict:
     }
 
 LIFECYCLE_STATES = ("started", "building", "testing", "done", "finished", "blocked", "abandoned")
+
+# What a "blocked" signal is blocked ON — the sidebar (sidebar_model.py) needs
+# this to tell "waiting on an external component" (⌚) apart from "waiting on
+# a peer agent" (🪷); absent (older callers, or any state other than
+# "blocked") the sidebar defaults to "component".
+BLOCKED_ON_STATES = ("component", "agent")
 
 
 def git(*args: str) -> str:
@@ -182,11 +226,20 @@ def usage_entries(path: Path):
             yield usage, message.get("model")
 
 
-def identity_of() -> dict:
+DEFAULT_EXIT_GRACE_SECONDS = 10
+
+
+def identity_of(exit_grace_seconds: int = DEFAULT_EXIT_GRACE_SECONDS) -> dict:
     """Immutable facts, fixed for this session's whole life.
 
     Model and effort are deliberately absent: they can change mid-session, so they
     are not identity, and pinning them here would bake in a value that goes stale.
+
+    `exit_grace_seconds` is the one exception to "immutable" in spirit rather than
+    mechanism: an agent declares it once, at announce time, as how long it needs
+    to send its two closing messages and exit after it starts finishing — the
+    orchestrator's lifecycle contract (docs/TODO.md.d/sidebar-polish.md item 2)
+    grants this instead of the default 10s before killing the process.
     """
     top = git("rev-parse", "--show-toplevel")
     worktree = Path(top).name if top else None
@@ -197,10 +250,13 @@ def identity_of() -> dict:
         "agent_type": os.environ.get("CLAUDE_CODE_AGENT") or None,
         "worktree": worktree,
         "feature_id": feature_id,
-        # Human name = feature id with '-' → spaces; derived once here so the sidebar
-        # and any bash consumer read one field instead of re-deriving (Decision-032).
-        "name": feature_id.replace("-", " ") if feature_id else None,
+        # Ledger-derived human name (tools/feature_name.py, sidebar-polish item 11):
+        # board short-title, else sidecar H1, else mechanical hyphen->space, so
+        # every consumer reads one already-authored field instead of re-deriving
+        # (Decision-032).
+        "name": _feature_name(feature_id, root=top) if feature_id else None,
         "parent_session": os.environ.get("ORCHID_PARENT_SESSION") or None,
+        "exit_grace_seconds": exit_grace_seconds,
     }
 
 
@@ -364,7 +420,7 @@ def announcement(body: dict, sender: str):
 def cmd_announce(args) -> None:
     me = whoami()
     inbox(me).mkdir(parents=True, exist_ok=True)
-    reached = fan_out(me, announcement(identity_of(), me))
+    reached = fan_out(me, announcement(identity_of(args.exit_grace_seconds), me))
     print(f"announced to {reached} agent(s)")
 
 
@@ -379,10 +435,20 @@ def cmd_signal(args) -> None:
     itself, not a request for it. Directed at the parent when its inbox is
     known and live, so only the conductor acts on it; broadcast otherwise, so
     the signal is not silently lost.
+
+    `--on-behalf-of` is the one exception to "you signal for yourself": the
+    orchestrator's exit-grace enforcement (docs/TODO.md.d/sidebar-polish.md
+    item 2) kills an agent that overran its declared grace period, and the
+    killed process can no longer send its own terminal signal — the
+    orchestrator sends it FOR it, `from` set to the killed session's id, so
+    the sidebar's evict-on-observed-terminal-signal logic still fires on that
+    agent's own row (attribution there is strictly by envelope `from`).
     """
-    sender = whoami()
+    sender = args.on_behalf_of or whoami()
     feature = args.feature or identity_of()["feature_id"]
     body = {"kind": "lifecycle", "state": args.state, "feature_id": feature}
+    if args.state == "blocked" and args.blocked_on:
+        body["blocked_on"] = args.blocked_on
     to = args.to or os.environ.get("ORCHID_PARENT_SESSION") or None
     if to and inbox(to).is_dir():
         deliver(inbox(to), make_envelope(sender, to, body=body, notify_user=args.notify_user))
@@ -391,6 +457,101 @@ def cmd_signal(args) -> None:
     reached = fan_out(sender, lambda name: make_envelope(sender, "*", body=body,
                                                           notify_user=args.notify_user))
     print(f"signal {args.state} broadcast to {reached} agent(s)")
+
+
+def _question_envelope(sender: str, to: str, question_id: str, question: str,
+                        options: list[str], *, title: str | None = None,
+                        summary: str | None = None, multi: bool = False) -> dict:
+    """The envelope a `bus.py ask` broadcast puts in every peer's inbox
+    (sidebar-polish item 12c; title/summary/multi added round 2, item 12g).
+
+    `body` stays the existing `orchid:activity:<text>` string with
+    `notify_user=True` — the SAME signal tools/sidebar_model.py's
+    _apply_message already turns into `last_notify_user` (and so the ❓
+    marker), rather than a parallel one. question_id/question/options are
+    additional envelope-level fields a plain activity broadcast never
+    carries; sidebar_model.py only reads `body`/`notify_user` and ignores
+    them, so this is the SAME message doing double duty, not two messages.
+    A reply is matched purely on the existing `in_reply_to` field (see
+    _match_answer) — no new field is needed on the answer side.
+
+    title/summary/multi follow the envelope's existing convention: present
+    only when set, so a plain single-select ask (the unchanged default) adds
+    no new fields to the wire format at all.
+
+    The activity text itself is the exact wording pinned by the operator for
+    item 12(e)'s passive deferral notice — "I have a question: <subject>…" —
+    using `title` as the subject when one was given, else the raw question
+    text, always followed by a single literal ellipsis and nothing else.
+    """
+    subject = title or question
+    body = f"orchid:activity:I have a question: {subject}…"
+    env = make_envelope(sender, to, body=body, notify_user=True)
+    env["question_id"] = question_id
+    env["question"] = question
+    env["options"] = options
+    if title:
+        env["title"] = title
+    if summary:
+        env["summary"] = summary
+    if multi:
+        env["multi"] = True
+    return env
+
+
+def _match_answer(box: Path, question_id: str) -> str | None:
+    """Non-destructively scan `box` for a reply to `question_id`.
+
+    Only the ONE matching file is consumed (deleted) — every other message
+    sitting in this inbox belongs to this session for some other reason and
+    is left untouched, exactly like bus.py's own receive() leaves anything
+    it does not drain. Returns the reply's `body` (whatever cmd_ask's caller
+    put there) or None if no reply has arrived yet.
+    """
+    if not box.is_dir():
+        return None
+    for f in sorted(box.glob("*.json")):
+        if f.name.startswith("."):
+            continue  # atomic-write .partial temp files
+        try:
+            env = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if env.get("in_reply_to") == question_id:
+            f.unlink(missing_ok=True)
+            return env.get("body")
+    return None
+
+
+def _await_answer(box: Path, question_id: str, poll_interval: float) -> str:
+    """Block until _match_answer finds a reply. No timeout: `ask` is a
+    blocking primitive by design (the trial's live round trip needs exactly
+    this); the broker script owns all of the deferral/keypress policy, not
+    this wait loop (sidebar-polish item 12f)."""
+    while True:
+        answer = _match_answer(box, question_id)
+        if answer is not None:
+            return answer
+        time.sleep(poll_interval)
+
+
+def cmd_ask(args) -> None:
+    me = whoami()
+    inbox(me).mkdir(parents=True, exist_ok=True)  # so a reply has somewhere to land
+    if len(args.option) < 2:
+        sys.exit("bus: ask requires at least two --option values")
+    question_id = uuid.uuid4().hex[:12]
+    reached = fan_out(
+        me, lambda to: _question_envelope(me, to, question_id, args.question, args.option,
+                                           title=args.title, summary=args.summary,
+                                           multi=args.multi),
+    )
+    if reached == 0:
+        sys.exit("bus: ask — no peers on the bus to broadcast the question to")
+    print(f"bus: asked {reached} peer(s); question {question_id}; waiting for an answer",
+          file=sys.stderr)
+    answer = _await_answer(inbox(me), question_id, args.poll_interval)
+    print(answer)
 
 
 def main() -> None:
@@ -406,7 +567,13 @@ def main() -> None:
     sub.add_parser("whoami").set_defaults(func=lambda a: print(whoami()))
     sub.add_parser("list").set_defaults(func=cmd_list)
     sub.add_parser("root").set_defaults(func=lambda a: print(bus_root()))
-    sub.add_parser("announce").set_defaults(func=cmd_announce)
+    s = sub.add_parser("announce")
+    s.add_argument("--exit-grace-seconds", dest="exit_grace_seconds", type=int,
+                   default=DEFAULT_EXIT_GRACE_SECONDS,
+                   help="seconds this agent needs, after it starts finishing, to "
+                        "send its two closing messages and exit before the "
+                        "orchestrator kills it (default 10)")
+    s.set_defaults(func=cmd_announce)
     sub.add_parser("depart").set_defaults(func=cmd_depart)
     sub.add_parser("identity").set_defaults(
         func=lambda a: print(json.dumps(identity_of(), indent=2)))
@@ -434,9 +601,40 @@ def main() -> None:
     s.add_argument("--state", required=True, choices=LIFECYCLE_STATES)
     s.add_argument("--feature")
     s.add_argument("--to")
+    s.add_argument("--blocked-on", dest="blocked_on", choices=BLOCKED_ON_STATES,
+                   help="only meaningful with --state blocked: what the block is "
+                        "on (component, the default sidebar assumption, or agent, "
+                        "a peer awaited)")
     s.add_argument("--notify-user", dest="notify_user", action="store_true",
                    help="the sending agent intends this for the user to see")
+    s.add_argument("--on-behalf-of", dest="on_behalf_of", metavar="SESSION_ID",
+                   help="signal as this session id instead of the caller — the "
+                        "orchestrator's escape hatch to broadcast an `abandoned` "
+                        "terminal signal for an agent it just killed after its "
+                        "exit-grace period ran out, so the sidebar still evicts it")
     s.set_defaults(func=cmd_signal)
+
+    s = sub.add_parser("ask")
+    s.add_argument("--question", required=True)
+    s.add_argument("--option", dest="option", action="append", required=True,
+                   help="an answer choice, numbered by the order given; repeat "
+                        "for each option (at least two required)")
+    s.add_argument("--multi", action="store_true",
+                   help="multi-select: digits TOGGLE membership instead of "
+                        "committing instantly, Enter confirms the current "
+                        "selection; answer becomes "
+                        '{"indices": [...], "options": [...]}. Default '
+                        "(unset) is single-select, unchanged: instant-on-digit, "
+                        '{"index": N, "option": "..."}')
+    s.add_argument("--title", help="short title shown prominently above the "
+                                    "question in the popup (optional)")
+    s.add_argument("--summary", help="short summary of what the decision is "
+                                      "about, shown below the title (optional)")
+    s.add_argument("--poll-interval", dest="poll_interval", type=float, default=1.0,
+                   help="seconds between checks for the answer while blocked "
+                        "(default 1.0) — polling cadence only, not a timeout: "
+                        "ask never gives up on its own")
+    s.set_defaults(func=cmd_ask)
 
     args = p.parse_args()
     if getattr(args, "agent_id", "sentinel") is None:

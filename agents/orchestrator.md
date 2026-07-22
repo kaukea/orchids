@@ -23,6 +23,13 @@ Rebuild from durable state; do not re-derive from any prior conversation:
   `archive/*` tags = open/abandoned branches; `claude agents` = dispatched sessions.
 - `MOOD.md` if present — read with timestamp decay.
 
+**Mount your own sidebar.** Before triaging, mount the fleet sidebar into YOUR OWN window
+so it is visible from the first turn, no manual step: `.claude/tools/sidebar-mount.sh` (no
+target argument = current window). The script is idempotent — it no-ops if this window
+already carries a sidebar pane — so calling it on every boot is safe. This is separate from,
+and in addition to, the per-architect mount at spawn (step 2 under Hand off); that call is
+unchanged and still targets the new architect's window, not this one.
+
 You never open a feature **sidecar** (`docs/TODO.md.d/*`) to triage — read only the
 projected stage on the TODO line. Opening a sidecar to assemble the substance of an
 answer is the tell you have crossed into a deliverable; stop.
@@ -152,11 +159,12 @@ On an explicit go for feature X:
    side-by-side split):
    ```
    orch=$TMUX_PANE                                  # capture THIS pane BEFORE spawning
-   id=<id>                                          # feature id; human name = id with '-' → spaces
+   id=<id>                                          # feature id
+   name=$(python3 .claude/tools/feature_name.py --id "$id")  # board short-title / sidecar H1 / mechanical fallback (sidebar-polish item 11)
    git worktree add .claude/worktrees/<id> -b f/<id> main
    printf '%s\n%s\n' "$orch" "${TMUX%%,*}" > .claude/worktrees/<id>/.return-window  # pane + tmux socket
-   win=$(tmux new-window -P -F '#{window_id}' -n "orchids ▸ ${id//-/ }" -c .claude/worktrees/<id> \
-     "ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect --name \"orchids ▸ ${id//-/ }\" 'Boot: read your sidecar and begin discovery.'")
+   win=$(tmux new-window -P -F '#{window_id}' -n "orchids ▸ $name" -c .claude/worktrees/<id> \
+     "ORCHID_PARENT_SESSION=$CLAUDE_CODE_SESSION_ID claude --agent architect --name \"orchids ▸ $name\" 'Boot: read your sidecar and begin discovery.'")
    tmux set-window-option -t "$win" automatic-rename off  # window shows the session name, not the program
    tmux set-option -w -t "$win" @arch_id "<id>"           # stable teardown/reaping handle (window user-option); pane title is clobbered by claude, so it's now only a human hint
    tmux select-pane -t "$win" -T "arch:<id>"              # arch:<id> stays the pane-TITLE handle teardown/reaping match
@@ -269,6 +277,25 @@ behind. Pane and session hygiene is YOURS entirely (operator, 2026-07-21): obser
 live (`tmux list-panes -a`), reap the dead and the stray — duplicate role sessions included —
 and never turn a cleanup into an operator question. Check only when a
 close is expected and the architect is silent — no polling loop, no scheduler.
+
+**Exit-grace enforcement (the lifecycle contract, docs/TODO.md.d/sidebar-polish.md item 2).**
+This is the DIFFERENT case from the one above — not an agent that already died, but one that
+signaled it is finishing (its bus's `done`/`finished`/`abandoned`) and is STILL RUNNING past
+its own declared grace period. Each agent's `exit_grace_seconds` travelled on its announce
+(`bus.py identity` shape, defaulting to 10) — you learned it when its bus first announced, so
+you already have it without asking again. From the moment its terminal signal arrives, give it
+that many seconds (not more, unless it asked for longer at announce) to release its bus, run
+its own teardown, and actually exit. If its window is STILL alive once the grace period has
+run out, treat this exactly like the dead-agent reap above — `.claude/tools/architect-teardown.sh
+<id>` resolves `@arch_id`, kills the window, and returns your focus — but the process was
+alive when you killed it, so it never got to send its own terminal signal; broadcast one on its
+behalf so the sidebar still evicts its row:
+```
+python3 .claude/tools/bus.py signal --state abandoned --feature <id> --on-behalf-of <its session id>
+```
+This is orchestrator/bus process-supervision, not the bus-singleton task (which reaps stray
+BUS SIDECAR folders specifically, one-per-agent, not whole agent processes) — the two are
+adjacent but distinct; reconcile the overlap with bus-singleton at board close.
 
 # Activity broadcasting
 On every meaningful activity change, run `python3 .claude/tools/bus.py broadcast` DIRECTLY (a mechanical send — never spend a bus-agent turn on it) with `orchid:activity:<wording>` — a

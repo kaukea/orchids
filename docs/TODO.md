@@ -45,7 +45,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
   - `feature · done · · complete/interactive · · gh#23` [Fleet sidebar: always-visible navigable job states with phase emojis](TODO.md.d/fleet-sidebar.md) ~bus-liveness ~agent-metadata
     - `feature · todo · · blocked-on-answers · process ·` [Cloud event feed: GitHub Actions events land as sidebar files](TODO.md.d/cloud-event-feed.md) ~cloud-architect
     - `bug · done · · complete/interactive · process ·` [Fleet sidebar fixes: correct the defects the first build shipped](TODO.md.d/sidebar-fixes.md)
-    - `bug · todo · · plan-ready · process ·` [Sidebar polish: the operator's live-pass list — rows, colors, states, /orchard](TODO.md.d/sidebar-polish.md) ~sidebar-fixes ~message-bus ~orchard
+    - `bug · done · · complete/interactive · process ·` [Sidebar polish: the operator's live-pass list — rows, colors, states, /orchard](TODO.md.d/sidebar-polish.md) ~sidebar-fixes ~message-bus ~orchard
     - `feature · todo · nice-to-have · queued · process ·` [Install detecting: richer orchids-install state beyond .ai.toml presence (upstream kauk)](TODO.md.d/install-detecting.md) ~sidebar-polish ~orchard
   - `bug · done · · complete/interactive · process · gh#34` [Session and feature naming: short, descriptive, visible — sidebar prerequisite](TODO.md.d/session-naming.md)
   - `feature · todo · · working · process · gh#43` [Handover contract: build-ready sidecars, questions front-loaded before launch](TODO.md.d/handover-contract.md) ~architect-delegation ~injection-integrity
