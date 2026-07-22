@@ -49,6 +49,19 @@ The operator's itemized list, verbatim in substance:
    must never shift with state.
 2. **Hide internal rows**: "app-identifying" (always first, internal, stale —
    see Findings) and the bare session-UUID row. Neither is operator-facing.
+   EXTENDED (operator via orchestrator, 2026-07-22, operator-origin relay,
+   req d9684a605004): beyond those two, ANY feature row whose lifecycle has
+   ENDED must actually leave the sidebar — live case: `agent-closing`,
+   which closed 2026-07-21 with a proper `finished` signal on the bus, still
+   renders as the first task row today. Find and clear whatever state
+   source keeps ended features alive (stale bus/state files surviving
+   their lifecycle message, or the reader never pruning them) — do not
+   just filter known names; the fix must generalize to any future ended
+   feature, not special-case `agent-closing`/`app-identifying` by name.
+   Secondary check folded in: confirm the "all subtask rows animate
+   simultaneously" symptom is fully subsumed by item 1's animation
+   removal; if any animation source survives item 1's fix, kill it there
+   too.
 3. **Subagent aggregation**: only the first feature ever shows subagents —
    every agent's subagents must render under their own parent row.
 4. **Per-agent color**, matching Claude Code's subagent color palette where
