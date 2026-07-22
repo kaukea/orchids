@@ -542,7 +542,7 @@ def pull(board: Board):
         board.append_line(
             f"- `feature · todo · · queued · · gh#{issue['number']}` "
             f"[{issue['title']}](TODO.md.d/{slug}.md)")
-        ensure_label(board.repo)
+        ensure_labels(board.repo)
         sh("gh", "issue", "edit", "-R", board.repo, str(issue["number"]),
            "--add-label", "board")
         ingested += 1
