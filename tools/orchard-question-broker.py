@@ -81,6 +81,11 @@ DEFAULT_MAX_HEIGHT = 40
 _POPUP_PADDING_W = 4  # left/right breathing room added to the longest line
 _POPUP_PADDING_H = 4  # top/bottom breathing room added to the line count
 
+# How long to hold the popup open after a closing keypress before tearing it
+# down — long enough for the echoed key (or the final option state) to
+# actually be visible, short enough that "instant" still feels instant.
+_ECHO_LINGER_SECONDS = 0.2
+
 # Item 12g colour: plain ANSI SGR (24-bit) — this is a standalone terminal
 # script run inside a tmux popup, not curses, so there are no colour pairs to
 # register. RGB values borrowed from tools/sidebar.py's ORCHID_PALETTE so the
@@ -465,6 +470,7 @@ def _popup_read_main(question: str, options: list[str], answer_file: str,
             if gate_buffer:
                 new_buffer, matched = gate_buffer_step(gate_buffer, ch)
                 if matched:
+                    time.sleep(_ECHO_LINGER_SECONDS)
                     write_answer({"gate": matched})
                     return
                 gate_buffer = new_buffer
@@ -478,6 +484,7 @@ def _popup_read_main(question: str, options: list[str], answer_file: str,
                 # never silently swallowed.
 
             if multi and is_confirm_key(ch):
+                time.sleep(_ECHO_LINGER_SECONDS)
                 write_answer({
                     "indices": sorted(selected),
                     "options": [options[i] for i in sorted(selected)],
@@ -492,6 +499,13 @@ def _popup_read_main(question: str, options: list[str], answer_file: str,
                     selected = toggle_selection(selected, idx)
                     redraw_options()
                     continue
+                # Linger a moment so the echoed digit above is actually
+                # perceptible — without this, write_answer()+return tears
+                # down the popup (tmux display-popup -E) in the same
+                # instant as the echo write, so the character never has
+                # time to render before the pane vanishes (operator-
+                # reported: "missing showing the key I typed").
+                time.sleep(_ECHO_LINGER_SECONDS)
                 write_answer({"index": idx, "option": options[idx]})
                 return
 
