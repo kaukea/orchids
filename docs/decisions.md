@@ -968,3 +968,18 @@ agent (sidebar-polish item 5).
 [Corrected 13:2x CEST same day: the initial recording misstated the ruling
 as one-bus-per-REPOSITORY — a transcription error by the orchestrator,
 fixed on the operator's immediate clarification.]
+
+## [2026-07-22 13:52 CEST] Decision-052: Sidebar rulings from the sidebar-fixes corrective
+#sidebar #panes #idempotency #status #flash #close #sidebar-fixes
+
+Three rulings made with the operator during the sidebar-fixes build
+(archive/sidebar-fixes, squash de71b80), promoted at ingest:
+1. Sidebar mount idempotency detects the sidebar PANE by its
+   pane_start_command (running sidebar.py) — self-contained, deliberately
+   NOT consuming the @arch_id window-identity handle of Decision-048: pane
+   presence and window identity are orthogonal concerns.
+2. A repository with no live orchestrator session renders a distinct IDLE
+   status (⚪, dim) — idle is a real state, never conflated with running.
+3. A terminal lifecycle signal (finished/abandoned) clears the
+   operator-waiting flash; otherwise only a new activity broadcast changes
+   it — a resolved session must never keep flashing "waiting".
