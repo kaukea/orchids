@@ -1074,3 +1074,12 @@ Operator addendum, minutes after Decision-057: **`ENGAGE`** is also an
 accepted operator build-gate phrase, translated at the same boundary to the
 internal `MAKE IT SO`. The accepted set is now: the full NO-NO phrase
 (THAT/THIS), `NO NO`, `ENGAGE`, and the internal string itself.
+
+## [2026-07-22, second addendum to Decision-057] The glacial-pace phrase joins the set
+#gates #keywords
+
+"BY ALL MEANS, MOVE AT A GLACIAL PACE" is the third operator build-gate
+phrase — approval by sarcasm, completing the operator's dictation
+("complement ENGAGE with…"). Same boundary translation to `MAKE IT SO`.
+Accepted set: the NO-NO phrase (THAT/THIS) · NO NO · ENGAGE · the
+glacial-pace phrase · the internal string itself.
