@@ -32,7 +32,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
 - `feature · todo · · plan-ready · process · gh#12` [Sync suggests a reset when the package changed (upstream kauk)](TODO.md.d/sync-suggest-reset.md) ~package-select-tree ~kauk-skill-symlink-write
 - `feature · todo · · queued · process · gh#24` [kauk validates role declarations: validate stub now, taxonomy check later (upstream kauk)](TODO.md.d/kauk-validate-roles.md) ~role-dag-frontmatter
 - `feature · functional · · complete/interactive · · gh#13` [Cross-repo board view: GitHub issues + user-level Project, orchestrator-synced](TODO.md.d/github-board-sync.md) ~cross-repo-inbox ~external-blockers
-  - `completion · todo · · plan-ready · process · gh#61` [Field projecting: every sidecar field maps to GitHub or is created there](TODO.md.d/field-projecting.md) ~nested-tasks-projecting ~tags-and-labels
+  - `completion · functional · · complete/interactive · process · gh#61` [Field projecting: every sidecar field maps to GitHub or is created there](TODO.md.d/field-projecting.md) ~nested-tasks-projecting ~tags-and-labels
   - `feature · todo · · plan-ready · process · gh#62` [Decision projecting: decisions mirror as their own type, closing on supersession](TODO.md.d/decision-projecting.md) ~field-projecting
 - `housekeeping · todo · nice-to-have · blocked-on-answers · process · gh#14` [Install-id migration to the kaukea org — parked until the org name is final](TODO.md.d/install-id-kaukea.md)
 - `feature · todo · · queued · · gh#25` [Orchard: the fleet workbench — global view, selection, dispatch](TODO.md.d/orchard.md) ~github-board-sync ~cross-repo-inbox
