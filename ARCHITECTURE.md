@@ -22,7 +22,7 @@ build approval are human-only, always.
 
 | Role | Model | Dispatch | Scope & boundary |
 |---|---|---|---|
-| orchestrator | opus | top-level session (`claude --agent orchestrator`) | Knows the board, prioritises, holds MOOD, hands ONE feature to an architect on explicit operator go. Never codes; never opens a sidecar in steady state. Authors only the workflow component, directly on `main`. |
+| orchestrator | opus | top-level session (`claude --agent orchestrator`) | Knows the board, prioritises, holds MOOD, hands ONE feature to an architect on explicit operator go. Never codes; never opens a sidecar in steady state. Authors only the workflow component, directly on `main`. Enforces the exit-grace lifecycle contract: kills a session that overruns its own declared window past its terminal signal, broadcasting that signal on its behalf. |
 | bloomer | sonnet | dispatched per parked task | Prep only: advances one task's readiness, fleshes its sidecar, commits. Never builds, branches, or opens PRs; build-ready parks at `plan-ready`. |
 | architect | opus | worktree session (`.claude/worktrees/<id>`, branch `f/<id>`) | One feature; its sidecar is the whole scope. Read-only discovery (parallel explorers) → plan agreed with the operator → **no file edit before MAKE IT SO** → builds/tests → on the operator's `THAT IS ALL`, countersigns and signals `finished` on the bus. Never reads the board or prior conversation. |
 | builder | sonnet | headless subagent from the architect | Exactly one step-spec; returns typed diff + self-test. |
@@ -78,7 +78,23 @@ session ──spawns──> bus sidecar ──announce──> every peer's inbox
 - **Transport** = one JSON file per message under
   `$(git rev-parse --git-common-dir)/the-works/bus/<session-id>/`, so every
   worktree of a repo shares one bus and nothing is committed. The set of folders
-  IS the registry; there is no broker.
+  IS the registry; there is no broker for ordinary traffic.
+- **Exception: `bus.py ask`** (sidebar-polish, a lean trial) blocks for a reply —
+  the one deliberate departure from "no delivery guarantee," used to put a
+  question to the operator. `tools/orchard-question-broker.py` is a narrow,
+  token-free broker (a plain process, never an agent) that watches for question
+  envelopes, defers popping while the operator has input in flight, pops a
+  native tmux popup accepting only the defined option keys, and answers back
+  over the bus (`send --in-reply-to`) — none of that policy is exposed to the
+  asking agent. A `Notification` harness hook backstops harness-native prompts
+  that bypass this path.
+- **Exit-grace lifecycle contract**: an agent declares `exit_grace_seconds`
+  (default 10) on its first announce — how long it needs, after signaling
+  `finished`/`abandoned`, to release its bus and exit. The orchestrator kills a
+  process that overruns its own declared window and broadcasts the terminal
+  signal on its behalf (`signal --on-behalf-of`) so the sidebar still evicts its
+  row. Distinct from the bus-singleton task (which reaps stray bus-sidecar
+  folders specifically, not whole agent processes).
 - **Membership** is established by hooks, not prompts: `SessionStart` creates the
   inbox, `SessionEnd` broadcasts a departure and removes it — so a send to a
   finished agent fails immediately instead of vanishing into an unwatched folder.
@@ -114,28 +130,48 @@ bus (per repo) ──observed──> sidebar_model ──Fleet──> sidebar.py
                                                             └─> sidebar_nav ──> tmux switch
 ```
 
-- **Reads the bus as a pure observer** across every repository named in a repolist
-  (`$ORCHIDS_SIDEBAR_REPOS` or `~/.config/orchids/sidebar-repos`, else the current
-  repo) — never mutating a bus file. State is attributed by message sender and
-  accumulated in memory, so it survives the bus's ephemerality; updates are
-  event-driven (inotify), never polled.
-- **Renders** a repo → feature → activity → sub-agent tree with a status emoji
-  ({running, standby, completed, failed} mapped from lifecycle signals; waiting
-  derived from `notify_user`/`blocked`), a flashing row when an agent waits on the
-  operator, and a braille spinner on in-flight sub-agents. Role names appear
-  nowhere; structure carries the role.
+- **Reads the bus as a pure observer** across every repository the Orchard
+  registry (`~/.config/orchids/sidebar-registry.json`, `tools/orchard_registry.py`)
+  currently resolves as visible — never mutating a bus file. Installing orchids
+  in a repo (`.ai.toml` presence) registers it there and it appears in every
+  mounted sidebar immediately, no add command; hiding a repo is conversational
+  (ask any agent, or `/orchard hide <name>`/`show`) and persists across remounts.
+  `$ORCHIDS_SIDEBAR_REPOS` survives only as an explicit manual override. State is
+  attributed by message sender and accumulated in memory, so it survives the
+  bus's ephemerality; a sender's state is evicted once its terminal lifecycle
+  signal is observed (paired with the exit-grace contract above so a killed
+  agent's row still clears). Updates are event-driven (inotify), never polled.
+- **Renders** a repo → feature → sub-agent tree, plus one collapsed, dimmed bus
+  row per live parent. Every status glyph is STATIC — no spinner, no flashing
+  row, layout never shifts with state — across six non-overlapping states:
+  working 🚧, waiting ⌚ (❓ variant specifically while waiting on the operator),
+  idle ⚪, awaiting-another-agent 🪷, done ✅, failed ❌ (never done's glyph/color).
+  A scroll offset follows the selected row once the tree exceeds the pane's
+  height. The project header is a static half-block colour-gradient bevel (the
+  classic orchid family), flat light-gray instead for a paused project. Each
+  live agent gets a stable colour from an 8-entry orchid-species palette,
+  degrading gracefully on a limited terminal. Truncated text ends in an ellipsis,
+  never a hard cut. Role names appear nowhere; structure carries the role.
 - **Navigates** by matching the tmux window name — the bare repository name for a
   repository's orchestrator, `<repo> ▸ <human name>` for a feature (the
-  session-naming display forms, Decision-032) — then switching the client to it.
-  Windows carry the human-readable identity. Teardown and reaping key off a stable
-  `@arch_id` tmux **window** user-option, set on the architect window at launch —
-  immune to the live status-glyph indicator that clobbers pane titles. `arch:<id>`
-  survives only as a non-load-bearing human hint on the pane title. `@arch_id` is
-  the small stable handle contract the sidebar mount also consumes.
-- Components in `tools/`: `sidebar.py` (renderer), `sidebar_model.py` (bus reader),
-  `sidebar_nav.py` (navigation), `sidebar-mount.sh` (mount). Cross-repo repo
-  discovery is deliberately an explicit repolist, deferring the fleet-wide
-  discovery decision to Orchard.
+  session-naming display forms, Decision-032). The human name is read from the
+  board's authored short title (`docs/TODO.md`) / sidecar H1 — never a runtime
+  grammar transform — falling back to the mechanical hyphen-to-space form only
+  pre-intake (`tools/feature_name.py`, one helper, every title call site).
+  Switching the client happens on Enter. Windows carry the human-readable
+  identity. Teardown and reaping key off a stable `@arch_id` tmux **window**
+  user-option, set on the architect window at launch — immune to the live
+  status-glyph indicator that clobbers pane titles. `arch:<id>` survives only as
+  a non-load-bearing human hint on the pane title. `@arch_id` is the small stable
+  handle contract the sidebar mount also consumes.
+- **Mounted automatically** at the orchestrator's own boot, in addition to the
+  existing per-architect-spawn mount — no manual step either way
+  (`tools/sidebar-mount.sh`, idempotent).
+- Components in `tools/`: `sidebar.py` (renderer), `sidebar_model.py` (bus
+  reader), `sidebar_nav.py` (navigation), `sidebar-mount.sh` (mount),
+  `orchard_registry.py` (repo registration/visibility), `feature_name.py` (ledger
+  name resolution), `orchard-question-broker.py` (the bus-ask popup broker,
+  above). `/orchard show|hide` is a skill (`skills/orchard/`).
 
 ## The sidecar contract
 
