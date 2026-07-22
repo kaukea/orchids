@@ -181,7 +181,12 @@ Durable state lives in files; no role depends on chat history.
 - `docs/TODO.md.d/<id>.md` — the task's **sidecar**, the single spine every
   role reads-and-advances: `Blockers / Questions / Findings / Proposal /
   Testing`. Formats in `AGENTS.files.md`.
-- `docs/decisions.md` — rulings, greppable by `#keyword`.
+- `docs/decisions.md` — rulings, greppable by `#keyword`; each entry also
+  mirrors to GitHub as its own `Decision`-typed issue (`tools/board_gh.py`,
+  same push pass as tasks) — a superseded entry closes there natively as a
+  duplicate of the decision that replaced it, so the file's strike/pointer
+  convention becomes real, traversable issue state instead of prose a reader
+  has to eyeball.
 - workstream logs (per-session, rolling) / `MOOD.md` — uncommittable by
   construction, kept in `$(git rev-parse --git-common-dir)/the-works/`.
 

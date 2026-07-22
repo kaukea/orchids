@@ -58,7 +58,8 @@ TYPE_LABELS = {"feature": "\u2728 feature", "bug": "\U0001f41b bug",
                "housekeeping": "\U0001f9f9 housekeeping",
                "completion": "\U0001f3c1 completion"}
 TYPE_ISSUE_TYPES = {"bug": "Bug", "feature": "Feature", "refactor": "Refactor",
-                     "housekeeping": "Housekeeping", "completion": "Completion"}
+                     "housekeeping": "Housekeeping", "completion": "Completion",
+                     "decision": "Decision"}
 URGENCY_LABELS = {"critical": "\U0001f525 critical",
                   "nice-to-have": "\U0001f352 nice-to-have",
                   "idea": "\U0001f4ad idea"}
@@ -260,10 +261,12 @@ def push(board: Board, with_project: bool):
     sync_issue_types(board)
     sync_priority(board)
     sync_relationships(board, by_id)
+    decision_result = sync_decisions(board)
     print(f"push {board.repo}: {created} created, {updated} updated, "
           f"{closed} closed")
     if with_project:
         project_sync(board)
+        decision_project_sync(board, decision_result)
 
 
 # ---------- Projects v2 ----------
@@ -385,7 +388,7 @@ SELECT_FIELDS = {
     "Readiness": ["queued", "working", "blocked-on-answers", "plan-ready",
                   "complete"],
 }
-TEXT_FIELDS = ["Area"]
+TEXT_FIELDS = ["Area", "Decision Number", "Decision Title"]
 
 
 def ensure_project():
@@ -549,6 +552,166 @@ def pull(board: Board):
     board.save()
     print(f"pull {board.repo}: {ingested} ingested, "
           f"{closed_from_gh} closed-from-GitHub")
+
+
+# ---------- Decisions ----------
+
+DECISION_HEADING_RE = re.compile(
+    r"^## (?P<struck>~~)?\[.+?\] Decision-(?P<number>\d+): "
+    r"(?P<title>.+?)(?(struck)~~)$"
+)
+SUPERSEDED_RE = re.compile(r"^> Superseded by Decision-(\d+)\b")
+HASHTAG_RE = re.compile(r"#([\w-]+)")
+
+
+class DecisionEntry:
+    def __init__(self, number: str, title: str, struck: bool,
+                 superseded_by, hashtags: list, body: str):
+        self.number = number
+        self.title = title
+        self.struck = struck
+        self.superseded_by = superseded_by
+        self.hashtags = hashtags
+        self.body = body
+
+
+def _parse_decision_block(heading: re.Match, block_lines: list) -> DecisionEntry:
+    struck = heading["struck"] is not None
+    superseded_by = None
+    hashtags = []
+    for line in block_lines:
+        m = SUPERSEDED_RE.match(line)
+        if m:
+            superseded_by = m.group(1)
+        if line.startswith("#") and not hashtags:
+            hashtags = HASHTAG_RE.findall(line)
+    body = "\n".join(block_lines).strip("\n")
+    return DecisionEntry(
+        number=heading["number"], title=heading["title"], struck=struck,
+        superseded_by=superseded_by, hashtags=hashtags, body=body,
+    )
+
+
+def parse_decisions(path: Path) -> list:
+    lines = path.read_text().splitlines()
+    entries = []
+    heading, block = None, []
+    for line in lines:
+        m = DECISION_HEADING_RE.match(line)
+        if m:
+            if heading is not None:
+                entries.append(_parse_decision_block(heading, block))
+            heading, block = m, []
+        elif heading is not None:
+            block.append(line)
+    if heading is not None:
+        entries.append(_parse_decision_block(heading, block))
+    return entries
+
+
+DECISION_ISSUE_TITLE_RE = re.compile(r"^Decision-(\d+): ")
+
+
+def list_decision_issues(repo: str) -> dict:
+    issues = gh_json("issue", "list", "-R", repo, "--search", "Decision- in:title",
+                     "--state", "all", "--limit", "500",
+                     "--json", "number,title,state,body") or []
+    by_number = {}
+    for issue in issues:
+        m = DECISION_ISSUE_TITLE_RE.match(issue["title"])
+        if not m:
+            continue
+        by_number.setdefault(m.group(1), []).append(issue)
+    return by_number
+
+
+def sync_decisions(board: Board) -> dict:
+    org = board.repo.split("/")[0]
+    issue_types = ensure_issue_types(org)
+    decision_type_id = issue_types.get("Decision")
+    entries = parse_decisions(board.root / "docs" / "decisions.md")
+    existing = list_decision_issues(board.repo)
+    state = {}   # number -> {"gh_num": int, "node_id": str, "was_open": bool}
+    created = updated = closed = reopened = skipped_ambiguous = 0
+
+    # pass 1: every entry gets an issue (create or update title/body), so
+    # every target node id exists before pass 2 needs to reference it for
+    # the superseded-by-duplicate close.
+    for e in entries:
+        matches = existing.get(e.number, [])
+        if len(matches) > 1:
+            print(f"warn: {len(matches)} issues match title 'Decision-{e.number}:' "
+                  "— skipping, resolve manually")
+            skipped_ambiguous += 1
+            continue
+        title = f"Decision-{e.number}: {e.title}"
+        if not matches:
+            out = sh("gh", "issue", "create", "-R", board.repo,
+                     "--title", title, "--body", e.body)
+            gh_num = int(out.strip().rsplit("/", 1)[1])
+            was_open = True
+            created += 1
+        else:
+            issue = matches[0]
+            gh_num = issue["number"]
+            was_open = issue["state"] == "OPEN"
+            if issue["title"] != title or issue["body"] != e.body:
+                sh("gh", "issue", "edit", "-R", board.repo, str(gh_num),
+                   "--title", title, "--body", e.body)
+                updated += 1
+        node_id = issue_node_id(board.repo, gh_num)
+        state[e.number] = {"gh_num": gh_num, "node_id": node_id, "was_open": was_open}
+        if decision_type_id:
+            set_issue_type(node_id, decision_type_id)
+
+    # pass 2: open/closed state — struck+superseded closes natively as a
+    # duplicate of the superseding decision; everything else stays/reopens.
+    for e in entries:
+        if e.number not in state:
+            continue  # skipped as ambiguous above
+        s = state[e.number]
+        if e.struck and e.superseded_by:
+            target = state.get(e.superseded_by)
+            if target is None:
+                print(f"warn: Decision-{e.number} superseded by "
+                      f"Decision-{e.superseded_by}, but that entry wasn't synced "
+                      "this run — leaving open")
+                continue
+            if s["was_open"]:
+                gql("""mutation($i:ID!,$d:ID!){closeIssue(input:{
+                    issueId:$i,stateReason:DUPLICATE,duplicateIssueId:$d}){
+                    clientMutationId}}""", i=s["node_id"], d=target["node_id"])
+                closed += 1
+        else:
+            if not s["was_open"]:
+                sh("gh", "issue", "reopen", "-R", board.repo, str(s["gh_num"]))
+                reopened += 1
+
+    print(f"decisions {board.repo}: {created} created, {updated} updated, "
+          f"{closed} closed, {reopened} reopened, {skipped_ambiguous} ambiguous-skipped")
+    return {"entries": entries, "state": state}
+
+
+def decision_project_sync(board: Board, sync_result: dict):
+    project = ensure_project()
+    fields = ensure_fields(project["id"])
+    items = project_items(project["id"])
+    n = 0
+    for e in sync_result["entries"]:
+        s = sync_result["state"].get(e.number)
+        if s is None:
+            continue
+        url = f"https://github.com/{board.repo}/issues/{s['gh_num']}"
+        item_id = items.get(url)
+        if not item_id:
+            item_id = gql("""mutation($p:ID!,$c:ID!){addProjectV2ItemById(
+                input:{projectId:$p,contentId:$c}){item{id}}}""",
+                p=project["id"], c=s["node_id"]
+                )["data"]["addProjectV2ItemById"]["item"]["id"]
+        set_field(project["id"], item_id, fields["Decision Number"], e.number)
+        set_field(project["id"], item_id, fields["Decision Title"], e.title)
+        n += 1
+    print(f"project {PROJECT_TITLE}: {n} decision rows ensured for {board.repo}")
 
 
 def main():
