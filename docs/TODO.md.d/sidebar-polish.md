@@ -51,6 +51,29 @@
   the row is stale state (likely a leftover bus/state file); the fix should
   find and clear the source, not just hide the label.
 
+**Result: done.** Branch `f/sidebar-polish`, HEAD `e97a8d7` (post this write:
+the sidecar-only commits closing this out land after). All 12 proposal items
+(including the mid-build item-7 revision, item-2 extension, and item-12
+sub-refinements a–g) built, merged, and unit-tested — 184/184 passing. The
+live-only piece (item 12's bus-popup mechanism) was exercised directly with
+the operator across three rounds, catching and fixing two real defects unit
+tests couldn't reach (Enter-required keypress, invisible echo). See
+`## Testing`'s "Actually run" subsection for the full breakdown, including
+what still lacks a live pass (auto-mount at orchestrator boot, exit-grace
+kill enforcement, popup multi-select/gate-keyword paths specifically).
+Sub-agents dispatched this build: 6 read-only discovery explorers (Phase 1)
++ 9 builders (core rendering/status/filtering/aggregation/color/gradient,
+auto-mount, viewport scroll, exit-grace lifecycle, title derivation, Orchard
+registry, bus-popup mechanism round 1, bus-popup polish round 2) + 0 steps
+built inline by the architect except two small, well-understood post-live-test
+bug fixes (the os.read fix and the echo-linger fix — both under 15 lines,
+directly diagnosed from live operator feedback, justified inline rather than
+another builder round-trip) and the exact-wording fix a builder correctly
+declined as outside its assigned scope. No task spawned outside this
+feature's own scope beyond what's flagged above (Decision-043 supersession,
+stale README/CHANGELOG/fleet-sidebar.md pointers — all noted for the
+orchestrator to promote/relay at ingest).
+
 ## Proposal
 
 The operator's itemized list, verbatim in substance:
@@ -296,6 +319,81 @@ The operator's itemized list, verbatim in substance:
 Operator visual pass on the live sidebar (the method that produced this list),
 plus unit coverage for the model changes: internal-row filtering, per-parent
 subagent aggregation, bus collapsing, truncation with ellipsis, the
-three-plus-one status vocabulary including the 5s waiting threshold, the
+status vocabulary including the operator-waiting variant, the
 paused-project gray vs orchid-gradient header path, and the deterministic
 title scheme (never the program name; dimmed repo name pre-announce).
+
+### Actually run (2026-07-22)
+
+- **Unit suite**: `python3 -m unittest discover -s tests -p "test_*.py"` —
+  **184/184 passing** at close (grew from the pre-existing 31 across the
+  build: status/filtering/aggregation/color/gradient rewrite, viewport
+  scroll, exit-grace lifecycle, title derivation, Orchard registry, and the
+  bus-popup question mechanism, each verified green before merge).
+- **Live operator round-trip on the real bus-popup mechanism** (item 12,
+  the one piece that categorically cannot be unit-tested): fired
+  `bus.py ask` for real against the live tmux server, operator pressed
+  keys on the actual popup. This SURFACED AND FIXED two real defects that
+  passed unit tests but failed live:
+  1. The raw-mode key reader needed Enter after a digit — root cause:
+     `sys.stdin.read(1)` can still buffer behind `tty.setraw()`; fixed
+     with a direct `os.read(fd, 1)`.
+  2. The echoed keypress was invisible — root cause: the echo write and
+     the popup's teardown happened in the same instant; fixed with a
+     short deliberate linger (0.2s) before closing.
+  Both fixes confirmed by a second live round with the operator directly
+  pressing keys and confirming the result, not by re-reading the diff.
+- Round-2 popup polish (title/summary/color/content-sizing/multi-select/
+  continue-escape/gate-keywords, item 12g) is unit-tested for all pure
+  logic; color rendering, live `[x]`/`[ ]` redraw, and the multi-select/
+  gate-keyword paths specifically have NOT had their own dedicated live
+  operator pass yet (only the single-select digit path was live-verified
+  twice, post-fix) — flagging honestly rather than claiming untested
+  ground as done. The trial framing (item 12c) already anticipates further
+  live exercise before any fleet-wide adoption decision.
+- **Not live-tested, needs an operator/real-environment check**: the
+  orchestrator auto-mount-at-boot step (agents/orchestrator.md prose — not
+  executable, can't be unit tested) and the exit-grace kill enforcement
+  (requires an agent actually overrunning its grace period against a real
+  orchestrator — not exercised this session). Both are small, reviewed
+  diffs reusing existing, already-tested mechanisms
+  (`tools/sidebar-mount.sh`'s idempotency; `tools/architect-teardown.sh`'s
+  kill pattern), but stating plainly that no live pass happened for either.
+
+## Changelog entry
+
+Polished the fleet sidebar from the operator's second live-pass list: status
+rows no longer animate (no spinner, no flashing waiting-state) and use a
+clear six-glyph vocabulary (working/waiting/idle/awaiting-another-agent/
+done/failed, done and failed never sharing a glyph); every agent's own
+sub-agents nest under its row, not just the first; bus rows now render,
+collapsed to one per live agent, at the top, dim and italic; internal and
+stale rows (including any feature whose lifecycle has genuinely ended) no
+longer linger; row text truncates with an ellipsis instead of a hard cut;
+the sidebar scrolls to follow the selected row once the list outgrows the
+pane; each agent gets a stable colour from an orchid-species palette; the
+project header renders as a static colour-gradient bevel (flat gray when
+paused); titles are now read from the task's own authored name instead of a
+mechanical id transform; the sidebar auto-mounts into the orchestrator's own
+window at boot, not just into spawned feature windows; repos with `.ai.toml`
+now appear automatically (no add command), and hiding one is a conversational
+ask-and-pick, persisted across remounts; agents now get a declared grace
+period to exit cleanly after finishing, with the orchestrator stepping in
+if that window is overrun; and a first, explicitly-trial version of asking
+the operator a question through a native popup (rather than only a model
+remembering to flag it) exists, refined twice against live use — including
+that a question never interrupts the operator mid-keystroke, Escape always
+means "let's keep talking" rather than "never mind," and the two workflow
+gate phrases are always available regardless of what's being asked.
+
+## Readme delta
+
+User-facing changes worth a README mention: the fleet sidebar's visual
+vocabulary changed (six static status glyphs, no more spinner/flashing
+rows); `/orchard hide <name>` / `show` exist as a direct command form
+alongside the conversational ask-a-running-agent-to-hide-a-repo flow;
+installing orchids in a repo (`.ai.toml` present) is now sufficient for it
+to appear in the fleet sidebar automatically, no manual registration step.
+The bus-popup question mechanism is a trial, not yet a documented supported
+surface — the orchestrator should decide at ingest whether it's ready for a
+README mention or stays internal until the trial concludes.
