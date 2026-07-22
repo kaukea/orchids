@@ -57,6 +57,8 @@ TYPE_LABELS = {"feature": "\u2728 feature", "bug": "\U0001f41b bug",
                "refactor": "\u267b\ufe0f refactor",
                "housekeeping": "\U0001f9f9 housekeeping",
                "completion": "\U0001f3c1 completion"}
+TYPE_ISSUE_TYPES = {"bug": "Bug", "feature": "Feature", "refactor": "Refactor",
+                     "housekeeping": "Housekeeping", "completion": "Completion"}
 URGENCY_LABELS = {"critical": "\U0001f525 critical",
                   "nice-to-have": "\U0001f352 nice-to-have",
                   "idea": "\U0001f4ad idea"}
@@ -247,6 +249,7 @@ def push(board: Board, with_project: bool):
                    "-c", f"Board: task reached `{t.status}`.")
                 closed += 1
     board.save()
+    sync_issue_types(board)
     print(f"push {board.repo}: {created} created, {updated} updated, "
           f"{closed} closed")
     if with_project:
@@ -260,6 +263,47 @@ def gql(query: str, **vars):
     for k, v in vars.items():
         args += ["-f", f"{k}={v}"]
     return gh_json(*args)
+
+
+def issue_node_id(repo: str, number: int) -> str:
+    return gql("""query($u:URI!){resource(url:$u){... on Issue{id}}}""",
+               u=f"https://github.com/{repo}/issues/{number}"
+               )["data"]["resource"]["id"]
+
+
+# ---------- Issue Types (org-level) ----------
+
+def ensure_issue_types(org: str) -> dict:
+    data = gql("""query($login:String!){organization(login:$login){id
+        issueTypes(first:50){nodes{id name}}}}""", login=org)["data"]["organization"]
+    have = {n["name"]: n["id"] for n in data["issueTypes"]["nodes"]}
+    for name in TYPE_ISSUE_TYPES.values():
+        if name in have:
+            continue
+        gql("""mutation($owner:ID!,$name:String!){createIssueType(input:{
+            ownerId:$owner,name:$name,isEnabled:true}){clientMutationId}}""",
+            owner=data["id"], name=name)
+    data = gql("""query($login:String!){organization(login:$login){
+        issueTypes(first:50){nodes{id name}}}}""", login=org)["data"]["organization"]
+    return {n["name"]: n["id"] for n in data["issueTypes"]["nodes"]}
+
+
+def set_issue_type(issue_id: str, issue_type_id: str):
+    gql("""mutation($i:ID!,$t:ID!){updateIssueIssueType(input:{
+        issueId:$i,issueTypeId:$t}){clientMutationId}}""", i=issue_id, t=issue_type_id)
+
+
+def sync_issue_types(board: Board):
+    org = board.repo.split("/")[0]
+    issue_types = ensure_issue_types(org)
+    for t in board.tasks():
+        if t.gh is None or t.status not in ACTIVE or t.type not in TYPE_ISSUE_TYPES:
+            continue
+        native = TYPE_ISSUE_TYPES[t.type]
+        if native not in issue_types:
+            continue
+        node_id = issue_node_id(board.repo, t.gh)
+        set_issue_type(node_id, issue_types[native])
 
 
 FIELDS_QUERY = """query($id:ID!){node(id:$id){... on ProjectV2{
