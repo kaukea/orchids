@@ -2,6 +2,8 @@
 
 - created: 2026-07-22
 - created_by: Sebastien Lambla
+- completed: 2026-07-22
+- completed_during: f/field-projecting
 
 ## Blockers
 
@@ -46,3 +48,11 @@ mint) proved unrelated to the failure — separate cheap follow-ups if ever.
 
 A live issues-triggered run (open + edit a test issue) completes green in
 both directions; the test issue's change lands on the board.
+
+### Resolution (2026-07-22)
+
+Fixed inside the field-projecting build per the operator's delegation
+(commit c984121 on the branch; squash d010887): ensure_labels renamed at
+the pull() call site. Verified in that build's live test — `board_gh.py
+pull` completed end-to-end (1 ingested, no crash) after twelve consecutive
+NameError failures earlier the same day.

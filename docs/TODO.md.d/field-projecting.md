@@ -29,7 +29,7 @@
 
 ## Proposal
 
-Frozen plan, agreed with the operator 2026-07-22 (recorded as Decision-051 —
+Frozen plan, agreed with the operator 2026-07-22 (recorded as Decision-053 —
 see there for the full rationale and the live-schema evidence gathered
 during discovery):
 

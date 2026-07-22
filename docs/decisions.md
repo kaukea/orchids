@@ -983,3 +983,24 @@ Three rulings made with the operator during the sidebar-fixes build
 3. A terminal lifecycle signal (finished/abandoned) clears the
    operator-waiting flash; otherwise only a new activity broadcast changes
    it — a resolved session must never keep flashing "waiting".
+
+## [2026-07-22 15:55 CEST] Decision-053: Field projection targets GitHub's native surfaces; Urgency stays alongside
+#board #github #sync #fields #priority #type #dependencies #field-projecting
+
+The field-projecting build's frozen plan, agreed with the operator
+2026-07-22 and promoted at ingest (the branch had recorded it under the
+number 051, which main had already assigned to the bus-singleton ruling —
+renumbered here):
+- **Type** → GitHub's native Issue Type (`updateIssueIssueType`); the three
+  missing org types (Refactor, Housekeeping, Completion) are created
+  org-wide, ensure-if-missing. The emoji type labels (Decision-035) stay.
+- **Priority** → the native org Issue Field "Priority", mapped from badge
+  urgency: critical→Urgent, empty/normal→Medium, nice-to-have→Low,
+  idea→Low (High unused). The Projects-v2 "Urgency" custom field is KEPT
+  and still written — operator ruling: both live side by side.
+- **Relationships** → board `⊘` edges become native Issue Dependencies
+  (addBlockedBy/removeBlockedBy), fully reconciled each push; `blocking`
+  is GitHub's derived inverse. `~related` has NO native equivalent
+  (schema-introspected) and projects as a `### Related` body-link list.
+- Board is canonical; the sync writes GitHub, never the reverse, on these
+  surfaces.
