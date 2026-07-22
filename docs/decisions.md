@@ -1039,3 +1039,17 @@ re-reads with cold context what was known hot, and nothing waits for the end:
 - The ORCHESTRATOR no longer pre-drafts what was staged; its close work is
   the operator-gated CHANGELOG placement, cross-feature promotions and
   corrections, stream archiving, convergence, one push.
+
+## [2026-07-22 16:22 CEST] Decision-056: Aggregation belongs to the context that already holds the tokens
+#economy #tokens #staging #builder #architect #scribe #principle
+
+Operator principle (2026-07-22), general and durable: a work product is
+staged by the agent whose context ALREADY contains its inputs — the builder
+that made the commit writes the ingest increment in its typed return; the
+architect folds increments as they arrive (the return enters its context
+regardless). Separate readers are the anti-pattern: a scribe subagent
+re-reading commits, or anyone reconstructing from `git log` at close, pays
+input tokens to re-load what the committing context had for free. The
+scribe variant of Decision-055 is retired before first use. Same family as
+the popup ruling (a script where no judgment is needed): spend model
+attention exactly once, where the information is born.

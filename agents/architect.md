@@ -161,13 +161,14 @@ collides with main's, as live-fired twice). The board and `docs/decisions.md` ar
 never yours to edit directly; staging final text for the mechanical fold is.
 
 **Staging is ROLLING, never a close-time catch-up** (operator design, 2026-07-22 —
-the same rule the workstream log lives by): update the staged blocks below at EVERY
-landed step/commit — the decision entry when the ruling happens, the changelog line
-when the behaviour lands, the result skeleton as tests pass — inline at the step
-boundary (default: your context is hottest there, and it costs nothing extra), or
-via a small cheap scribe subagent aggregating one commit at a time when your own
-thread is mid-flight. By the gate word, the staged ingest already EXISTS; the close
-gate is a read-through, not authoring.
+the same rule the workstream log lives by), and the increments come from WHOEVER
+ALREADY HOLDS THE TOKENS: each builder's typed return carries an
+`ingest_increment` (final-quality prose, written from its hot context); you fold
+each into the staged blocks the moment the return lands — the return is entering
+your context anyway, so the fold is near-free. Steps you build inline you stage
+inline, at the step boundary. NOBODY re-reads commits or logs to author staging —
+no scribe subagent, no close-time `git log` reconstruction. By the gate word, the
+staged ingest already EXISTS; the close gate is a read-through, not authoring.
 
 **You STAGE the repo-level docs — the orchestrator files them (Decision-034).** While the
 feature context is hot, write into your sidecar result, VERBATIM and sanitized: a

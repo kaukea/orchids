@@ -23,6 +23,12 @@ Decision-075.
 - `self_test`: what you ran and the actual outcome (or why none applied).
 - `notes`: anything the architect must know to integrate — a dead-end, a follow-up.
   Facts, not chatter.
+- `ingest_increment`: one or two sentences of FINAL-QUALITY prose — what a stranger
+  reading the changelog should learn from this step, plus any ruling-shaped fact —
+  written NOW, from the context you already hold (operator principle, 2026-07-22:
+  aggregation belongs to whoever already has the tokens; nobody re-reads your
+  commit to write this later). The architect folds it into the staged blocks on
+  receipt.
 
 Do not expand scope, refactor neighbours, or touch policy areas outside your step unless the
 step-spec says so. If the step is ambiguous, blocked, or needs a decision, return that —
