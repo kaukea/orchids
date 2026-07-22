@@ -7,14 +7,31 @@
 
 ## Questions
 
-- None open — value mappings (priority scale options, issue-type names) are read
-  from or created in the GitHub schema at build time; no operator answer needed.
+- **Labels overlap**: since this task was written, the tags-and-labels build
+  (Decision-035) already landed a full label vocabulary in `tools/board_gh.py`
+  (`labels_for`/`TYPE_LABELS`/`URGENCY_LABELS`/`AREA_LABELS`/`TAG_LABELS`) — type,
+  urgency, component, and tags all project as GitHub labels today. Does this
+  task's "labels" bullet drop as already-done, or does it mean something
+  additional (e.g. a *separate* project-field representation on top of the
+  labels)? Recommendation: drop the labels bullet — it duplicates shipped work —
+  and keep this task scoped to what's still missing: a native "Priority"
+  project field (today only "Urgency" exists, single-select, not obviously the
+  same scale), a native "Type" project field (none exists — `Status`, `Urgency`,
+  `Readiness`, `Component` are the only synced fields), and blocked-by/blocking
+  relationship sync (not implemented at all).
 
 ## Findings
 
 - Operator sizing note (2026-07-21): very mechanical work — mapping badge fields
   the board already carries onto GitHub fields GitHub already supports, inside
   the existing board→GitHub sync.
+- 2026-07-22 recheck: nested-tasks-projecting's indentation fix (commit
+  495a48d) is orthogonal to this task — it fixed line-parsing, not field
+  content; no overlap there.
+- 2026-07-22 recheck: `project_sync` in `tools/board_gh.py` already syncs
+  Status, Urgency, Readiness, Component as GitHub Project custom fields — no
+  Priority or Type field exists yet, and no relationship (blocked-by/blocking)
+  sync exists.
 
 ## Proposal
 
