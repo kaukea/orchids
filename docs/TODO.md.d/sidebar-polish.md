@@ -31,6 +31,17 @@
 
 ## Findings
 
+- Item 7's build (registry-based dynamic appearance) supersedes
+  `docs/decisions.md` Decision-043 ("Fleet sidebar aggregates via an
+  explicit repolist — Orchard's discovery deferred") — flagging for the
+  orchestrator to promote/record at ingest, not written by this architect
+  directly per the decisions.md convention.
+- Item 7's build also leaves three docs stale, describing the retired
+  default-repolist-file behavior: `README.md:50`, `CHANGELOG.md:80-81`,
+  and (cross-task, not this sidecar) `docs/TODO.md.d/fleet-sidebar.md:131-141`
+  — the first two are staged in this sidecar's Result at close
+  (Decision-034); the third belongs to a different task's sidecar and is
+  noted here only as a pointer for the orchestrator to relay.
 - Operator live pass, 2026-07-22, on the sidebar-fixes branch build mounted in
   his window. Some of the duplicate bus rows observed were real duplicates:
   the orchestrator session that morning had spawned a second bus sidecar by
