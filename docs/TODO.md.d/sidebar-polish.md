@@ -62,8 +62,48 @@ The operator's itemized list, verbatim in substance:
    simultaneously" symptom is fully subsumed by item 1's animation
    removal; if any animation source survives item 1's fix, kill it there
    too.
+
+   BUILD FINDING (core-rendering builder, 2026-07-22): eviction was
+   implemented as evict-on-*observed* terminal signal, but live-checked
+   against this repo's real bus data, `agent-closing`'s `finished` message
+   was already drained from disk before any aggregator scan ever saw it —
+   so this specific case still renders stale. Evict-on-observed-signal is
+   necessary but not sufficient.
+
+   RESOLVED (operator, 2026-07-22, direct): the real fix is a lifecycle
+   contract, not a sidebar timeout — an agent leaves on its own accord when
+   done by sending two messages then cleaning up and exiting; it gets 10
+   seconds to do so. If it hasn't exited by then, the ORCHESTRATOR kills
+   it — unless the agent specifically asked for more time when it
+   announced its presence. For the sidebar to observe this and evict
+   correctly (reusing the already-built evict-on-observed-terminal-signal
+   logic), the orchestrator's kill action must itself broadcast a terminal
+   (`abandoned`) lifecycle signal on the killed agent's behalf. Scope note:
+   this is orchestrator/bus process-supervision, adjacent to but distinct
+   from the separately-queued bus-singleton task (which scopes to the BUS
+   SIDECAR being one-per-agent and reaping stray *sidecars*, not killing
+   the whole agent process) — building it here since it's the direct,
+   in-context answer to what item 2 needs to actually hold; flagging the
+   overlap for the orchestrator/board to reconcile with bus-singleton at
+   close.
+   too.
 3. **Subagent aggregation**: only the first feature ever shows subagents —
    every agent's subagents must render under their own parent row.
+
+   BUILD FINDING (core-rendering builder, 2026-07-22): reproduced with 2
+   architects each with their own subagents BEFORE any change — aggregation
+   already nested correctly; a regression test now locks this in. The real
+   cause of the reported symptom is more likely a viewport-scroll cutoff:
+   the curses draw loop has no scroll-offset tracking (`if y >= max_y:
+   break`), so once total rows exceed the pane's height, everything past
+   that line — which could be a later feature's subagents — is simply
+   never drawn, with no way to scroll to it. This feature's own additions
+   (bus rows, project headers) push row counts higher, making the cutoff
+   more likely, not less.
+
+   RESOLVED (operator, 2026-07-22, direct): fix now, in this build — add
+   scroll-follows-selection to the curses draw loop so the visible window
+   tracks the selected row.
 4. **Per-agent color**, matching Claude Code's subagent color palette where
    the terminal allows (see Questions).
 5. **Buses**: shown at the TOP, italic, greyed, with a message icon (📬
