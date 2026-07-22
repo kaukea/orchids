@@ -57,9 +57,13 @@ TYPE_LABELS = {"feature": "\u2728 feature", "bug": "\U0001f41b bug",
                "refactor": "\u267b\ufe0f refactor",
                "housekeeping": "\U0001f9f9 housekeeping",
                "completion": "\U0001f3c1 completion"}
+TYPE_ISSUE_TYPES = {"bug": "Bug", "feature": "Feature", "refactor": "Refactor",
+                     "housekeeping": "Housekeeping", "completion": "Completion"}
 URGENCY_LABELS = {"critical": "\U0001f525 critical",
                   "nice-to-have": "\U0001f352 nice-to-have",
                   "idea": "\U0001f4ad idea"}
+URGENCY_PRIORITY = {"": "Medium", "critical": "Urgent", "nice-to-have": "Low",
+                     "idea": "Low"}
 AREA_LABELS = {"process": "\u2699\ufe0f area/process", "sync": "\U0001f504 area/sync",
                "skills": "\U0001f393 area/skills",
                "publication": "\U0001f4e2 area/publication"}
@@ -86,6 +90,7 @@ class Task:
             idx, m["title"], m["path"], m["edges"]
         self.depth = len(m["indent"]) // 2
         self.blocked_by = re.findall(r"\u2298([a-z0-9-]+)", self.edges)
+        self.related = re.findall(r"~([a-z0-9-]+)", self.edges)
         self.tags = re.findall(r"#([a-z0-9-]+)", self.edges)
         self.children = []
         parts = [p.strip() for p in m["badge"].split("·")]
@@ -150,7 +155,7 @@ def sidecar_questions(root: Path, rel: str) -> str:
     return m.group(1).strip() if m else ""
 
 
-def issue_body(board: Board, t: Task) -> str:
+def issue_body(board: Board, t: Task, by_id: dict) -> str:
     lines = [
         f"`{t.type} · {t.status} · {t.urgency or '—'} · "
         f"{t.readiness} · {t.component or '—'}`",
@@ -164,6 +169,11 @@ def issue_body(board: Board, t: Task) -> str:
     if t.children:
         subs = [f"- {'#' + str(c.gh) if c.gh else c.title}" for c in t.children]
         lines += ["", "### Sub-tasks"] + subs
+    if t.related:
+        rel = [by_id[r] for r in t.related if r in by_id]
+        if rel:
+            links = [f"- {'#' + str(r.gh) if r.gh else r.title}" for r in rel]
+            lines += ["", "### Related"] + links
     return "\n".join(lines)
 
 
@@ -229,7 +239,7 @@ def push(board: Board, with_project: bool):
         if t.gh is None:
             continue
         if t.status in ACTIVE:
-            body = issue_body(board, t)
+            body = issue_body(board, t, by_id)
             issue = existing.get(t.gh)
             if issue is None or issue["body"] != body or issue["title"] != t.title:
                 sh("gh", "issue", "edit", "-R", board.repo, str(t.gh),
@@ -247,6 +257,9 @@ def push(board: Board, with_project: bool):
                    "-c", f"Board: task reached `{t.status}`.")
                 closed += 1
     board.save()
+    sync_issue_types(board)
+    sync_priority(board)
+    sync_relationships(board, by_id)
     print(f"push {board.repo}: {created} created, {updated} updated, "
           f"{closed} closed")
     if with_project:
@@ -260,6 +273,106 @@ def gql(query: str, **vars):
     for k, v in vars.items():
         args += ["-f", f"{k}={v}"]
     return gh_json(*args)
+
+
+def issue_node_id(repo: str, number: int) -> str:
+    return gql("""query($u:URI!){resource(url:$u){... on Issue{id}}}""",
+               u=f"https://github.com/{repo}/issues/{number}"
+               )["data"]["resource"]["id"]
+
+
+# ---------- Issue Types (org-level) ----------
+
+def ensure_issue_types(org: str) -> dict:
+    data = gql("""query($login:String!){organization(login:$login){id
+        issueTypes(first:50){nodes{id name}}}}""", login=org)["data"]["organization"]
+    have = {n["name"]: n["id"] for n in data["issueTypes"]["nodes"]}
+    for name in TYPE_ISSUE_TYPES.values():
+        if name in have:
+            continue
+        gql("""mutation($owner:ID!,$name:String!){createIssueType(input:{
+            ownerId:$owner,name:$name,isEnabled:true}){clientMutationId}}""",
+            owner=data["id"], name=name)
+    data = gql("""query($login:String!){organization(login:$login){
+        issueTypes(first:50){nodes{id name}}}}""", login=org)["data"]["organization"]
+    return {n["name"]: n["id"] for n in data["issueTypes"]["nodes"]}
+
+
+def set_issue_type(issue_id: str, issue_type_id: str):
+    gql("""mutation($i:ID!,$t:ID!){updateIssueIssueType(input:{
+        issueId:$i,issueTypeId:$t}){clientMutationId}}""", i=issue_id, t=issue_type_id)
+
+
+def sync_issue_types(board: Board):
+    org = board.repo.split("/")[0]
+    issue_types = ensure_issue_types(org)
+    for t in board.tasks():
+        if t.gh is None or t.status not in ACTIVE or t.type not in TYPE_ISSUE_TYPES:
+            continue
+        native = TYPE_ISSUE_TYPES[t.type]
+        if native not in issue_types:
+            continue
+        node_id = issue_node_id(board.repo, t.gh)
+        set_issue_type(node_id, issue_types[native])
+
+
+# ---------- Priority (org-level native issue field) ----------
+
+def priority_field(org: str) -> dict:
+    data = gql("""query($login:String!){organization(login:$login){
+        issueFields(first:20){nodes{... on IssueFieldSingleSelect{
+        id name options{id name}}}}}}""", login=org)["data"]["organization"]
+    for f in data["issueFields"]["nodes"]:
+        if f and f.get("name") == "Priority":
+            return f
+    raise RuntimeError(f"org '{org}' has no native 'Priority' issue field — "
+                        "expected one to already exist (see Decision-051)")
+
+
+def set_priority(issue_id: str, field_id: str, option_id: str):
+    gql("""mutation($i:ID!,$f:ID!,$o:ID!){setIssueFieldValue(input:{
+        issueId:$i,issueFields:[{fieldId:$f,singleSelectOptionId:$o}]}){
+        clientMutationId}}""", i=issue_id, f=field_id, o=option_id)
+
+
+def sync_priority(board: Board):
+    org = board.repo.split("/")[0]
+    field = priority_field(org)
+    options = {o["name"]: o["id"] for o in field["options"]}
+    for t in board.tasks():
+        if t.gh is None or t.status not in ACTIVE:
+            continue
+        native = URGENCY_PRIORITY.get(t.urgency)
+        if native is None or native not in options:
+            continue
+        node_id = issue_node_id(board.repo, t.gh)
+        set_priority(node_id, field["id"], options[native])
+
+
+# ---------- Relationships (native blocked-by / blocking) ----------
+
+def blocked_by_ids(issue_node_id_: str) -> set:
+    data = gql("""query($id:ID!){node(id:$id){... on Issue{
+        blockedBy(first:50){nodes{number}}}}}""", id=issue_node_id_)
+    return {n["number"] for n in data["data"]["node"]["blockedBy"]["nodes"]}
+
+
+def sync_relationships(board: Board, by_id: dict):
+    for t in board.tasks():
+        if t.gh is None or t.status not in ACTIVE:
+            continue
+        desired = {by_id[b].gh for b in t.blocked_by
+                   if b in by_id and by_id[b].gh is not None}
+        node_id = issue_node_id(board.repo, t.gh)
+        current = blocked_by_ids(node_id)
+        for gh_num in desired - current:
+            gql("""mutation($i:ID!,$b:ID!){addBlockedBy(input:{
+                issueId:$i,blockingIssueId:$b}){clientMutationId}}""",
+                i=node_id, b=issue_node_id(board.repo, gh_num))
+        for gh_num in current - desired:
+            gql("""mutation($i:ID!,$b:ID!){removeBlockedBy(input:{
+                issueId:$i,blockingIssueId:$b}){clientMutationId}}""",
+                i=node_id, b=issue_node_id(board.repo, gh_num))
 
 
 FIELDS_QUERY = """query($id:ID!){node(id:$id){... on ProjectV2{
@@ -429,7 +542,7 @@ def pull(board: Board):
         board.append_line(
             f"- `feature · todo · · queued · · gh#{issue['number']}` "
             f"[{issue['title']}](TODO.md.d/{slug}.md)")
-        ensure_label(board.repo)
+        ensure_labels(board.repo)
         sh("gh", "issue", "edit", "-R", board.repo, str(issue["number"]),
            "--add-label", "board")
         ingested += 1
