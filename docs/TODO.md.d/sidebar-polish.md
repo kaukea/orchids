@@ -14,10 +14,10 @@
 - Per-agent colors: match Claude Code's subagent palette (red/blue/green/
   yellow/purple/orange/pink/cyan) — confirm terminal rendering fidelity is
   acceptable in the sidebar's tmux pane before committing to exact hues.
-- Bus singleton: today EVERY agent loads its own bus sidecar (Decision-041) —
-  the operator expected ONE message bus per repo. Display-wise this round
-  collapses buses to a single top row; whether the MECHANISM becomes a true
-  singleton is a design question to rule on (touches Decision-041).
+- ~~Bus singleton: design question?~~ RULED (operator, 2026-07-22,
+  Decision-051): the bus IS a singleton per repository, by design — the
+  per-agent multiplicity is drift, correctived in [[bus-singleton]]. This
+  round renders exactly one bus row.
 - Emoji set for the status vocabulary (operator invites proposals; current
   proposal in the item below).
 - /orchard `add <path>`: what counts as "an orchids installation in progress"

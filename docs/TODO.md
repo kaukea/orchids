@@ -81,6 +81,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
 - `bug · todo · · blocked-on-answers · process · gh#33` [Hooks are an unowned pool in one shared file: no per-repo surface, no provenance](TODO.md.d/hook-composition.md) ~manifest-by-convention
 - `bug · cancelled · · complete · process ·` [~~Architect skips its delegation contract: builds without dispatching builders~~](TODO.md.d/architect-delegation.md) ~handover-contract
 - `feature · done · · complete/interactive · process ·` [Message bus: repo-scoped agent-to-agent messaging via a bus sidecar](TODO.md.d/message-bus.md) ~hook-choreography ~cross-repo-inbox
+- `bug · todo · · queued · process ·` [Bus singleton: one message bus per repository, as designed](TODO.md.d/bus-singleton.md) ~message-bus ~sidebar-polish ~agent-closing
 - `feature · todo · idea · queued · process · gh#15` [Writing emails — scope to be defined by the operator](TODO.md.d/writing-emails.md)
 
 ## Role delivery

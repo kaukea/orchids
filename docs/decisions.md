@@ -952,3 +952,15 @@ architect is spawned until the round returns and its Questions are answered.
 A `plan-ready` badge does not skip the round — it confirms the WHAT is
 current at launch, not merely present. Launches themselves stay
 operator-gated; Decision-027's autonomous kick-off remains gated off.
+
+## [2026-07-22 13:19 CEST] Decision-051: The message bus is a singleton — per repository, by design
+#bus #singleton #message-bus #architecture #ruling
+
+Ruling (operator, 2026-07-22, verbatim in substance: "singleton message bus
+is how I designed it, it's not up for conversation"): there is ONE message
+bus per repository. The observed multiplicity — a bus sidecar instance per
+agent, presenting as several buses — is DRIFT from the designed
+architecture, not a display quirk and not an open design question. Agents
+communicate THROUGH the one bus; whatever per-agent helper exists is a
+client of it, never a peer bus. Corrective boarded as bus-singleton; the
+sidebar renders exactly one bus row (sidebar-polish item 5).
