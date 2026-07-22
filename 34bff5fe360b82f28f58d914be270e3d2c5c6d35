@@ -1,0 +1,12 @@
+decision-projecting — exit interview
+
+Deviations:
+- Step-1 builder's first commit omitted the required 🎉/Base:<sha> anchor
+  trailer for the first post-MAKE-IT-SO commit. Cause: the architect's own
+  step-spec for that builder didn't state the anchor-commit requirement
+  explicitly. Caught before step 2 dispatched; fixed via amend (commit was
+  local/unpushed/unreviewed, safe to amend). Lesson: future architect
+  step-specs should state the anchor-commit requirement explicitly whenever
+  dispatching a feature's FIRST build step.
+- No other process deviations — discovery, plan, build, and live test ran
+  as specified once that gap was closed.
