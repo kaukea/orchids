@@ -1,4 +1,5 @@
-"""Unit tests for tools/bus.py's operator_origin provenance flag.
+"""Unit tests for tools/bus.py's operator_origin provenance flag, and the
+`ask`/answer question protocol (sidebar-polish item 12c-f).
 
 Mirrors the notify_user coverage style used elsewhere in this suite (see
 tests/test_sidebar_model.py, tests/support.py): a real git-init'd temp repo,
@@ -11,7 +12,9 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+from pathlib import Path
 
 try:
     import jsonschema
@@ -192,6 +195,132 @@ class SignalOnBehalfOfTests(unittest.TestCase):
         messages = json.loads(out.stdout)
 
         self.assertEqual(messages[0]["from"], "selfSignallerA")
+
+
+class QuestionEnvelopeUnitTests(unittest.TestCase):
+    """Unit-level: _question_envelope() itself, no subprocess involved."""
+
+    def test_carries_notify_user_and_activity_body_for_the_existing_sidebar_signal(self):
+        env = bus._question_envelope("askerX", "peerA", "q1", "Proceed?", ["Yes", "No"])
+        self.assertTrue(env["notify_user"])
+        self.assertEqual(env["body"], "orchid:activity:Proceed?")
+
+    def test_carries_question_fields(self):
+        env = bus._question_envelope("askerX", "peerA", "q1", "Proceed?", ["Yes", "No"])
+        self.assertEqual(env["question_id"], "q1")
+        self.assertEqual(env["question"], "Proceed?")
+        self.assertEqual(env["options"], ["Yes", "No"])
+
+    @unittest.skipIf(jsonschema is None, "jsonschema not installed")
+    def test_question_envelope_validates_against_schema(self):
+        env = bus._question_envelope("askerX", "peerA", "q1", "Proceed?", ["Yes", "No"])
+        jsonschema.validate(instance=env, schema=_schema())
+
+
+class MatchAnswerUnitTests(unittest.TestCase):
+    """Unit-level: _match_answer() — consumes only the matching reply,
+    leaves every other message in the inbox untouched."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.box = Path(self._tmp.name)
+
+    def _write(self, name, env):
+        (self.box / name).write_text(json.dumps(env), encoding="utf-8")
+
+    def test_no_reply_yet_returns_none(self):
+        self._write("unrelated.json", {"id": "1", "from": "x", "to": "y", "body": "hi"})
+        self.assertIsNone(bus._match_answer(self.box, "q1"))
+        self.assertTrue((self.box / "unrelated.json").exists())
+
+    def test_matching_reply_is_consumed_and_returned(self):
+        self._write("other.json", {"id": "1", "from": "x", "to": "y",
+                                    "in_reply_to": "q-other", "body": "not this one"})
+        self._write("answer.json", {"id": "2", "from": "question-broker", "to": "askerX",
+                                     "in_reply_to": "q1", "body": '{"index": 0, "option": "Yes"}'})
+
+        answer = bus._match_answer(self.box, "q1")
+
+        self.assertEqual(answer, '{"index": 0, "option": "Yes"}')
+        self.assertFalse((self.box / "answer.json").exists())
+        self.assertTrue((self.box / "other.json").exists())  # untouched — belongs to someone else
+
+
+class AskCliRoundTripTests(unittest.TestCase):
+    """CLI-level: `ask` broadcasts, blocks, and returns once a reply
+    addressed back to it (via the existing `send --in-reply-to`) arrives —
+    the live-tmux-popup half of item 12c is NOT exercised here (see the
+    orchard-question-broker tests/report for that boundary); this is the
+    bus message protocol only."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.repo = make_repo(self._tmp.name)
+
+    def _bus(self, *args, session_id=None, **kwargs):
+        env = dict(os.environ)
+        if session_id is not None:
+            env["CLAUDE_CODE_SESSION_ID"] = session_id
+        return subprocess.run(
+            [sys.executable, _BUS_PY, *args],
+            cwd=self.repo, capture_output=True, text=True, env=env, **kwargs,
+        )
+
+    def test_ask_round_trips_to_an_answer(self):
+        self._bus("init", "peerA", session_id="peerA")
+
+        proc = subprocess.Popen(
+            [sys.executable, _BUS_PY, "ask", "--question", "Proceed?",
+             "--option", "Yes", "--option", "No", "--poll-interval", "0.05"],
+            cwd=self.repo, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=dict(os.environ, CLAUDE_CODE_SESSION_ID="askerX"),
+        )
+        try:
+            # the broadcast lands in peerA's inbox almost immediately
+            deadline = time.time() + 5
+            question_id = None
+            while time.time() < deadline and question_id is None:
+                out = self._bus("receive", "peerA", session_id="peerA")
+                messages = json.loads(out.stdout)
+                for m in messages:
+                    if m.get("question_id"):
+                        question_id = m["question_id"]
+                        received = m
+                if question_id is None:
+                    time.sleep(0.05)
+            self.assertIsNotNone(question_id, "ask() never broadcast a question")
+
+            self.assertTrue(received["notify_user"])
+            self.assertEqual(received["question"], "Proceed?")
+            self.assertEqual(received["options"], ["Yes", "No"])
+            self.assertEqual(received["body"], "orchid:activity:Proceed?")
+
+            # the "broker" (standing in for tools/orchard-question-broker.py)
+            # answers directly over the bus, exactly like it would after a
+            # real popup returned a keypress
+            self._bus(
+                "send", "--from", "question-broker", "--to", "askerX",
+                "--in-reply-to", question_id, "--body", '{"index": 0, "option": "Yes"}',
+            )
+
+            stdout, stderr = proc.communicate(timeout=5)
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.communicate()
+
+        self.assertEqual(proc.returncode, 0, stderr)
+        self.assertEqual(json.loads(stdout), {"index": 0, "option": "Yes"})
+
+    def test_ask_requires_at_least_two_options(self):
+        proc = self._bus(
+            "ask", "--question", "Proceed?", "--option", "OnlyOne",
+            session_id="askerY",
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("at least two", proc.stderr)
 
 
 if __name__ == "__main__":

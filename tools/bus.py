@@ -42,6 +42,10 @@ Usage:
   bus.py signal --state S --on-behalf-of ID     same, but `from` is ID, not the caller —
                                                 orchestrator-only, for signaling a
                                                 killed agent's own terminal state
+  bus.py ask --question Q --option A --option B [...]
+                                                broadcast a question (sidebar-polish item 12);
+                                                blocks until an answer addressed back to this
+                                                session arrives, then prints it and exits
   bus.py root                                  print the bus root
 """
 import argparse
@@ -49,6 +53,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -430,6 +435,81 @@ def cmd_signal(args) -> None:
     print(f"signal {args.state} broadcast to {reached} agent(s)")
 
 
+def _question_envelope(sender: str, to: str, question_id: str, question: str,
+                        options: list[str]) -> dict:
+    """The envelope a `bus.py ask` broadcast puts in every peer's inbox
+    (sidebar-polish item 12c).
+
+    `body` stays the existing `orchid:activity:<text>` string with
+    `notify_user=True` — the SAME signal tools/sidebar_model.py's
+    _apply_message already turns into `last_notify_user` (and so the ❓
+    marker), rather than a parallel one. question_id/question/options are
+    additional envelope-level fields a plain activity broadcast never
+    carries; sidebar_model.py only reads `body`/`notify_user` and ignores
+    them, so this is the SAME message doing double duty, not two messages.
+    A reply is matched purely on the existing `in_reply_to` field (see
+    _match_answer) — no new field is needed on the answer side.
+    """
+    env = make_envelope(sender, to, body=f"orchid:activity:{question}", notify_user=True)
+    env["question_id"] = question_id
+    env["question"] = question
+    env["options"] = options
+    return env
+
+
+def _match_answer(box: Path, question_id: str) -> str | None:
+    """Non-destructively scan `box` for a reply to `question_id`.
+
+    Only the ONE matching file is consumed (deleted) — every other message
+    sitting in this inbox belongs to this session for some other reason and
+    is left untouched, exactly like bus.py's own receive() leaves anything
+    it does not drain. Returns the reply's `body` (whatever cmd_ask's caller
+    put there) or None if no reply has arrived yet.
+    """
+    if not box.is_dir():
+        return None
+    for f in sorted(box.glob("*.json")):
+        if f.name.startswith("."):
+            continue  # atomic-write .partial temp files
+        try:
+            env = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if env.get("in_reply_to") == question_id:
+            f.unlink(missing_ok=True)
+            return env.get("body")
+    return None
+
+
+def _await_answer(box: Path, question_id: str, poll_interval: float) -> str:
+    """Block until _match_answer finds a reply. No timeout: `ask` is a
+    blocking primitive by design (the trial's live round trip needs exactly
+    this); the broker script owns all of the deferral/keypress policy, not
+    this wait loop (sidebar-polish item 12f)."""
+    while True:
+        answer = _match_answer(box, question_id)
+        if answer is not None:
+            return answer
+        time.sleep(poll_interval)
+
+
+def cmd_ask(args) -> None:
+    me = whoami()
+    inbox(me).mkdir(parents=True, exist_ok=True)  # so a reply has somewhere to land
+    if len(args.option) < 2:
+        sys.exit("bus: ask requires at least two --option values")
+    question_id = uuid.uuid4().hex[:12]
+    reached = fan_out(
+        me, lambda to: _question_envelope(me, to, question_id, args.question, args.option),
+    )
+    if reached == 0:
+        sys.exit("bus: ask — no peers on the bus to broadcast the question to")
+    print(f"bus: asked {reached} peer(s); question {question_id}; waiting for an answer",
+          file=sys.stderr)
+    answer = _await_answer(inbox(me), question_id, args.poll_interval)
+    print(answer)
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="repo-scoped agent message bus")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -489,6 +569,17 @@ def main() -> None:
                         "terminal signal for an agent it just killed after its "
                         "exit-grace period ran out, so the sidebar still evicts it")
     s.set_defaults(func=cmd_signal)
+
+    s = sub.add_parser("ask")
+    s.add_argument("--question", required=True)
+    s.add_argument("--option", dest="option", action="append", required=True,
+                   help="an answer choice, numbered by the order given; repeat "
+                        "for each option (at least two required)")
+    s.add_argument("--poll-interval", dest="poll_interval", type=float, default=1.0,
+                   help="seconds between checks for the answer while blocked "
+                        "(default 1.0) — polling cadence only, not a timeout: "
+                        "ask never gives up on its own")
+    s.set_defaults(func=cmd_ask)
 
     args = p.parse_args()
     if getattr(args, "agent_id", "sentinel") is None:

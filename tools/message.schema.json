@@ -38,6 +38,19 @@
     },
     "body": {
       "description": "The payload. Optional; any type. A standard request's body is a fixed identifier string (e.g. \"identity\", \"status\") that the recipient's sidecar answers itself."
+    },
+    "question_id": {
+      "type": "string",
+      "description": "Present only on a bus.py `ask` broadcast (sidebar-polish item 12). A reply references it via the existing in_reply_to field — answers add no new envelope field of their own."
+    },
+    "question": {
+      "type": "string",
+      "description": "The question text, present only alongside question_id."
+    },
+    "options": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Numbered answer choices, present only alongside question_id; array index = display/option number."
     }
   }
 }

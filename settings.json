@@ -25,6 +25,26 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "root=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -x \"$root/.claude/hooks/question-input-activity.sh\" ] && \"$root/.claude/hooks/question-input-activity.sh\"; exit 0",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "root=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -x \"$root/.claude/hooks/question-notification-backstop.sh\" ] && \"$root/.claude/hooks/question-notification-backstop.sh\"; exit 0",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "SessionStart": [
