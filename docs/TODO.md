@@ -49,6 +49,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
     - `completion · todo · · plan-ready · process ·` [Popup finishing: the operator's round-2 requests, finished and live-proven](TODO.md.d/popup-finishing.md) ~sidebar-polish ~operator-interacting
     - `bug · todo · · queued · process ·` [Sidebar spacing and glyphs: gaps found on the first live pass after sidebar-polish merged](TODO.md.d/sidebar-spacing-and-glyphs.md) ~sidebar-polish
     - `feature · todo · nice-to-have · queued · process ·` [Install detecting: richer orchids-install state beyond .ai.toml presence (upstream kauk)](TODO.md.d/install-detecting.md) ~sidebar-polish ~orchard
+    - `bug · todo · · queued · process ·` [Sidebar witnessing: ghost rows persist, silent live agents invisible — the ephemeral-bus observer gap](TODO.md.d/sidebar-witnessing.md) ~sidebar-polish ~bus-singleton ~message-bus
   - `bug · done · · complete/interactive · process · gh#34` [Session and feature naming: short, descriptive, visible — sidebar prerequisite](TODO.md.d/session-naming.md)
   - `feature · todo · · working · process · gh#43` [Handover contract: build-ready sidecars, questions front-loaded before launch](TODO.md.d/handover-contract.md) ~architect-delegation ~injection-integrity
   - `feature · done · · complete/interactive · process · gh#44` [Cloud architect: automate the analyzable share of the architect's job](TODO.md.d/cloud-architect.md) ~handover-contract ⊘app-identifying
