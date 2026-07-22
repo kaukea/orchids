@@ -10,3 +10,17 @@ Deviations:
   dispatching a feature's FIRST build step.
 - No other process deviations — discovery, plan, build, and live test ran
   as specified once that gap was closed.
+
+Additional deviation (caught only at close): mid-session, when relaying a
+message to the orchestrator, I called the Agent tool fresh with
+subagent_type "bus" instead of using SendMessage to continue my
+already-announced bus sidecar. That spawned a SECOND, independent bus
+listener that ran in parallel with the original for most of the build/test
+phase (both periodically reported "listening"/"empty inbox"). No messages
+were lost or misrouted as far as observed, but it was pure duplication and
+could have caused a message to be picked up by the wrong instance. Repeated
+the same mistake again at close when releasing ("release" sent via a fresh
+Agent call, not SendMessage) — caught immediately that time and corrected
+via SendMessage to the real bus id. Lesson: ALWAYS use SendMessage with the
+bus's known agentId to talk to an already-running bus sidecar; only use the
+Agent tool for it once, at session start.
