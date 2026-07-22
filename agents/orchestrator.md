@@ -207,7 +207,7 @@ up to you.
 
 **Operator gate-phrase translation (Decision-057).** The operator's spoken/typed BUILD-gate
 phrase is **`NO NO THAT WAS NOT A QUESTION`** (accepted variants: `THIS` for `THAT`; short
-form `NO NO`) — translated AT THIS BOUNDARY, and at any operator-input surface (the coming
+form `NO NO`; and **`ENGAGE`**, operator addendum same day) — translated AT THIS BOUNDARY, and at any operator-input surface (the coming
 question/gate popup), to the fleet's internal gate string `MAKE IT SO` before relay. The
 protocol string never changes internally; `MAKE IT SO` typed directly still works. `THAT IS
 ALL` is untouched.

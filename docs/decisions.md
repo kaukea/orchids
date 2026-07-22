@@ -1066,3 +1066,11 @@ BOUNDARY, per the operator's scope guidance: every operator-input surface
 the phrase to the fleet's INTERNAL protocol string `MAKE IT SO`, which is
 unchanged everywhere else — defs, bus matching, in-flight builds. A
 directly-typed `MAKE IT SO` still works. `THAT IS ALL` is untouched.
+
+## [2026-07-22, addendum to Decision-057] ENGAGE joins the build-gate phrases
+#gates #keywords #engage
+
+Operator addendum, minutes after Decision-057: **`ENGAGE`** is also an
+accepted operator build-gate phrase, translated at the same boundary to the
+internal `MAKE IT SO`. The accepted set is now: the full NO-NO phrase
+(THAT/THIS), `NO NO`, `ENGAGE`, and the internal string itself.
