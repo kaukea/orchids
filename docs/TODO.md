@@ -34,8 +34,8 @@ Badge: `type · status · urgency · readiness · area · gh#`.
 - `feature · functional · · complete/interactive · · gh#13` [Cross-repo board view: GitHub issues + user-level Project, orchestrator-synced](TODO.md.d/github-board-sync.md) ~cross-repo-inbox ~external-blockers
   - `bug · done · · complete/interactive · process ·` [Sync ingest failing: board-sync's GitHub→board direction exits 1](TODO.md.d/sync-ingest-failing.md) ~github-board-sync ~field-projecting
   - `completion · done · · complete/interactive · process ·` [Field projecting: every sidecar field maps to GitHub or is created there](TODO.md.d/field-projecting.md) ~nested-tasks-projecting ~tags-and-labels
-  - `feature · todo · · plan-ready · process ·` [Decision projecting: decisions mirror as their own type, closing on supersession](TODO.md.d/decision-projecting.md) ~field-projecting
-  - `completion · todo · · queued · process ·` [Component field declaring: Component missing from board_gh field sets](TODO.md.d/component-field-declaring.md) ~field-projecting
+  - `feature · todo · · plan-ready · process · gh#73` [Decision projecting: decisions mirror as their own type, closing on supersession](TODO.md.d/decision-projecting.md) ~field-projecting
+  - `completion · todo · · queued · process · gh#74` [Component field declaring: Component missing from board_gh field sets](TODO.md.d/component-field-declaring.md) ~field-projecting
 - `housekeeping · todo · nice-to-have · blocked-on-answers · process · gh#14` [Install-id migration to the kaukea org — parked until the org name is final](TODO.md.d/install-id-kaukea.md)
 - `feature · todo · · queued · · gh#25` [Orchard: the fleet workbench — global view, selection, dispatch](TODO.md.d/orchard.md) ~github-board-sync ~cross-repo-inbox
   - `feature · todo · · blocked-on-answers · process · gh#39` [Orchestrator emits the orchard summary file, parseable from outside](TODO.md.d/orchard-summary.md)
@@ -43,24 +43,24 @@ Badge: `type · status · urgency · readiness · area · gh#`.
   - `feature · todo · · queued · process · gh#41` [Orchard launch: session per repo, orchestrator told the pick and double-checks](TODO.md.d/orchard-launch.md) ⊘orchard-view
   - `feature · todo · · plan-ready · process · gh#42` [Tmux topology: window per architect, stacked pane per coder, focus returns on close](TODO.md.d/tmux-topology.md) ~hook-choreography ~fleet-sidebar
   - `feature · done · · complete/interactive · · gh#23` [Fleet sidebar: always-visible navigable job states with phase emojis](TODO.md.d/fleet-sidebar.md) ~bus-liveness ~agent-metadata
-    - `feature · todo · · blocked-on-answers · process ·` [Cloud event feed: GitHub Actions events land as sidebar files](TODO.md.d/cloud-event-feed.md) ~cloud-architect
+    - `feature · todo · · blocked-on-answers · process · gh#75` [Cloud event feed: GitHub Actions events land as sidebar files](TODO.md.d/cloud-event-feed.md) ~cloud-architect
     - `bug · done · · complete/interactive · process ·` [Fleet sidebar fixes: correct the defects the first build shipped](TODO.md.d/sidebar-fixes.md)
-    - `bug · todo · · plan-ready · process ·` [Sidebar polish: the operator's live-pass list — rows, colors, states, /orchard](TODO.md.d/sidebar-polish.md) ~sidebar-fixes ~message-bus ~orchard
-    - `feature · todo · nice-to-have · queued · process ·` [Install detecting: richer orchids-install state beyond .ai.toml presence (upstream kauk)](TODO.md.d/install-detecting.md) ~sidebar-polish ~orchard
+    - `bug · todo · · plan-ready · process · gh#76` [Sidebar polish: the operator's live-pass list — rows, colors, states, /orchard](TODO.md.d/sidebar-polish.md) ~sidebar-fixes ~message-bus ~orchard
+    - `feature · todo · nice-to-have · queued · process · gh#77` [Install detecting: richer orchids-install state beyond .ai.toml presence (upstream kauk)](TODO.md.d/install-detecting.md) ~sidebar-polish ~orchard
   - `bug · done · · complete/interactive · process · gh#34` [Session and feature naming: short, descriptive, visible — sidebar prerequisite](TODO.md.d/session-naming.md)
   - `feature · todo · · working · process · gh#43` [Handover contract: build-ready sidecars, questions front-loaded before launch](TODO.md.d/handover-contract.md) ~architect-delegation ~injection-integrity
   - `feature · done · · complete/interactive · process · gh#44` [Cloud architect: automate the analyzable share of the architect's job](TODO.md.d/cloud-architect.md) ~handover-contract ⊘app-identifying
   - `completion · done · · complete/interactive · process ·` [callabloom: the cloud hops' named app identity](TODO.md.d/app-identifying.md) ~cloud-architect
-  - `feature · todo · · blocked-on-answers · process ·` [Branch protection as code: operator approval to merge, callabloom excepted](TODO.md.d/branch-protecting.md) ~app-identifying
-  - `feature · todo · · blocked-on-answers · process ·` [Mr. Rabbit: serialized merge ordering owns changelog order, closes the loop](TODO.md.d/merge-ordering.md) ~branch-protecting ~cloud-architect
-  - `refactor · todo · · blocked-on-answers · process ·` [Launcher subagent: extract worktree creation and agent launch from the orchestrator](TODO.md.d/launcher-subagent.md) ~merge-ordering
-  - `feature · todo · · queued · process ·` [Delta commenting: agents converse in threads — acknowledge, advise, refine](TODO.md.d/delta-commenting.md)
-  - `feature · todo · idea · queued · process ·` [Routine NL-trigger: an Anthropic routine dispatches the cloud path](TODO.md.d/routine-triggering.md) ~merge-ordering
+  - `feature · todo · · blocked-on-answers · process · gh#78` [Branch protection as code: operator approval to merge, callabloom excepted](TODO.md.d/branch-protecting.md) ~app-identifying
+  - `feature · todo · · blocked-on-answers · process · gh#79` [Mr. Rabbit: serialized merge ordering owns changelog order, closes the loop](TODO.md.d/merge-ordering.md) ~branch-protecting ~cloud-architect
+  - `refactor · todo · · blocked-on-answers · process · gh#80` [Launcher subagent: extract worktree creation and agent launch from the orchestrator](TODO.md.d/launcher-subagent.md) ~merge-ordering
+  - `feature · todo · · queued · process · gh#81` [Delta commenting: agents converse in threads — acknowledge, advise, refine](TODO.md.d/delta-commenting.md)
+  - `feature · todo · idea · queued · process · gh#82` [Routine NL-trigger: an Anthropic routine dispatches the cloud path](TODO.md.d/routine-triggering.md) ~merge-ordering
   - `feature · todo · · blocked-on-answers · process · gh#45` [Cross-repo bus: live messaging across repository boundaries](TODO.md.d/cross-repo-bus.md) ~message-bus ~cross-repo-inbox
   - `feature · todo · · blocked-on-answers · process · gh#46` [Diagnostic channel for agents, cloud and local — cross-cutting](TODO.md.d/diagnostic-channel.md) ~bus-liveness ~agent-metadata ~fleet-sidebar ~cloud-architect
   - `feature · todo · · blocked-on-answers · process · gh#47` [Bloomer charter: close functional scope, statistical readiness, auto-kick](TODO.md.d/psychometric-discovery.md) ~handover-contract ~retire-groom-vocabulary
 - `bug · done · · complete/interactive · process ·` [Agents leave sub-agents and sessions unclosed: the flow cannot finish](TODO.md.d/agent-closing.md) ~message-bus ~hook-choreography ~zombie-revival
-- `bug · todo · nice-to-have · plan-ready · process ·` [Skills cite decision numbers that mean something else in decisions.md](TODO.md.d/decision-collision-skills.md)
+- `bug · todo · nice-to-have · plan-ready · process · gh#83` [Skills cite decision numbers that mean something else in decisions.md](TODO.md.d/decision-collision-skills.md)
 - `housekeeping · todo · nice-to-have · blocked-on-answers · process · gh#26` [Rename the TODO vocabulary to task list](TODO.md.d/todo-to-task-list.md)
 - `housekeeping · done · · complete/interactive · process · gh#27` [Retire the ripen word family: rename the skill, the agent, and the verb](TODO.md.d/retire-groom-vocabulary.md) ~todo-to-task-list
 - `feature · todo · critical · blocked-on-answers · process · gh#28` [Injection integrity: make instructions arrive intact, not summarised](TODO.md.d/injection-integrity.md) ⊘readme-changelog-ownership ~session-start-hook
@@ -76,17 +76,17 @@ Badge: `type · status · urgency · readiness · area · gh#`.
 - `feature · todo · · queued · process · gh#32` [Deviance detection: surface drift when it happens, not weeks later](TODO.md.d/deviance-detection.md) ⊘injection-integrity
 - `feature · functional · · complete/interactive · ·` [Rules tuning: exit interviews feed statistical prompt optimization, A/B tested](TODO.md.d/rules-tuning.md) ~deviance-detection ~diagnostic-channel ~psychometric-discovery
   - `feature · done · · complete/interactive · process ·` [Telemetry collecting: deviations and exit interviews to git notes](TODO.md.d/telemetry-collecting.md)
-  - `feature · todo · · blocked-on-answers · process ·` [Digest identity: the telemetry routine publishes as callabloom, not the operator](TODO.md.d/digest-identity.md) ~telemetry-collecting ~app-identifying ~branch-protecting
-  - `feature · todo · · blocked-on-answers · process ·` [Digest formatting: emoji-keyed bullets, impact subtitles, links](TODO.md.d/digest-formatting.md) ~telemetry-collecting ~digest-identity
+  - `feature · todo · · blocked-on-answers · process · gh#84` [Digest identity: the telemetry routine publishes as callabloom, not the operator](TODO.md.d/digest-identity.md) ~telemetry-collecting ~app-identifying ~branch-protecting
+  - `feature · todo · · blocked-on-answers · process · gh#85` [Digest formatting: emoji-keyed bullets, impact subtitles, links](TODO.md.d/digest-formatting.md) ~telemetry-collecting ~digest-identity
   - `feature · todo · · queued · process · gh#51` [Telemetry mining: batch analysis of notes and transcripts](TODO.md.d/telemetry-mining.md) ⊘telemetry-collecting
   - `feature · todo · · queued · process · gh#52` [Prompt optimizing: rule changes proposed from deviation evidence](TODO.md.d/prompt-optimizing.md) ⊘telemetry-mining
   - `feature · todo · idea · queued · process · gh#53` [Rules abtesting: variants measured statistically, reverted on regression](TODO.md.d/rules-abtesting.md) ⊘prompt-optimizing
 - `bug · todo · · blocked-on-answers · process · gh#33` [Hooks are an unowned pool in one shared file: no per-repo surface, no provenance](TODO.md.d/hook-composition.md) ~manifest-by-convention
 - `bug · cancelled · · complete · process ·` [~~Architect skips its delegation contract: builds without dispatching builders~~](TODO.md.d/architect-delegation.md) ~handover-contract
 - `feature · done · · complete/interactive · process ·` [Message bus: repo-scoped agent-to-agent messaging via a bus sidecar](TODO.md.d/message-bus.md) ~hook-choreography ~cross-repo-inbox
-- `bug · todo · · queued · process ·` [Bus singleton: exactly one bus sidecar per agent, as designed](TODO.md.d/bus-singleton.md) ~message-bus ~sidebar-polish ~agent-closing
-- `feature · todo · · blocked-on-answers · process ·` [Operator interacting: questions, gates and summaries as one typed exchange](TODO.md.d/operator-interacting.md) ~message-bus ~sidebar-polish ~hook-choreography
-- `feature · todo · · blocked-on-answers · process ·` [Step recording: one authored record, scripted projections](TODO.md.d/step-recording.md) ~handover-contract
+- `bug · todo · · queued · process · gh#86` [Bus singleton: exactly one bus sidecar per agent, as designed](TODO.md.d/bus-singleton.md) ~message-bus ~sidebar-polish ~agent-closing
+- `feature · todo · · blocked-on-answers · process · gh#87` [Operator interacting: questions, gates and summaries as one typed exchange](TODO.md.d/operator-interacting.md) ~message-bus ~sidebar-polish ~hook-choreography
+- `feature · todo · · blocked-on-answers · process · gh#88` [Step recording: one authored record, scripted projections](TODO.md.d/step-recording.md) ~handover-contract
 - `feature · todo · idea · queued · process · gh#15` [Writing emails — scope to be defined by the operator](TODO.md.d/writing-emails.md)
 
 ## Role delivery
