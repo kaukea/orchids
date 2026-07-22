@@ -39,9 +39,13 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from feature_name import feature_name as _feature_name  # noqa: E402
 
 DEFAULT_REPOLIST = Path.home() / ".config" / "orchids" / "sidebar-repos"
 
@@ -432,7 +436,14 @@ def _assemble_repo(repo_path: str, sessions: dict[str, _SessionState]) -> Repo:
             continue
 
         feature_id = arch.feature_id or arch.session_id
-        feature_name = arch.name or (feature_id.replace("-", " ") if feature_id else feature_id)
+        # arch.name is whatever the architect announced (already ledger-derived
+        # via bus.py's identity_of() in the normal case) — an explicit runtime
+        # override wins; otherwise re-derive from the board/sidecar directly
+        # (sidebar-polish item 11) rather than falling back to the mechanical
+        # id-with-spaces form.
+        feature_name = arch.name or (
+            _feature_name(feature_id, root=repo_path) if feature_id else feature_id
+        )
         feature = Feature(
             feature_id=feature_id,
             name=feature_name,

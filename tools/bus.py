@@ -53,6 +53,9 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from feature_name import feature_name as _feature_name  # noqa: E402
+
 # Standard request bodies the sidecar answers itself, without waking its parent:
 # a message whose body is one of these is a pull for that information. Closed set,
 # handled deterministically so it costs no tokens in the parent or the sidecar.
@@ -218,9 +221,11 @@ def identity_of(exit_grace_seconds: int = DEFAULT_EXIT_GRACE_SECONDS) -> dict:
         "agent_type": os.environ.get("CLAUDE_CODE_AGENT") or None,
         "worktree": worktree,
         "feature_id": feature_id,
-        # Human name = feature id with '-' → spaces; derived once here so the sidebar
-        # and any bash consumer read one field instead of re-deriving (Decision-032).
-        "name": feature_id.replace("-", " ") if feature_id else None,
+        # Ledger-derived human name (tools/feature_name.py, sidebar-polish item 11):
+        # board short-title, else sidecar H1, else mechanical hyphen->space, so
+        # every consumer reads one already-authored field instead of re-deriving
+        # (Decision-032).
+        "name": _feature_name(feature_id, root=top) if feature_id else None,
         "parent_session": os.environ.get("ORCHID_PARENT_SESSION") or None,
         "exit_grace_seconds": exit_grace_seconds,
     }
