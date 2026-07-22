@@ -38,8 +38,11 @@ is trigger-agnostic, so adding a schedule later changes only how it is kicked of
      stalest 2 of those.
    Bloomable = a parked task (`status` todo|functional); `done`/`cancelled` are terminal.
    **Cost cap: N=2 per pass** — never fan the bloomer over the whole board at once.
-2. **Dispatch the bloomer** on each chosen `<id>` — `Agent` tool `subagent_type: bloomer` (or
-   `claude --bg --agent bloomer --name "orchids ▸ ${id//-/ }"`), one task per bloomer — the
+2. **Dispatch the bloomer** on each chosen `<id>` — `Agent` tool `subagent_type: bloomer`,
+   one task per bloomer. PREFER the Agent tool from a live session: a `claude --bg` bloomer
+   is headless and PARKS FOREVER on its first permission prompt (live-fired 2026-07-22 —
+   two bloomers blocked 19 minutes unattended); use `claude --bg --agent bloomer --name
+   "orchids ▸ ${id//-/ }"` only when the needed permissions are pre-allowed. The
    `--name` carries the feature's human name (id with `-` → spaces), never the role. The
    bloomer is **prep-only**: it
    advances the stage, fleshes the sidecar, projects the readiness badge, runs `board_lint.py`,
