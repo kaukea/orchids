@@ -1226,3 +1226,24 @@ looks more efficient. Therefore, mechanically:
 Enforcement by architecture, never by instruction — the same family as
 Decisions 056 (token-holder aggregation) and the popup broker (script
 decides, agent cannot override).
+
+## [2026-07-23 03:52 CEST] Decision-070: Telemetry mining's first slice runs as a cloud routine
+#telemetry #telemetry-mining #routine #cloud #wiki #digest
+
+The first slice of telemetry mining (gh#51) runs as an Anthropic cloud routine,
+not a local cron: haiku model, daily at 00:00 UTC, publishing its digest to the
+repository wiki as primary destination with a pull request as fallback. Context,
+not ruling: the routine id at promotion time is trig_01VjojrA8RTPZuVpAQkvtTR1;
+it went live 2026-07-21 and this entry was carried as "still pending" in the
+fleet-sidebar ingest prep before landing here.
+
+## [2026-07-23 03:52 CEST] Decision-071: .ai.toml is operator-owned; delivery markings belong in AGENTS.d
+#kauk #ai-toml #agents-d #delivery #sync #file-formats
+
+Operator ruling (2026-07-23): `.ai.toml` — like all file formats — is for the
+operator alone to change and validate. Agents never add `local`/`copy`/`link`
+delivery markings there, not even to silence kauk's BLOCKED warnings. Per-file
+delivery configuration belongs in `AGENTS.d` instead; its exact shape is to be
+proposed by the scheduled delivery-config review and validated by the operator
+before adoption. Until then the two standing BLOCKED lines on orchids'
+AGENTS.shared.md / AGENTS.files.md stay as-is.

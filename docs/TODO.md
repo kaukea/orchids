@@ -31,6 +31,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
 - `feature · todo · · blocked-on-answers · process · gh#11` [Standard tree display+selection for package installs (upstream kauk)](TODO.md.d/package-select-tree.md) ~kauk-skill-symlink-write
 - `feature · todo · · plan-ready · process · gh#12` [Sync suggests a reset when the package changed (upstream kauk)](TODO.md.d/sync-suggest-reset.md) ~package-select-tree ~kauk-skill-symlink-write
 - `feature · todo · · queued · process · gh#24` [kauk validates role declarations: validate stub now, taxonomy check later (upstream kauk)](TODO.md.d/kauk-validate-roles.md) ~role-dag-frontmatter
+- `refactor · todo · · queued · process ·` [Delivery config review: markings out of .ai.toml into AGENTS.d (upstream kauk)](TODO.md.d/delivery-config-review.md) ~manifest-copy-ro ~install-detecting
 - `feature · functional · · complete/interactive · · gh#13` [Cross-repo board view: GitHub issues + user-level Project, orchestrator-synced](TODO.md.d/github-board-sync.md) ~cross-repo-inbox ~external-blockers
   - `bug · done · · complete/interactive · process ·` [Sync ingest failing: board-sync's GitHub→board direction exits 1](TODO.md.d/sync-ingest-failing.md) ~github-board-sync ~field-projecting
   - `completion · done · · complete/interactive · process ·` [Field projecting: every sidecar field maps to GitHub or is created there](TODO.md.d/field-projecting.md) ~nested-tasks-projecting ~tags-and-labels
@@ -82,7 +83,7 @@ Badge: `type · status · urgency · readiness · area · gh#`.
   - `feature · done · · complete/interactive · process ·` [Telemetry collecting: deviations and exit interviews to git notes](TODO.md.d/telemetry-collecting.md)
   - `feature · todo · · blocked-on-answers · process ·` [Digest identity: the telemetry routine publishes as callabloom, not the operator](TODO.md.d/digest-identity.md) ~telemetry-collecting ~app-identifying ~branch-protecting
   - `feature · todo · · blocked-on-answers · process ·` [Digest formatting: emoji-keyed bullets, impact subtitles, links](TODO.md.d/digest-formatting.md) ~telemetry-collecting ~digest-identity
-  - `feature · todo · · queued · process · gh#51` [Telemetry mining: batch analysis of notes and transcripts](TODO.md.d/telemetry-mining.md) ⊘telemetry-collecting
+  - `feature · functional · · queued · process · gh#51` [Telemetry mining: batch analysis of notes and transcripts](TODO.md.d/telemetry-mining.md) ⊘telemetry-collecting
   - `feature · todo · · queued · process · gh#52` [Prompt optimizing: rule changes proposed from deviation evidence](TODO.md.d/prompt-optimizing.md) ⊘telemetry-mining
   - `feature · todo · idea · queued · process · gh#53` [Rules abtesting: variants measured statistically, reverted on regression](TODO.md.d/rules-abtesting.md) ⊘prompt-optimizing
 - `bug · todo · · blocked-on-answers · process · gh#33` [Hooks are an unowned pool in one shared file: no per-repo surface, no provenance](TODO.md.d/hook-composition.md) ~manifest-by-convention

@@ -16,6 +16,11 @@
   observed half — transcript mining for thinking-vs-doing time (local
   transcripts on disk; cloud needs an export step; Batches API at half price is
   a candidate reader).
+- First slice LIVE since 2026-07-21 (Decision-070): an Anthropic cloud routine
+  (trig_01VjojrA8RTPZuVpAQkvtTR1, haiku, daily 00:00 UTC) mines the accumulated
+  notes and publishes to the wiki as primary, pull request as fallback.
+  Promoted 2026-07-23 from the fleet-sidebar ingest prep, where it had been
+  carried as "still pending".
 
 ## Proposal
 
