@@ -35,6 +35,18 @@
   automatically. The convergence criterion IS this task's subject; it is no longer only
   a fuzzy-feature special case. Names land via [[retire-groom-vocabulary]].
 
+- Operator charter sharpened (2026-07-24): blooming operates at the FUNCTIONALITY
+  DEFINITION level — turning a two-to-three-sentence functional spec into a complete
+  understanding of what the operator wants — which is explicitly NOT the orchestrator's
+  job (the orchestrator does relationships, board placement, delivery). Target
+  interaction shape: the operator spends one morning hour with the instrument, then
+  everything else runs without him. The existing clerk implementation was demoted to
+  the `groomer` name (deliberately forbidden vocabulary, as a not-to-persist marker);
+  this task's instrument is to be rebuilt separately and takes the `bloomer` name.
+  Design inputs: the 2026-07-24 blueprint (EIG/BED question selection, corpus priors,
+  convergence-triggered launch; orchestrator workstream log) and the
+  [[bloomer-forensics]] investigation into how the divergence happened.
+
 ## Proposal
 
 - (to be shaped once the Questions are answered; expected: a fuzzy-feature question
